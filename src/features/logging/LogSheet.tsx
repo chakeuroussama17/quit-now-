@@ -10,6 +10,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Chip } from '@/components/ui/Chip';
 import { IntensityPicker } from '@/components/ui/IntensityPicker';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { getPostLogReflection } from '@/services/aiService';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { colors, durations, spacing } from '@/theme';
@@ -40,6 +41,7 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
   const [trigger, setTrigger] = useState<TriggerType | null>(null);
   const [loggedId, setLoggedId] = useState<number | null>(null);
   const [ackLine, setAckLine] = useState('');
+  const [reflection, setReflection] = useState<string | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [intensity, setIntensity] = useState<number | null>(null);
   const [location, setLocation] = useState<LocationTag | null>(null);
@@ -53,6 +55,7 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
     setProduct(null);
     setTrigger(null);
     setLoggedId(null);
+    setReflection(null);
     setShowDetail(false);
     setIntensity(null);
     setLocation(null);
@@ -81,6 +84,10 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
     setLoggedId(id);
     setAckLine(randomAckLine());
     setStep('done');
+    // Occasionally (throttled, max 3/day) the coach adds a short reflection.
+    getPostLogReflection({ trigger, emotion: value }).then((text) => {
+      if (text) setReflection(text);
+    });
   };
 
   const saveDetails = async () => {
@@ -153,6 +160,17 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
             {ackLine}
           </AppText>
 
+          {reflection && (
+            <Animated.View entering={FadeInDown.duration(durations.base)} style={styles.reflection}>
+              <AppText variant="micro" color={colors.accent}>
+                Coach
+              </AppText>
+              <AppText variant="caption" color={colors.textSecondary} style={styles.reflectionText}>
+                {reflection}
+              </AppText>
+            </Animated.View>
+          )}
+
           {!showDetail ? (
             <Pressable onPress={() => setShowDetail(true)} style={styles.detailToggle}>
               <AppText variant="bodyMedium" color={colors.accent}>
@@ -209,6 +227,14 @@ const styles = StyleSheet.create({
   chipGridTight: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   stepHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   ack: { marginTop: spacing.sm, lineHeight: 26 },
+  reflection: {
+    marginTop: spacing.md,
+    padding: spacing.md,
+    borderRadius: 12,
+    backgroundColor: colors.accentDim,
+    gap: spacing.xs,
+  },
+  reflectionText: { lineHeight: 19 },
   detailToggle: { marginTop: spacing.lg, paddingVertical: spacing.sm },
   detailBlock: { marginTop: spacing.lg, gap: spacing.md },
   noteInput: { minHeight: 72, textAlignVertical: 'top', paddingTop: spacing.md },

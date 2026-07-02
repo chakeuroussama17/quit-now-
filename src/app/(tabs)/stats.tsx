@@ -11,11 +11,12 @@ import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
 import { Screen } from '@/components/ui/Screen';
 import { EMOTION_OPTIONS, TRIGGER_OPTIONS } from '@/features/logging/options';
+import { WeeklyInsightCard } from '@/features/stats/WeeklyInsightCard';
 import { useStatsData } from '@/features/stats/useStatsData';
 import { useProfileStore } from '@/state/useProfileStore';
+import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, spacing } from '@/theme';
-import { dailyTarget } from '@/utils/baseline';
-import { daysBetween } from '@/utils/time';
+import { getDailyTargetFor } from '@/utils/reduction';
 
 const TRIGGER_LABELS = Object.fromEntries(TRIGGER_OPTIONS.map((o) => [o.value, o.label]));
 const EMOTION_LABELS = Object.fromEntries(EMOTION_OPTIONS.map((o) => [o.value, o.label]));
@@ -59,6 +60,7 @@ function xLabels(days: { day: string }[]): string[] {
 
 export default function StatsScreen() {
   const profile = useProfileStore((s) => s.profile);
+  const planJson = useSettingsStore((s) => s.values['reduction_plan']);
   const [range, setRange] = useState<7 | 30>(7);
   const data = useStatsData(range);
 
@@ -89,10 +91,7 @@ export default function StatsScreen() {
   }
 
   const isVape = profile.products[0] === 'vape';
-  const target =
-    profile.quitMode === 'gradual'
-      ? dailyTarget(profile, daysBetween(profile.programStartDate))
-      : null;
+  const target = profile.quitMode === 'gradual' ? getDailyTargetFor(profile, planJson) : null;
   const smokedInRange = data.daily.reduce((sum, d) => sum + d.value, 0);
   const nicotineMg = isVape && profile.vapeNicotineMgMl ? profile.vapeNicotineMgMl : null;
 
@@ -106,6 +105,8 @@ export default function StatsScreen() {
             <Chip label="30d" size="sm" selected={range === 30} onPress={() => setRange(30)} />
           </View>
         </View>
+
+        <WeeklyInsightCard />
 
         <Section
           title="Consumption"

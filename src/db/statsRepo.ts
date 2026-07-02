@@ -131,3 +131,34 @@ export async function getWinRate(days: number): Promise<{ resisted: number; tota
   );
   return { resisted: row?.resisted ?? 0, total: row?.total ?? 0 };
 }
+
+export async function getAvgCraving(
+  days: number,
+): Promise<{ avgIntensity: number; avgDurationSeconds: number }> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{ i: number | null; d: number | null }>(
+    `SELECT AVG(intensity) AS i, AVG(duration_seconds) AS d
+     FROM craving_logs WHERE timestamp >= ?`,
+    [sinceIso(days)],
+  );
+  return { avgIntensity: row?.i ?? 0, avgDurationSeconds: row?.d ?? 0 };
+}
+
+/**
+ * Longest smoke-free stretch in days: the widest gap between consecutive
+ * smoke logs, including anchor→first log and last log→now. With no logs at
+ * all, it's simply anchor→now.
+ */
+export async function getLongestGapDays(anchorIso: string): Promise<number> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<{ timestamp: string }>(
+    'SELECT timestamp FROM smoke_logs ORDER BY timestamp ASC',
+  );
+  const anchor = new Date(anchorIso).getTime();
+  const points = [anchor, ...rows.map((r) => new Date(r.timestamp).getTime()), Date.now()];
+  let longestMs = 0;
+  for (let i = 1; i < points.length; i++) {
+    longestMs = Math.max(longestMs, points[i] - points[i - 1]);
+  }
+  return Math.max(0, longestMs / 86_400_000);
+}

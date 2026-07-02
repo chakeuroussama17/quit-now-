@@ -69,6 +69,10 @@ export default function RootLayout() {
       >
         <Stack.Protected guard={profile != null}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen
+            name="sos-chat"
+            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+          />
         </Stack.Protected>
         <Stack.Protected guard={profile == null}>
           <Stack.Screen name="onboarding" />

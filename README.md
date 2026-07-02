@@ -22,13 +22,35 @@ Useful scripts: `npm run lint`, `npm run typecheck`, `npm run format`.
 
 ## Secrets
 
-Copy `.env.example` to `.env` and fill in your key. `.env` is gitignored — never commit it, and never put the key in `EXPO_PUBLIC_*` variables (those are bundled into the app).
+Copy `.env.example` to `.env` and fill in your key. `.env` is gitignored — never commit it, and never put the OpenAI key in `EXPO_PUBLIC_*` variables (those are bundled into the app).
+
+## AI coach setup (Phase 3)
+
+The app never talks to OpenAI directly — it goes through a thin proxy in `server/` that holds the key. Two ways to run it:
+
+**Local (testing):**
+
+```bash
+node server/local-server.mjs        # reads OPENAI_API_KEY from .env, listens on :3001
+```
+
+Then set `EXPO_PUBLIC_AI_PROXY_URL` in `.env` to `http://<your-PC-LAN-IP>:3001` (or `http://10.0.2.2:3001` for the Android emulator) and restart `npx expo start`.
+
+**Deployed (real use):**
+
+```bash
+cd server && npx vercel deploy --prod
+```
+
+Add `OPENAI_API_KEY` as an environment variable in the Vercel project settings, then set `EXPO_PUBLIC_AI_PROXY_URL=https://<your-project>.vercel.app` in `.env` and rebuild the app.
+
+Leave `EXPO_PUBLIC_AI_PROXY_URL` empty and everything still works — AI features quietly fall back to 50 bundled motivation lines and offline SOS coaching.
 
 ## Status
 
 - ✅ Phase 1 — onboarding, data model, fast logging flow, home dashboard
-- ⏳ Phase 2 — dashboard charts, health milestones, stats screen
-- ⏳ Phase 3 — AI coach (OpenAI via backend proxy)
+- ✅ Phase 2 — dashboard charts, health milestones, stats screen
+- ✅ Phase 3 — AI coach (OpenAI via backend proxy)
 - ⏳ Phase 4 — Craving SOS toolkit & gamification
 - ⏳ Phase 4.5 — "The Room" emotional support chat
 - ⏳ Phase 5 — polish, notifications, accessibility

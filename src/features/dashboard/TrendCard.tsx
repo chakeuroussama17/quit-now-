@@ -8,10 +8,10 @@ import { Card } from '@/components/ui/Card';
 import { TrendLine } from '@/components/charts/TrendLine';
 import { getDailyCravingStats, getDailySmokeQuantities } from '@/db/statsRepo';
 import { useLogsStore } from '@/state/useLogsStore';
+import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, spacing } from '@/theme';
 import type { UserProfile } from '@/types/models';
-import { dailyTarget } from '@/utils/baseline';
-import { daysBetween } from '@/utils/time';
+import { getDailyTargetFor } from '@/utils/reduction';
 
 interface TrendData {
   values: number[];
@@ -32,6 +32,7 @@ export function TrendCard({ profile }: { profile: UserProfile }) {
   const router = useRouter();
   const todaySmokedCount = useLogsStore((s) => s.todaySmokedCount);
   const todayResisted = useLogsStore((s) => s.todayCravingsResisted);
+  const planJson = useSettingsStore((s) => s.values['reduction_plan']);
   const [trend, setTrend] = useState<TrendData | null>(null);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export function TrendCard({ profile }: { profile: UserProfile }) {
           values: days.map((d) => d.value),
           labels: days.map((d) => weekdayInitial(d.day)),
           caption: 'Units per day vs your plan',
-          target: dailyTarget(profile, daysBetween(profile.programStartDate)),
+          target: getDailyTargetFor(profile, planJson),
         });
       } else {
         const days = await getDailyCravingStats(7);
@@ -63,7 +64,7 @@ export function TrendCard({ profile }: { profile: UserProfile }) {
     return () => {
       cancelled = true;
     };
-  }, [profile, todaySmokedCount, todayResisted]);
+  }, [profile, todaySmokedCount, todayResisted, planJson]);
 
   if (!trend) return null;
 

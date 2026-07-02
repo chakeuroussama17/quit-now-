@@ -5,10 +5,11 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useLogsStore } from '@/state/useLogsStore';
+import { useSettingsStore } from '@/state/useSettingsStore';
 import { accentGlowShadow, colors, spacing } from '@/theme';
 import type { UserProfile } from '@/types/models';
-import { dailyTarget } from '@/utils/baseline';
-import { daysBetween, formatDuration, formatShortDate } from '@/utils/time';
+import { getDailyTargetFor } from '@/utils/reduction';
+import { formatDuration, formatShortDate } from '@/utils/time';
 
 interface StreakHeroProps {
   profile: UserProfile;
@@ -18,6 +19,7 @@ interface StreakHeroProps {
 export function StreakHero({ profile }: StreakHeroProps) {
   const lastSmokeAt = useLogsStore((s) => s.lastSmokeAt);
   const todayQuantity = useLogsStore((s) => s.todaySmokedQuantity);
+  const planJson = useSettingsStore((s) => s.values['reduction_plan']);
   const [now, setNow] = useState(() => Date.now());
 
   // Live counter — a 30s tick keeps the minutes fresh without burning battery.
@@ -27,7 +29,7 @@ export function StreakHero({ profile }: StreakHeroProps) {
   }, []);
 
   if (profile.quitMode === 'gradual') {
-    const target = dailyTarget(profile, daysBetween(profile.programStartDate));
+    const target = getDailyTargetFor(profile, planJson);
     const progress = target > 0 ? todayQuantity / target : todayQuantity > 0 ? 2 : 1;
     const over = todayQuantity > target;
     return (

@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -15,6 +16,7 @@ import { TrendCard } from '@/features/dashboard/TrendCard';
 import { useProgress } from '@/features/dashboard/useProgress';
 import { LogSheet } from '@/features/logging/LogSheet';
 import { ResistedSheet } from '@/features/logging/ResistedSheet';
+import { useEnsureReductionPlan } from '@/features/dashboard/useEnsureReductionPlan';
 import { useProfileStore } from '@/state/useProfileStore';
 import { accentGlowShadow, colors, radii, spacing } from '@/theme';
 import { greeting } from '@/utils/time';
@@ -28,24 +30,44 @@ export default function HomeScreen() {
 }
 
 function HomeContent() {
+  const router = useRouter();
   const profile = useProfileStore((s) => s.profile)!;
   const progress = useProgress(profile);
+  useEnsureReductionPlan(profile);
   const [logOpen, setLogOpen] = useState(false);
   const [resistedOpen, setResistedOpen] = useState(false);
 
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <AppText variant="h2" style={styles.greeting}>
-          {greeting(profile.name)}
-        </AppText>
-        <AppText variant="caption" color={colors.textMuted}>
-          {new Date().toLocaleDateString(undefined, {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </AppText>
+        <View style={styles.topRow}>
+          <View>
+            <AppText variant="h2" style={styles.greeting}>
+              {greeting(profile.name)}
+            </AppText>
+            <AppText variant="caption" color={colors.textMuted}>
+              {new Date().toLocaleDateString(undefined, {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </AppText>
+          </View>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              router.push('/sos-chat');
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="SOS — talk to your coach now"
+            style={({ pressed }) => [styles.sosButton, pressed && { opacity: 0.85 }]}
+          >
+            <Ionicons name="flash" size={16} color={colors.amber} />
+            <AppText variant="bodyMedium" color={colors.amber}>
+              SOS
+            </AppText>
+          </Pressable>
+        </View>
 
         <View style={styles.section}>
           <StreakHero profile={profile} />
@@ -118,6 +140,22 @@ function HomeContent() {
 
 const styles = StyleSheet.create({
   content: { paddingTop: spacing.lg, paddingBottom: 140 },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  sosButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.amberDim,
+    borderWidth: 1,
+    borderColor: 'rgba(245,166,35,0.35)',
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
   greeting: { marginBottom: spacing.xs },
   section: { marginTop: spacing.lg },
   resistedButton: {

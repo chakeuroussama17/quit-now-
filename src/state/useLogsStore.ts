@@ -9,6 +9,7 @@ import {
   type NewSmokeLog,
   type SmokeLogDetail,
 } from '@/db/logsRepo';
+import { invalidateContextCache } from '@/services/contextBuilder';
 
 interface LogsState {
   todaySmokedCount: number;
@@ -39,6 +40,7 @@ export const useLogsStore = create<LogsState>((set, get) => ({
 
   logSmoke: async (input) => {
     const id = await insertSmokeLog(input);
+    invalidateContextCache();
     await get().refresh();
     return id;
   },
@@ -49,6 +51,7 @@ export const useLogsStore = create<LogsState>((set, get) => ({
 
   logResistedCraving: async (intensity) => {
     await insertCravingLog({ resisted: true, intensity: intensity ?? null });
+    invalidateContextCache();
     await get().refresh();
   },
 }));
