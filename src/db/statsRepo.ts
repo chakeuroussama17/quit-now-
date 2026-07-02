@@ -132,6 +132,27 @@ export async function getWinRate(days: number): Promise<{ resisted: number; tota
   return { resisted: row?.resisted ?? 0, total: row?.total ?? 0 };
 }
 
+/**
+ * Week-over-week craving change: last 7 days vs the 7 before, as a signed
+ * fraction (-0.38 = 38% fewer cravings — improving). Null without enough data.
+ */
+export async function getCravingWeekDelta(): Promise<number | null> {
+  const db = await getDb();
+  const [current, previous] = await Promise.all([
+    db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM craving_logs WHERE timestamp >= ?', [
+      sinceIso(7),
+    ]),
+    db.getFirstAsync<{ n: number }>(
+      'SELECT COUNT(*) AS n FROM craving_logs WHERE timestamp >= ? AND timestamp < ?',
+      [sinceIso(14), sinceIso(7)],
+    ),
+  ]);
+  const now = current?.n ?? 0;
+  const before = previous?.n ?? 0;
+  if (before === 0) return null;
+  return (now - before) / before;
+}
+
 export async function getAvgCraving(
   days: number,
 ): Promise<{ avgIntensity: number; avgDurationSeconds: number }> {
@@ -142,6 +163,21 @@ export async function getAvgCraving(
     [sinceIso(days)],
   );
   return { avgIntensity: row?.i ?? 0, avgDurationSeconds: row?.d ?? 0 };
+}
+
+/** All-time counters for XP and achievements. */
+export async function getAllTimeCounts(): Promise<{
+  smokeLogCount: number;
+  urgeSurfCount: number;
+}> {
+  const db = await getDb();
+  const [smoke, surf] = await Promise.all([
+    db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM smoke_logs'),
+    db.getFirstAsync<{ n: number }>(
+      "SELECT COUNT(*) AS n FROM craving_logs WHERE technique_used = 'urge_surf'",
+    ),
+  ]);
+  return { smokeLogCount: smoke?.n ?? 0, urgeSurfCount: surf?.n ?? 0 };
 }
 
 /**

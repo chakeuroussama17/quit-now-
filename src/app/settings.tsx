@@ -1,11 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
-import { wipeAllData } from '@/db/database';
+import { wipeAllData, wipeRoomData } from '@/db/database';
 import { seedDemoData } from '@/db/seed';
 import { PRODUCT_LABELS } from '@/features/logging/options';
 import { RewardGoalSheet } from '@/features/settings/RewardGoalSheet';
@@ -58,6 +59,7 @@ function SettingsRow({
 }
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const profile = useProfileStore((s) => s.profile);
   const hydrateProfile = useProfileStore((s) => s.hydrate);
   const clearProfile = useProfileStore((s) => s.clearProfile);
@@ -66,6 +68,21 @@ export default function SettingsScreen() {
   const goalName = useSettingsStore((s) => s.values['reward_goal_name']);
   const [seeding, setSeeding] = useState(false);
   const [goalOpen, setGoalOpen] = useState(false);
+
+  const confirmDeleteRoom = () => {
+    Alert.alert(
+      'Delete all Room conversations?',
+      'Every session with Mind is erased from this device. Nothing else is touched. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete conversations',
+          style: 'destructive',
+          onPress: () => wipeRoomData(),
+        },
+      ],
+    );
+  };
 
   const confirmDeleteAll = () => {
     Alert.alert(
@@ -78,7 +95,7 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             await wipeAllData();
-            await refreshLogs();
+            await Promise.all([refreshLogs(), hydrateSettings()]);
             clearProfile(); // guard flips → back to onboarding
           },
         },
@@ -97,12 +114,19 @@ export default function SettingsScreen() {
   };
 
   return (
-    <Screen>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <AppText variant="h1" style={styles.title}>
-          Settings
-        </AppText>
+    <Screen edges={['top', 'bottom']}>
+      <View style={styles.header}>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityLabel="Back"
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back" size={22} color={colors.textSecondary} />
+        </Pressable>
+        <AppText variant="h2">Settings</AppText>
+      </View>
 
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {profile && (
           <Card style={styles.profileCard}>
             <AppText variant="title">{profile.name}</AppText>
@@ -153,6 +177,13 @@ export default function SettingsScreen() {
         </AppText>
         <Card style={styles.group}>
           <SettingsRow
+            icon="chatbubble-ellipses-outline"
+            label="Delete all Room conversations"
+            caption="Your most private data, wiped separately"
+            onPress={confirmDeleteRoom}
+            destructive
+          />
+          <SettingsRow
             icon="trash-outline"
             label="Delete all data"
             caption="Everything lives only on this device"
@@ -188,9 +219,15 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { paddingTop: spacing.lg, paddingBottom: spacing.xxl },
-  title: { marginBottom: spacing.lg },
-  profileCard: { gap: spacing.xs, marginBottom: spacing.md },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
+  backButton: { padding: spacing.xs },
+  content: { paddingBottom: spacing.xxl },
+  profileCard: { gap: spacing.xs },
   reason: { marginTop: spacing.sm, fontStyle: 'italic' },
   sectionLabel: { marginTop: spacing.xl, marginBottom: spacing.sm },
   group: { padding: spacing.sm, gap: spacing.xs },

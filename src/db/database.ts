@@ -81,6 +81,26 @@ const MIGRATIONS: string[] = [
     value TEXT NOT NULL
   );
   `,
+  // v2 — The Room. These are the MOST SENSITIVE tables in the app: private
+  // emotional conversations. They must never feed stats, gamification,
+  // analytics or logging, and are deletable separately from everything else.
+  `
+  CREATE TABLE IF NOT EXISTS room_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    started_at TEXT NOT NULL,
+    ended_at TEXT,
+    takeaway TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS room_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL REFERENCES room_sessions(id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    timestamp TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_room_messages_session ON room_messages(session_id);
+  `,
 ];
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
@@ -115,5 +135,16 @@ export async function wipeAllData(): Promise<void> {
     DELETE FROM achievements;
     DELETE FROM ai_messages;
     DELETE FROM settings;
+    DELETE FROM room_messages;
+    DELETE FROM room_sessions;
+  `);
+}
+
+/** Deletes ONLY Room conversations — separate control for the most private data. */
+export async function wipeRoomData(): Promise<void> {
+  const db = await getDb();
+  await db.execAsync(`
+    DELETE FROM room_messages;
+    DELETE FROM room_sessions;
   `);
 }

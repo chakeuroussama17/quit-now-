@@ -23,6 +23,8 @@ interface TrendLineProps {
   /** Surface behind the chart, used for the end-dot ring. */
   surface?: string;
   color?: string;
+  /** Sparkline mode: no axis labels, no endpoint value, tighter padding. */
+  compact?: boolean;
 }
 
 interface Pt {
@@ -71,11 +73,12 @@ export function TrendLine({
   target = null,
   surface = colors.card,
   color = colors.accent,
+  compact = false,
 }: TrendLineProps) {
   const [width, setWidth] = useState(0);
 
-  const padTop = 18;
-  const padBottom = 22;
+  const padTop = compact ? 8 : 18;
+  const padBottom = compact ? 8 : 22;
   const padX = 10;
   const plotBottom = height - padBottom;
 
@@ -160,34 +163,37 @@ export function TrendLine({
           {/* end dot with surface ring + endpoint value (text token, not series color) */}
           {end && (
             <>
-              <Circle cx={end.x} cy={end.y} r={6.5} fill={surface} />
-              <Circle cx={end.x} cy={end.y} r={4.5} fill={color} />
-              <SvgText
-                x={Math.min(end.x, width - padX - 4)}
-                y={end.y - 10}
-                fontSize={11}
-                fontFamily={font.semibold}
-                fill={colors.textSecondary}
-                textAnchor="end"
-              >
-                {Math.round(data[data.length - 1] * 10) / 10}
-              </SvgText>
+              <Circle cx={end.x} cy={end.y} r={compact ? 5 : 6.5} fill={surface} />
+              <Circle cx={end.x} cy={end.y} r={compact ? 3.5 : 4.5} fill={color} />
+              {!compact && (
+                <SvgText
+                  x={Math.min(end.x, width - padX - 4)}
+                  y={end.y - 10}
+                  fontSize={11}
+                  fontFamily={font.semibold}
+                  fill={colors.textSecondary}
+                  textAnchor="end"
+                >
+                  {Math.round(data[data.length - 1] * 10) / 10}
+                </SvgText>
+              )}
             </>
           )}
 
-          {labels.map((label, i) => (
-            <SvgText
-              key={i}
-              x={padX + i * stepX}
-              y={height - 6}
-              fontSize={10}
-              fontFamily={font.regular}
-              fill={colors.textMuted}
-              textAnchor="middle"
-            >
-              {label}
-            </SvgText>
-          ))}
+          {!compact &&
+            labels.map((label, i) => (
+              <SvgText
+                key={i}
+                x={padX + i * stepX}
+                y={height - 6}
+                fontSize={10}
+                fontFamily={font.regular}
+                fill={colors.textMuted}
+                textAnchor="middle"
+              >
+                {label}
+              </SvgText>
+            ))}
         </Svg>
       )}
     </View>

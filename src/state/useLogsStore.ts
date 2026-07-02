@@ -19,7 +19,11 @@ interface LogsState {
   refresh: () => Promise<void>;
   logSmoke: (input: NewSmokeLog) => Promise<number>;
   addSmokeDetail: (id: number, detail: SmokeLogDetail) => Promise<void>;
-  logResistedCraving: (intensity?: number | null) => Promise<void>;
+  logResistedCraving: (
+    intensity?: number | null,
+    techniqueUsed?: string | null,
+    durationSeconds?: number | null,
+  ) => Promise<void>;
 }
 
 export const useLogsStore = create<LogsState>((set, get) => ({
@@ -49,8 +53,13 @@ export const useLogsStore = create<LogsState>((set, get) => ({
     await updateSmokeLogDetail(id, detail);
   },
 
-  logResistedCraving: async (intensity) => {
-    await insertCravingLog({ resisted: true, intensity: intensity ?? null });
+  logResistedCraving: async (intensity, techniqueUsed, durationSeconds) => {
+    await insertCravingLog({
+      resisted: true,
+      intensity: intensity ?? null,
+      techniqueUsed: techniqueUsed ?? null,
+      durationSeconds: durationSeconds ?? null,
+    });
     invalidateContextCache();
     await get().refresh();
   },

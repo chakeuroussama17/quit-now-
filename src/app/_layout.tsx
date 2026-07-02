@@ -73,6 +73,7 @@ export default function RootLayout() {
             name="sos-chat"
             options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
           />
+          <Stack.Screen name="settings" />
         </Stack.Protected>
         <Stack.Protected guard={profile == null}>
           <Stack.Screen name="onboarding" />
