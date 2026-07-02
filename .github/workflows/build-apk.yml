@@ -32,11 +32,13 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
 
+      # arm64-v8a only: covers essentially every Android phone since ~2016 and
+      # cuts the APK to roughly a third of the universal (4-ABI) size.
       - name: Build release APK (debug-signed, installable)
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
