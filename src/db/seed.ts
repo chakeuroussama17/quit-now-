@@ -3,6 +3,7 @@ import { addDaysIso } from '@/utils/time';
 
 import { insertCravingLog, insertSmokeLog } from './logsRepo';
 import { saveProfile } from './profileRepo';
+import { setSetting } from './settingsRepo';
 
 const TRIGGERS: TriggerType[] = ['stress', 'habit', 'coffee', 'after_meal', 'boredom', 'social'];
 const EMOTIONS: Emotion[] = ['stressed', 'neutral', 'bored', 'anxious', 'tired', 'relaxed'];
@@ -54,6 +55,8 @@ export async function seedDemoData(): Promise<void> {
     createdAt: addDaysIso(-(quitDaysAgo + 5)),
   };
   await saveProfile(profile);
+  await setSetting('reward_goal_name', 'New running shoes');
+  await setSetting('reward_goal_price', '400');
 
   // Smoking history before the quit date (days 14 → 10 ago), ~10–12 a day
   // clustered at typical hours so the Phase 2 heatmap has a shape.

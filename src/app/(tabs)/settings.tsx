@@ -8,8 +8,10 @@ import { Screen } from '@/components/ui/Screen';
 import { wipeAllData } from '@/db/database';
 import { seedDemoData } from '@/db/seed';
 import { PRODUCT_LABELS } from '@/features/logging/options';
+import { RewardGoalSheet } from '@/features/settings/RewardGoalSheet';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
+import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, radii, spacing } from '@/theme';
 import { formatShortDate } from '@/utils/time';
 
@@ -60,7 +62,10 @@ export default function SettingsScreen() {
   const hydrateProfile = useProfileStore((s) => s.hydrate);
   const clearProfile = useProfileStore((s) => s.clearProfile);
   const refreshLogs = useLogsStore((s) => s.refresh);
+  const hydrateSettings = useSettingsStore((s) => s.hydrate);
+  const goalName = useSettingsStore((s) => s.values['reward_goal_name']);
   const [seeding, setSeeding] = useState(false);
+  const [goalOpen, setGoalOpen] = useState(false);
 
   const confirmDeleteAll = () => {
     Alert.alert(
@@ -85,7 +90,7 @@ export default function SettingsScreen() {
     setSeeding(true);
     try {
       await seedDemoData();
-      await Promise.all([hydrateProfile(), refreshLogs()]);
+      await Promise.all([hydrateProfile(), refreshLogs(), hydrateSettings()]);
     } finally {
       setSeeding(false);
     }
@@ -114,6 +119,18 @@ export default function SettingsScreen() {
         )}
 
         <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
+          Goals
+        </AppText>
+        <Card style={styles.group}>
+          <SettingsRow
+            icon="trophy-outline"
+            label="Reward goal"
+            caption={goalName ? `Saving for: ${goalName}` : 'Set what your saved money is for'}
+            onPress={() => setGoalOpen(true)}
+          />
+        </Card>
+
+        <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
           Coming in later phases
         </AppText>
         <Card style={styles.group}>
@@ -127,12 +144,6 @@ export default function SettingsScreen() {
             icon="download-outline"
             label="Export data (CSV)"
             caption="Phase 5"
-            disabled
-          />
-          <SettingsRow
-            icon="trophy-outline"
-            label="Reward goal"
-            caption="Set what your saved money is for — Phase 2"
             disabled
           />
         </Card>
@@ -166,6 +177,12 @@ export default function SettingsScreen() {
           </>
         )}
       </ScrollView>
+
+      <RewardGoalSheet
+        visible={goalOpen}
+        onClose={() => setGoalOpen(false)}
+        currency={profile?.currency ?? 'RM'}
+      />
     </Screen>
   );
 }

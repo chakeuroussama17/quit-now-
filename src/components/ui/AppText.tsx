@@ -18,12 +18,13 @@ const variants = StyleSheet.create<Record<Variant, TextStyle>>({
     letterSpacing: -1.5,
     fontVariant: ['tabular-nums'],
   },
+  // Proportional figures on static stats (tabular digits look loose at display
+  // sizes); 'display' keeps tabular-nums because the live counter ticks.
   stat: {
     fontFamily: font.bold,
     fontSize: 32,
     lineHeight: 38,
     letterSpacing: -0.5,
-    fontVariant: ['tabular-nums'],
   },
   h1: { fontFamily: font.bold, fontSize: 28, lineHeight: 34, letterSpacing: -0.5 },
   h2: { fontFamily: font.semibold, fontSize: 22, lineHeight: 28, letterSpacing: -0.3 },

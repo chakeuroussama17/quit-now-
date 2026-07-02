@@ -4,22 +4,34 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
-import { Card } from '@/components/ui/Card';
+import { Screen } from '@/components/ui/Screen';
+import { AvoidedCard } from '@/features/dashboard/AvoidedCard';
+import { DailyLine } from '@/features/dashboard/DailyLine';
+import { HealthMilestoneCard } from '@/features/dashboard/HealthMilestoneCard';
+import { MoneyCard } from '@/features/dashboard/MoneyCard';
 import { StreakHero } from '@/features/dashboard/StreakHero';
 import { TodayStats } from '@/features/dashboard/TodayStats';
+import { TrendCard } from '@/features/dashboard/TrendCard';
+import { useProgress } from '@/features/dashboard/useProgress';
 import { LogSheet } from '@/features/logging/LogSheet';
 import { ResistedSheet } from '@/features/logging/ResistedSheet';
-import { Screen } from '@/components/ui/Screen';
 import { useProfileStore } from '@/state/useProfileStore';
 import { accentGlowShadow, colors, radii, spacing } from '@/theme';
 import { greeting } from '@/utils/time';
 
 export default function HomeScreen() {
   const profile = useProfileStore((s) => s.profile);
+  // Profile is guaranteed by the router guard, but a render can slip in during
+  // "delete all data" — bail quietly instead of crashing.
+  if (!profile) return null;
+  return <HomeContent />;
+}
+
+function HomeContent() {
+  const profile = useProfileStore((s) => s.profile)!;
+  const progress = useProgress(profile);
   const [logOpen, setLogOpen] = useState(false);
   const [resistedOpen, setResistedOpen] = useState(false);
-
-  if (!profile) return null;
 
   return (
     <Screen>
@@ -40,7 +52,27 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.section}>
-          <TodayStats profile={profile} />
+          <DailyLine profile={profile} />
+        </View>
+
+        <View style={styles.section}>
+          <MoneyCard profile={profile} progress={progress} />
+        </View>
+
+        <View style={styles.section}>
+          <HealthMilestoneCard profile={profile} />
+        </View>
+
+        <View style={styles.section}>
+          <AvoidedCard profile={profile} progress={progress} />
+        </View>
+
+        <View style={styles.section}>
+          <TrendCard profile={profile} />
+        </View>
+
+        <View style={styles.section}>
+          <TodayStats />
         </View>
 
         <Pressable
@@ -62,13 +94,6 @@ export default function HomeScreen() {
             </AppText>
           </View>
         </Pressable>
-
-        <Card glass style={styles.section}>
-          <AppText variant="caption" color={colors.textMuted}>
-            Your 7-day trend, health milestones and money goals arrive in Phase 2. Everything you
-            log now is already feeding them.
-          </AppText>
-        </Card>
       </ScrollView>
 
       <View style={styles.fabWrap} pointerEvents="box-none">
