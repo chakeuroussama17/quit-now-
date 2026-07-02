@@ -30,7 +30,8 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files — API keys are NEVER shipped in the app bundle
+.env
 .env*.local
 
 # typescript

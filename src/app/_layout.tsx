@@ -1,18 +1,79 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts,
+} from '@expo-google-fonts/inter';
+import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { useLogsStore } from '@/state/useLogsStore';
+import { useProfileStore } from '@/state/useProfileStore';
+import { useSettingsStore } from '@/state/useSettingsStore';
+import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+const navTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: colors.accent,
+    background: colors.bg,
+    card: colors.bgElevated,
+    text: colors.text,
+    border: colors.hairline,
+    notification: colors.accent,
+  },
+};
+
+export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  const profile = useProfileStore((s) => s.profile);
+  const hydrated = useProfileStore((s) => s.hydrated);
+  const hydrateProfile = useProfileStore((s) => s.hydrate);
+  const hydrateSettings = useSettingsStore((s) => s.hydrate);
+  const refreshLogs = useLogsStore((s) => s.refresh);
+
+  useEffect(() => {
+    hydrateProfile();
+    hydrateSettings();
+    refreshLogs();
+  }, [hydrateProfile, hydrateSettings, refreshLogs]);
+
+  const ready = fontsLoaded && hydrated;
+
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
+    <ThemeProvider value={navTheme}>
+      <StatusBar style="light" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.bg },
+        }}
+      >
+        <Stack.Protected guard={profile != null}>
+          <Stack.Screen name="(tabs)" />
+        </Stack.Protected>
+        <Stack.Protected guard={profile == null}>
+          <Stack.Screen name="onboarding" />
+        </Stack.Protected>
+      </Stack>
     </ThemeProvider>
   );
 }
