@@ -114,7 +114,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.xl,
   },
-  image: { width: '78%', aspectRatio: 1, marginBottom: spacing.xl },
+  // Fills the free vertical space; portrait or square art both letterbox cleanly.
+  image: { flex: 1, width: '100%', marginBottom: spacing.lg },
   title: { textAlign: 'center', marginBottom: spacing.md },
   body: { textAlign: 'center', lineHeight: 24 },
   footer: { paddingHorizontal: spacing.xl, paddingBottom: spacing.lg, gap: spacing.lg },
