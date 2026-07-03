@@ -306,7 +306,7 @@ export default function SettingsScreen() {
           <SettingsRow
             icon="person-circle-outline"
             label={session?.user.email ?? 'Signed in'}
-            caption={isPremium ? 'SOS subscription active' : 'Free plan — SOS locked'}
+            caption={isPremium ? 'Premium active' : 'Free plan — SOS & The Room locked'}
           />
           <SettingsRow
             icon="log-out-outline"

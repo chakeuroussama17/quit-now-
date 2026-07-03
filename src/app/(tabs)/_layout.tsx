@@ -98,7 +98,11 @@ export default function TabsLayout() {
           options={{
             title: 'Room',
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="heart-circle-outline" size={size} color={color} />
+              <Ionicons
+                name={isPremium ? 'heart-circle-outline' : 'lock-closed-outline'}
+                size={size}
+                color={color}
+              />
             ),
           }}
         />

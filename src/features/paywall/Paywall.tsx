@@ -4,33 +4,59 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
+import { Card } from '@/components/ui/Card';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Screen } from '@/components/ui/Screen';
 import { useAuthStore } from '@/state/useAuthStore';
+import { useProfileStore } from '@/state/useProfileStore';
 import { colors, radii, spacing } from '@/theme';
+import { baselineDailyCost, formatMoney } from '@/utils/baseline';
 
 /**
- * Stripe Payment Link for the $3.99/month SOS subscription. Create it in the
- * Stripe dashboard and set EXPO_PUBLIC_STRIPE_PAYMENT_LINK (or paste it here).
+ * Stripe Payment Link for the $3.99/month Premium subscription. Create it in
+ * the Stripe dashboard and set EXPO_PUBLIC_STRIPE_PAYMENT_LINK.
  * client_reference_id carries the Supabase user id to the webhook.
  */
 const PAYMENT_LINK = (process.env.EXPO_PUBLIC_STRIPE_PAYMENT_LINK ?? '').trim();
 
-const PERKS = [
-  { icon: 'timer-outline' as const, text: 'Urge-surf timer with guided 4-7-8 breathing' },
-  { icon: 'chatbubble-ellipses-outline' as const, text: 'Real-time AI coach for the hard minutes' },
+const PREMIUM_FEATURES = [
   {
-    icon: 'shield-checkmark-outline' as const,
-    text: 'Win logging that tracks cravings getting weaker',
+    icon: 'flame' as const,
+    title: 'Craving SOS toolkit',
+    detail:
+      '5-minute urge-surf timer with guided 4-7-8 breathing, quick actions, and win logging that proves your cravings are getting shorter.',
   },
-  { icon: 'flash-outline' as const, text: 'There exactly when the craving hits' },
+  {
+    icon: 'chatbubbles' as const,
+    title: 'AI Coach — live, 24/7',
+    detail:
+      'A real-time coach that knows your quit reason, your triggers and your risky hours. It talks you through the wave exactly when it hits.',
+  },
+  {
+    icon: 'heart-circle' as const,
+    title: 'The Room, with Mind',
+    detail:
+      'A private space to vent and untangle the stress behind the urge. Warm but honest — and everything stays on your phone.',
+  },
 ];
 
-/** Shown in place of SOS features until the subscription is active. */
+const FREE_FEATURES = [
+  'Streak, money saved & health milestones',
+  'Fast logging, stats, heatmap & trends',
+  'Ranks, XP and achievements',
+  'Daily coach line & weekly insight',
+];
+
+/** Shown in place of SOS and The Room until the subscription is active. */
 export function Paywall() {
   const session = useAuthStore((s) => s.session);
   const refreshPremium = useAuthStore((s) => s.refreshPremium);
+  const profile = useProfileStore((s) => s.profile);
   const [checking, setChecking] = useState(false);
+
+  // Their own numbers do the selling: what a day of smoking used to cost.
+  const dailyCost = profile ? baselineDailyCost(profile) : 0;
+  const currency = profile?.currency ?? 'RM';
 
   const subscribe = async () => {
     if (!PAYMENT_LINK) {
@@ -54,36 +80,59 @@ export function Paywall() {
     <Screen>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.badge}>
-          <Ionicons name="flame" size={30} color={colors.amber} />
+          <Ionicons name="sparkles" size={28} color={colors.accent} />
         </View>
         <AppText variant="h1" style={styles.title}>
-          Craving SOS
+          Exhale Premium
         </AppText>
         <AppText variant="body" color={colors.textSecondary} style={styles.subtitle}>
-          Your emergency toolkit for the moments that decide everything.
+          Quitting is decided in a handful of hard moments. Premium is the support system built for
+          exactly those moments.
         </AppText>
 
-        <View style={styles.perks}>
-          {PERKS.map((perk) => (
-            <View key={perk.text} style={styles.perkRow}>
-              <Ionicons name={perk.icon} size={18} color={colors.accent} />
-              <AppText variant="body" color={colors.textSecondary} style={styles.perkText}>
-                {perk.text}
+        {PREMIUM_FEATURES.map((feature) => (
+          <Card key={feature.title} style={styles.featureCard}>
+            <View style={styles.featureIcon}>
+              <Ionicons name={feature.icon} size={20} color={colors.accent} />
+            </View>
+            <View style={styles.featureText}>
+              <AppText variant="title">{feature.title}</AppText>
+              <AppText variant="caption" color={colors.textSecondary} style={styles.featureDetail}>
+                {feature.detail}
               </AppText>
             </View>
-          ))}
+          </Card>
+        ))}
+
+        <View style={styles.priceBlock}>
+          <View style={styles.priceRow}>
+            <AppText variant="display" color={colors.accent}>
+              $3.99
+            </AppText>
+            <AppText variant="body" color={colors.textMuted}>
+              / month
+            </AppText>
+          </View>
+          {dailyCost > 0.5 ? (
+            <AppText variant="caption" color={colors.textSecondary} style={styles.priceNote}>
+              Smoking used to cost you about {formatMoney(dailyCost, currency)} every single day.
+              Premium costs less than most people spent before lunch — and it exists to keep that
+              money in your pocket.
+            </AppText>
+          ) : (
+            <AppText variant="caption" color={colors.textSecondary} style={styles.priceNote}>
+              Less than a single pack. Cancel anytime, in one tap.
+            </AppText>
+          )}
         </View>
 
-        <View style={styles.priceRow}>
-          <AppText variant="display" color={colors.accent}>
-            $3.99
-          </AppText>
-          <AppText variant="body" color={colors.textMuted}>
-            / month · cancel anytime
+        <PrimaryButton label="Start Premium — $3.99/month" onPress={subscribe} />
+
+        <View style={styles.trustRow}>
+          <AppText variant="caption" color={colors.textMuted}>
+            Cancel anytime · No ads, ever · Your logs never leave your phone
           </AppText>
         </View>
-
-        <PrimaryButton label="Unlock SOS" onPress={subscribe} />
 
         <Pressable
           onPress={checkAgain}
@@ -96,47 +145,72 @@ export function Paywall() {
           </AppText>
         </Pressable>
 
-        <AppText variant="caption" color={colors.textMuted} style={styles.fineprint}>
-          Everything else in Exhale stays free: tracking, stats, ranks, The Room and your daily
-          coach line.
-        </AppText>
+        <View style={styles.freeBlock}>
+          <AppText variant="micro" color={colors.textMuted} style={styles.freeTitle}>
+            Always free, no subscription needed
+          </AppText>
+          {FREE_FEATURES.map((item) => (
+            <View key={item} style={styles.freeRow}>
+              <Ionicons name="checkmark" size={14} color={colors.textMuted} />
+              <AppText variant="caption" color={colors.textMuted}>
+                {item}
+              </AppText>
+            </View>
+          ))}
+        </View>
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { flexGrow: 1, justifyContent: 'center', paddingBottom: spacing.xxl },
+  content: { paddingTop: spacing.xl, paddingBottom: spacing.xxl },
   badge: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.amberDim,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.accentDim,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
     marginBottom: spacing.lg,
   },
   title: { textAlign: 'center' },
-  subtitle: { textAlign: 'center', marginTop: spacing.sm, marginBottom: spacing.xl },
-  perks: {
-    backgroundColor: colors.card,
+  subtitle: {
+    textAlign: 'center',
+    marginTop: spacing.sm,
+    marginBottom: spacing.xl,
+    lineHeight: 22,
+  },
+  featureCard: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.sm,
+    padding: spacing.lg,
+  },
+  featureIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: radii.sm,
+    backgroundColor: colors.accentDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureText: { flex: 1, gap: 2 },
+  featureDetail: { lineHeight: 18 },
+  priceBlock: { alignItems: 'center', marginVertical: spacing.xl, gap: spacing.sm },
+  priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
+  priceNote: { textAlign: 'center', lineHeight: 18, paddingHorizontal: spacing.lg },
+  trustRow: { alignItems: 'center', marginTop: spacing.md },
+  refresh: { alignItems: 'center', marginTop: spacing.md, padding: spacing.sm },
+  freeBlock: {
+    marginTop: spacing.xl,
+    padding: spacing.lg,
     borderRadius: radii.lg,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.hairline,
-    padding: spacing.lg,
-    gap: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  perkRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  perkText: { flex: 1 },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'center',
     gap: spacing.sm,
-    marginBottom: spacing.lg,
   },
-  refresh: { alignItems: 'center', marginTop: spacing.lg, padding: spacing.sm },
-  fineprint: { textAlign: 'center', marginTop: spacing.lg, lineHeight: 18 },
+  freeTitle: { marginBottom: spacing.xs },
+  freeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
 });
