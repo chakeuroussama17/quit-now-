@@ -4,6 +4,8 @@ import { getDb } from './database';
 
 interface ProfileRow {
   name: string;
+  dob: string | null;
+  gender: string | null;
   products: string;
   cigs_per_day: number | null;
   price_per_pack: number | null;
@@ -32,6 +34,8 @@ interface ProfileRow {
 function rowToProfile(row: ProfileRow): UserProfile {
   return {
     name: row.name,
+    dob: row.dob,
+    gender: row.gender as UserProfile['gender'],
     products: JSON.parse(row.products),
     cigsPerDay: row.cigs_per_day,
     pricePerPack: row.price_per_pack,
@@ -68,15 +72,17 @@ export async function saveProfile(profile: UserProfile): Promise<void> {
   const db = await getDb();
   await db.runAsync(
     `INSERT OR REPLACE INTO user_profile (
-      id, name, products, cigs_per_day, price_per_pack, sticks_per_pack, cig_brand,
+      id, name, dob, gender, products, cigs_per_day, price_per_pack, sticks_per_pack, cig_brand,
       vape_nicotine_mg_ml, vape_ml_per_day, vape_pods_per_week, vape_cost_per_unit,
       shisha_sessions_per_week, shisha_cost_per_session,
       years_using, quit_reasons, quit_reason_text, usage_moments,
       quit_mode, quit_date, program_start_date, tried_before,
       previous_relapse_causes, previous_relapse_text, currency, created_at
-    ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       profile.name,
+      profile.dob,
+      profile.gender,
       JSON.stringify(profile.products),
       profile.cigsPerDay,
       profile.pricePerPack,

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import type {
+  Gender,
   ProductType,
   QuitMode,
   QuitReason,
@@ -8,10 +9,14 @@ import type {
   UsageMoment,
   UserProfile,
 } from '@/types/models';
-import { addDaysIso } from '@/utils/time';
+import { addDaysIso, ageFromDob } from '@/utils/time';
 
 export interface OnboardingDraft {
   name: string;
+  dobDay: string;
+  dobMonth: string;
+  dobYear: string;
+  gender: Gender | null;
   products: ProductType[];
   // Cigarettes / rolled tobacco
   cigsPerDay: number;
@@ -48,6 +53,10 @@ export interface OnboardingDraft {
 
 const initialDraft: OnboardingDraft = {
   name: '',
+  dobDay: '',
+  dobMonth: '',
+  dobYear: '',
+  gender: null,
   products: [],
   cigsPerDay: 10,
   pricePerPack: 0,
@@ -97,6 +106,23 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
   reset: () => set({ draft: initialDraft }),
 }));
 
+/** ISO date of birth from the draft's three fields, or null when invalid. */
+export function draftDobIso(draft: OnboardingDraft): string | null {
+  const day = parseInt(draft.dobDay, 10);
+  const month = parseInt(draft.dobMonth, 10);
+  const year = parseInt(draft.dobYear, 10);
+  if (!Number.isFinite(day) || !Number.isFinite(month) || !Number.isFinite(year)) return null;
+  if (year < 1920 || year > new Date().getFullYear()) return null;
+  const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const date = new Date(iso);
+  // Round-trip check rejects impossible dates like 31/02.
+  if (Number.isNaN(date.getTime()) || date.getUTCDate() !== day || date.getUTCMonth() + 1 !== month)
+    return null;
+  const age = ageFromDob(iso);
+  if (age < 13 || age > 100) return null;
+  return iso;
+}
+
 /** Builds the persistent profile from the finished draft. */
 export function draftToProfile(draft: OnboardingDraft): UserProfile {
   const now = new Date().toISOString();
@@ -106,6 +132,8 @@ export function draftToProfile(draft: OnboardingDraft): UserProfile {
 
   return {
     name: draft.name.trim(),
+    dob: draftDobIso(draft),
+    gender: draft.gender,
     products: draft.products,
     cigsPerDay: usesCigs ? draft.cigsPerDay : null,
     pricePerPack: usesCigs ? draft.pricePerPack : null,

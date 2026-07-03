@@ -52,9 +52,13 @@ export default function RootLayout() {
   const refreshLogs = useLogsStore((s) => s.refresh);
 
   useEffect(() => {
-    hydrateProfile();
-    hydrateSettings().then(() => hydrateAuth());
-    refreshLogs();
+    // Profile + settings first: auth hydration restores the cloud profile
+    // only when the LOCAL profile is genuinely absent.
+    (async () => {
+      await Promise.all([hydrateProfile(), hydrateSettings()]);
+      await hydrateAuth();
+      refreshLogs();
+    })();
   }, [hydrateProfile, hydrateSettings, hydrateAuth, refreshLogs]);
 
   const ready = fontsLoaded && profileHydrated && settingsHydrated && authHydrated;

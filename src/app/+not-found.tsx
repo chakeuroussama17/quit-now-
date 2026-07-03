@@ -1,6 +1,8 @@
 import { Redirect } from 'expo-router';
 
-/** Any unknown deep link lands on the right screen instead of a dead end. */
+import { landingRoute } from '@/state/useAuthStore';
+
+/** Any unknown link lands where the user belongs — never a dead end or a loop. */
 export default function NotFoundScreen() {
-  return <Redirect href="/" />;
+  return <Redirect href={landingRoute()} />;
 }

@@ -67,8 +67,13 @@ export type RelapseCause =
   | 'weight_gain'
   | 'other';
 
+export type Gender = 'male' | 'female' | 'other' | 'prefer_not';
+
 export interface UserProfile {
   name: string;
+  /** ISO date of birth (age derives from it). */
+  dob: string | null;
+  gender: Gender | null;
   products: ProductType[];
   // Cigarettes / rolled tobacco
   cigsPerDay: number | null;

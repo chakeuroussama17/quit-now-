@@ -101,6 +101,11 @@ const MIGRATIONS: string[] = [
   );
   CREATE INDEX IF NOT EXISTS idx_room_messages_session ON room_messages(session_id);
   `,
+  // v3 — date of birth + gender on the profile
+  `
+  ALTER TABLE user_profile ADD COLUMN dob TEXT;
+  ALTER TABLE user_profile ADD COLUMN gender TEXT;
+  `,
 ];
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;

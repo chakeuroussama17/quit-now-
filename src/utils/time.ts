@@ -40,3 +40,12 @@ export function addDaysIso(days: number, from: Date = new Date()): string {
   d.setDate(d.getDate() + days);
   return d.toISOString();
 }
+
+/** Whole years between a date of birth and now. */
+export function ageFromDob(dobIso: string, at: Date = new Date()): number {
+  const dob = new Date(dobIso);
+  let age = at.getFullYear() - dob.getFullYear();
+  const monthDiff = at.getMonth() - dob.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && at.getDate() < dob.getDate())) age -= 1;
+  return age;
+}

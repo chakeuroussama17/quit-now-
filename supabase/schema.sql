@@ -9,6 +9,8 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   email text,
   name text,
+  dob date,
+  gender text,
   products jsonb default '[]',
   quit_mode text,
   quit_date timestamptz,
@@ -17,9 +19,18 @@ create table if not exists public.profiles (
   quit_reason_text text,
   baseline_per_day numeric,
   currency text,
+  -- Complete profile snapshot: lets a returning user restore on a new device
+  -- instead of being re-onboarded (and overwriting this row with blanks).
+  profile_json jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Upgrading an existing table? Run just these:
+-- alter table public.profiles
+--   add column if not exists dob date,
+--   add column if not exists gender text,
+--   add column if not exists profile_json jsonb;
 
 alter table public.profiles enable row level security;
 

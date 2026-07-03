@@ -3,15 +3,16 @@ import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 import { supabase } from '@/services/supabase';
+import { landingRoute, restoreProfileFromCloud } from '@/state/useAuthStore';
 
 /**
  * Deep-link landing for OAuth/email flows (exhale://auth-callback#access_token=…).
- * The router navigates here when the browser hands control back; we absorb the
- * tokens into a session and bounce to the right screen via the root guards.
+ * Absorbs the tokens into a session, restores the cloud profile for returning
+ * users, then routes to wherever the guards say the user belongs.
  */
 export default function AuthCallbackScreen() {
   const url = Linking.useURL();
-  const [done, setDone] = useState(false);
+  const [target, setTarget] = useState<ReturnType<typeof landingRoute> | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -26,15 +27,16 @@ export default function AuthCallbackScreen() {
               access_token: accessToken,
               refresh_token: refreshToken,
             });
+            await restoreProfileFromCloud();
           }
         }
       } catch {
-        // No tokens or bad tokens — the guards will land us on /auth.
+        // No tokens or bad tokens — landingRoute() sends us to /auth.
       }
-      setDone(true);
+      setTarget(landingRoute());
     })();
   }, [url]);
 
-  if (!done) return null;
-  return <Redirect href="/" />;
+  if (!target) return null;
+  return <Redirect href={target} />;
 }

@@ -1,14 +1,23 @@
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { Chip } from '@/components/ui/Chip';
 import { Stepper } from '@/components/ui/Stepper';
 import { AppText } from '@/components/ui/AppText';
 import { colors, spacing } from '@/theme';
+import type { Gender } from '@/types/models';
+import { ageFromDob } from '@/utils/time';
 
 import { PRODUCT_OPTIONS } from '../options';
-import { useOnboardingStore } from '../onboardingStore';
+import { draftDobIso, useOnboardingStore } from '../onboardingStore';
 import { ChipGrid, FieldLabel, MoneyInput, StepScreen } from './common';
+
+const GENDER_OPTIONS: { value: Gender; label: string }[] = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+  { value: 'prefer_not', label: 'Prefer not to say' },
+];
 
 export function NameStep() {
   const { draft, patch } = useOnboardingStore();
@@ -26,6 +35,72 @@ export function NameStep() {
     </StepScreen>
   );
 }
+
+export function AboutYouStep() {
+  const { draft, patch } = useOnboardingStore();
+  const dobIso = draftDobIso(draft);
+  const filled = draft.dobDay !== '' && draft.dobMonth !== '' && draft.dobYear.length === 4;
+
+  return (
+    <StepScreen title="About you" subtitle="Helps personalize your recovery timeline and coaching.">
+      <FieldLabel>Date of birth</FieldLabel>
+      <View style={dobStyles.row}>
+        <AppTextInput
+          placeholder="DD"
+          keyboardType="number-pad"
+          maxLength={2}
+          defaultValue={draft.dobDay}
+          onChangeText={(dobDay) => patch({ dobDay: dobDay.replace(/\D/g, '') })}
+          style={dobStyles.small}
+          accessibilityLabel="Day of birth"
+        />
+        <AppTextInput
+          placeholder="MM"
+          keyboardType="number-pad"
+          maxLength={2}
+          defaultValue={draft.dobMonth}
+          onChangeText={(dobMonth) => patch({ dobMonth: dobMonth.replace(/\D/g, '') })}
+          style={dobStyles.small}
+          accessibilityLabel="Month of birth"
+        />
+        <AppTextInput
+          placeholder="YYYY"
+          keyboardType="number-pad"
+          maxLength={4}
+          defaultValue={draft.dobYear}
+          onChangeText={(dobYear) => patch({ dobYear: dobYear.replace(/\D/g, '') })}
+          style={dobStyles.year}
+          accessibilityLabel="Year of birth"
+        />
+      </View>
+      <AppText variant="caption" color={filled && !dobIso ? colors.danger : colors.textMuted}>
+        {dobIso
+          ? `You're ${ageFromDob(dobIso)}`
+          : filled
+            ? 'That date doesn’t look right — check it once more.'
+            : 'Day / month / year'}
+      </AppText>
+
+      <FieldLabel>Gender</FieldLabel>
+      <ChipGrid>
+        {GENDER_OPTIONS.map((option) => (
+          <Chip
+            key={option.value}
+            label={option.label}
+            selected={draft.gender === option.value}
+            onPress={() => patch({ gender: option.value })}
+          />
+        ))}
+      </ChipGrid>
+    </StepScreen>
+  );
+}
+
+const dobStyles = StyleSheet.create({
+  row: { flexDirection: 'row', gap: spacing.sm },
+  small: { flex: 1, textAlign: 'center' },
+  year: { flex: 1.6, textAlign: 'center' },
+});
 
 export function ProductsStep() {
   const { draft, toggleIn } = useOnboardingStore();

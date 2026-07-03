@@ -30,6 +30,8 @@ export async function seedDemoData(): Promise<void> {
   const quitDaysAgo = 9;
   const profile: UserProfile = {
     name: 'Alex',
+    dob: '1993-04-12',
+    gender: 'male',
     products: ['cigarette'],
     cigsPerDay: 12,
     pricePerPack: 15,

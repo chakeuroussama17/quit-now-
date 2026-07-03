@@ -4,6 +4,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { create } from 'zustand';
 
 import { supabase } from '@/services/supabase';
+import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import type { UserProfile } from '@/types/models';
 import { baselinePerDay } from '@/utils/baseline';
@@ -13,7 +14,7 @@ WebBrowser.maybeCompleteAuthSession();
 interface AuthState {
   session: Session | null;
   hydrated: boolean;
-  /** SOS entitlement — driven by the subscriptions table (Stripe webhook). */
+  /** Premium entitlement — driven by the subscriptions table (Stripe webhook). */
   isPremium: boolean;
   hydrate: () => Promise<void>;
   signInWithGoogle: () => Promise<{ error?: string }>;
@@ -44,14 +45,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Last known entitlement first, so premium users aren't locked out offline.
     const cached = useSettingsStore.getState().values['premium_cached'] === 'true';
     const { data } = await supabase.auth.getSession();
-    set({ session: data.session, hydrated: true, isPremium: cached });
+    set({ session: data.session, isPremium: cached });
+
+    // Existing account on a fresh device: pull their profile down BEFORE the
+    // router decides between onboarding and the app.
+    if (data.session) {
+      await restoreProfileFromCloud();
+      get().refreshPremium();
+    }
+    set({ hydrated: true });
 
     supabase.auth.onAuthStateChange((_event, session) => {
       set({ session });
       if (session) get().refreshPremium();
     });
-
-    if (data.session) get().refreshPremium();
   },
 
   signInWithGoogle: async () => {
@@ -69,11 +76,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const tokens = tokensFromUrl(result.url);
       if (!tokens) return { error: 'Google did not return a session' };
 
-      const { error: sessionError } = await supabase.auth.setSession({
+      const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
         access_token: tokens.accessToken,
         refresh_token: tokens.refreshToken,
       });
       if (sessionError) return { error: sessionError.message };
+      set({ session: sessionData.session });
+      await restoreProfileFromCloud();
       return {};
     } catch (err) {
       return { error: String(err) };
@@ -81,13 +90,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signInWithEmail: async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return error ? { error: error.message } : {};
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
+    set({ session: data.session });
+    await restoreProfileFromCloud();
+    return {};
   },
 
   signUpWithEmail: async (email, password) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return { error: error.message };
+    if (data.session) {
+      set({ session: data.session });
+      await restoreProfileFromCloud();
+    }
     // With email confirmation enabled in Supabase, there's no session yet.
     return { needsConfirmation: !data.session };
   },
@@ -118,10 +134,51 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 }));
 
+/** Where should the user land right now? Single source of truth for redirects. */
+export function landingRoute(): '/' | '/onboarding' | '/auth' | '/intro' {
+  const session = useAuthStore.getState().session;
+  const profile = useProfileStore.getState().profile;
+  const introSeen = useSettingsStore.getState().values['intro_seen'] === 'true';
+  if (!session) return introSeen ? '/auth' : '/intro';
+  if (!profile) return '/onboarding';
+  return '/';
+}
+
 /**
- * Mirror the onboarding profile to Supabase so users are manageable centrally.
- * Fire-and-forget: the app never blocks on the network. Logs and Room
- * conversations are intentionally NOT synced.
+ * Existing account, fresh install: pull the complete profile (profile_json)
+ * back from Supabase into local SQLite so the user is NOT re-onboarded and
+ * their cloud data is never overwritten by a blank run-through.
+ */
+export async function restoreProfileFromCloud(): Promise<boolean> {
+  const session = useAuthStore.getState().session;
+  if (!session) return false;
+  if (useProfileStore.getState().profile) return false;
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('profile_json')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    const json = data?.profile_json as Partial<UserProfile> | null;
+    if (json && json.name && json.programStartDate && Array.isArray(json.products)) {
+      const restored: UserProfile = {
+        ...(json as UserProfile),
+        dob: json.dob ?? null,
+        gender: json.gender ?? null,
+      };
+      await useProfileStore.getState().setProfile(restored);
+      return true;
+    }
+  } catch {
+    // Offline or missing table — onboarding remains the fallback.
+  }
+  return false;
+}
+
+/**
+ * Mirror the onboarding profile to Supabase so users are manageable centrally,
+ * including the full profile_json used for cross-device restore. Logs and
+ * Room conversations are intentionally NOT synced.
  */
 export async function pushProfileToCloud(profile: UserProfile): Promise<void> {
   const session = useAuthStore.getState().session;
@@ -131,6 +188,8 @@ export async function pushProfileToCloud(profile: UserProfile): Promise<void> {
       id: session.user.id,
       email: session.user.email,
       name: profile.name,
+      dob: profile.dob,
+      gender: profile.gender,
       products: profile.products,
       quit_mode: profile.quitMode,
       quit_date: profile.quitDate,
@@ -139,6 +198,7 @@ export async function pushProfileToCloud(profile: UserProfile): Promise<void> {
       quit_reason_text: profile.quitReasonText,
       baseline_per_day: Math.round(baselinePerDay(profile) * 10) / 10,
       currency: profile.currency,
+      profile_json: profile,
       updated_at: new Date().toISOString(),
     });
   } catch {

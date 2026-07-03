@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -7,12 +8,13 @@ import { AppText } from '@/components/ui/AppText';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Screen } from '@/components/ui/Screen';
-import { useAuthStore } from '@/state/useAuthStore';
+import { landingRoute, useAuthStore } from '@/state/useAuthStore';
 import { colors, radii, spacing } from '@/theme';
 
 type Mode = 'login' | 'register';
 
 export default function AuthScreen() {
+  const router = useRouter();
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
   const signUpWithEmail = useAuthStore((s) => s.signUpWithEmail);
@@ -27,9 +29,14 @@ export default function AuthScreen() {
     setBusy(true);
     setMessage(null);
     const { error } = await signInWithGoogle();
-    if (error) setMessage({ text: error, error: true });
-    else Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setBusy(false);
+    if (error) {
+      setMessage({ text: error, error: true });
+      return;
+    }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Explicit navigation — never leave the router hanging between guards.
+    router.replace(landingRoute());
   };
 
   const submitEmail = async () => {
@@ -44,17 +51,28 @@ export default function AuthScreen() {
     setMessage(null);
     if (mode === 'login') {
       const { error } = await signInWithEmail(email.trim(), password);
-      if (error) setMessage({ text: error, error: true });
+      setBusy(false);
+      if (error) {
+        setMessage({ text: error, error: true });
+        return;
+      }
+      router.replace(landingRoute());
     } else {
       const { error, needsConfirmation } = await signUpWithEmail(email.trim(), password);
-      if (error) setMessage({ text: error, error: true });
-      else if (needsConfirmation)
+      setBusy(false);
+      if (error) {
+        setMessage({ text: error, error: true });
+        return;
+      }
+      if (needsConfirmation) {
         setMessage({
           text: 'Check your email to confirm your account, then log in here.',
           error: false,
         });
+        return;
+      }
+      router.replace(landingRoute());
     }
-    setBusy(false);
   };
 
   return (

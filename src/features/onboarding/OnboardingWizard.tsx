@@ -13,8 +13,13 @@ import { pushProfileToCloud } from '@/state/useAuthStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { colors, durations, spacing } from '@/theme';
 
-import { draftToProfile, useOnboardingStore, type OnboardingDraft } from './onboardingStore';
-import { DurationStep, NameStep, ProductsStep, UsageStep } from './steps/BasicsSteps';
+import {
+  draftDobIso,
+  draftToProfile,
+  useOnboardingStore,
+  type OnboardingDraft,
+} from './onboardingStore';
+import { AboutYouStep, DurationStep, NameStep, ProductsStep, UsageStep } from './steps/BasicsSteps';
 import { MomentsStep, ReasonsStep, ReasonTextStep } from './steps/MotivationSteps';
 import { ApproachStep, HistoryStep } from './steps/PlanSteps';
 
@@ -42,6 +47,11 @@ function usageComplete(draft: OnboardingDraft): boolean {
 
 const STEPS: StepDef[] = [
   { key: 'name', component: NameStep, canContinue: (d) => d.name.trim().length > 0 },
+  {
+    key: 'about',
+    component: AboutYouStep,
+    canContinue: (d) => draftDobIso(d) !== null && d.gender !== null,
+  },
   { key: 'products', component: ProductsStep, canContinue: (d) => d.products.length > 0 },
   { key: 'usage', component: UsageStep, canContinue: usageComplete },
   {
