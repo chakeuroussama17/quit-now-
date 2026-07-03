@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Application from 'expo-application';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
@@ -336,6 +337,11 @@ export default function SettingsScreen() {
             </Card>
           </>
         )}
+
+        <AppText variant="caption" color={colors.textMuted} style={styles.versionFooter}>
+          Exhale v{Application.nativeApplicationVersion ?? '1.0.0'} · build{' '}
+          {Application.nativeBuildVersion ?? 'dev'}
+        </AppText>
       </ScrollView>
 
       <RewardGoalSheet
@@ -370,4 +376,5 @@ const styles = StyleSheet.create({
     borderRadius: radii.sm,
   },
   rowText: { flex: 1, gap: 2 },
+  versionFooter: { textAlign: 'center', marginTop: spacing.xl },
 });
