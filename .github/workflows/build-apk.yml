@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EXPO_NO_TELEMETRY: '1'
+      # Set once in GitHub: repo Settings → Secrets and variables → Actions →
+      # Variables → EXPO_PUBLIC_AI_PROXY_URL = https://<project>.vercel.app
+      # Baked into the JS bundle at build time. Empty = offline fallbacks.
+      EXPO_PUBLIC_AI_PROXY_URL: ${{ vars.EXPO_PUBLIC_AI_PROXY_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
