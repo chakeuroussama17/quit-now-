@@ -50,8 +50,8 @@ Leave `EXPO_PUBLIC_AI_PROXY_URL` empty and everything still works — AI feature
 
 - ✅ Phase 1 — onboarding, data model, fast logging flow, home dashboard
 - ✅ Phase 2 — dashboard charts, health milestones, stats screen
-- ✅ Phase 3 — AI coach (OpenAI via backend proxy)
-- ⏳ Phase 4 — Craving SOS toolkit & gamification
-- ⏳ Phase 4.5 — "The Room" emotional support chat
-- ⏳ Phase 5 — polish, notifications, accessibility
-- ⏳ Phase 6 — AI context wiring
+- ✅ Phase 3 — AI coach (OpenAI via backend proxy, deployed on Vercel)
+- ✅ Phase 4 — Craving SOS urge surfing, ranks, XP, achievements
+- ✅ Phase 4.5 — "The Room" emotional support chat (private, local-only)
+- ✅ Phase 5 — notifications, CSV export, profile editing, app icon/splash, a11y
+- ✅ Phase 6 — AI context wiring (buildContextJSON in every AI call)

@@ -10,6 +10,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
 import { Screen } from '@/components/ui/Screen';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { EMOTION_OPTIONS, TRIGGER_OPTIONS } from '@/features/logging/options';
 import { WeeklyInsightCard } from '@/features/stats/WeeklyInsightCard';
 import { useStatsData } from '@/features/stats/useStatsData';
@@ -64,7 +65,18 @@ export default function StatsScreen() {
   const [range, setRange] = useState<7 | 30>(7);
   const data = useStatsData(range);
 
-  if (!profile || !data.loaded) return <Screen />;
+  if (!profile || !data.loaded) {
+    return (
+      <Screen>
+        <View style={styles.skeletons}>
+          <Skeleton height={34} width={120} />
+          <Skeleton height={190} borderRadius={20} />
+          <Skeleton height={160} borderRadius={20} />
+          <Skeleton height={140} borderRadius={20} />
+        </View>
+      </Screen>
+    );
+  }
 
   const hasAnyData =
     data.daily.some((d) => d.value > 0) ||
@@ -176,6 +188,7 @@ export default function StatsScreen() {
 }
 
 const styles = StyleSheet.create({
+  skeletons: { paddingTop: spacing.lg, gap: spacing.md },
   content: { paddingTop: spacing.lg, paddingBottom: spacing.xxl },
   header: {
     flexDirection: 'row',

@@ -10,6 +10,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { syncNotifications } from '@/services/notificationService';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
@@ -55,6 +56,15 @@ export default function RootLayout() {
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
   }, [ready]);
+
+  // Keep the local notification schedule fresh (risky hours drift with data).
+  const settingsHydrated = useSettingsStore((s) => s.hydrated);
+  useEffect(() => {
+    if (!settingsHydrated) return;
+    if (useSettingsStore.getState().values['notif_enabled'] === 'true') {
+      syncNotifications().catch(() => {});
+    }
+  }, [settingsHydrated]);
 
   if (!ready) return null;
 

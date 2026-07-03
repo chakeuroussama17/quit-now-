@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
@@ -9,7 +9,10 @@ import { Screen } from '@/components/ui/Screen';
 import { wipeAllData, wipeRoomData } from '@/db/database';
 import { seedDemoData } from '@/db/seed';
 import { PRODUCT_LABELS } from '@/features/logging/options';
+import { EditProfileSheet } from '@/features/settings/EditProfileSheet';
 import { RewardGoalSheet } from '@/features/settings/RewardGoalSheet';
+import { exportDataCsv } from '@/services/exportService';
+import { ensureNotificationPermissions, syncNotifications } from '@/services/notificationService';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
@@ -58,6 +61,41 @@ function SettingsRow({
   );
 }
 
+function ToggleRow({
+  label,
+  caption,
+  value,
+  onChange,
+  disabled = false,
+}: {
+  label: string;
+  caption?: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <View style={[styles.row, disabled && { opacity: 0.4 }]}>
+      <View style={styles.rowText}>
+        <AppText variant="bodyMedium">{label}</AppText>
+        {caption ? (
+          <AppText variant="caption" color={colors.textMuted}>
+            {caption}
+          </AppText>
+        ) : null}
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        disabled={disabled}
+        trackColor={{ false: 'rgba(255,255,255,0.12)', true: colors.accentDim }}
+        thumbColor={value ? colors.accent : colors.textMuted}
+        accessibilityLabel={label}
+      />
+    </View>
+  );
+}
+
 export default function SettingsScreen() {
   const router = useRouter();
   const profile = useProfileStore((s) => s.profile);
@@ -66,8 +104,32 @@ export default function SettingsScreen() {
   const refreshLogs = useLogsStore((s) => s.refresh);
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
   const goalName = useSettingsStore((s) => s.values['reward_goal_name']);
+  const setSetting = useSettingsStore((s) => s.set);
+  const values = useSettingsStore((s) => s.values);
+  const notifEnabled = values['notif_enabled'] === 'true';
   const [seeding, setSeeding] = useState(false);
   const [goalOpen, setGoalOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+
+  const toggleNotifications = async (value: boolean) => {
+    if (value) {
+      const granted = await ensureNotificationPermissions();
+      if (!granted) {
+        Alert.alert(
+          'Permission needed',
+          'Enable notifications for Exhale in your system settings to use reminders.',
+        );
+        return;
+      }
+    }
+    await setSetting('notif_enabled', String(value));
+    syncNotifications();
+  };
+
+  const toggleSub = async (key: string, value: boolean) => {
+    await setSetting(key, String(value));
+    syncNotifications();
+  };
 
   const confirmDeleteRoom = () => {
     Alert.alert(
@@ -143,9 +205,15 @@ export default function SettingsScreen() {
         )}
 
         <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
-          Goals
+          Profile & goals
         </AppText>
         <Card style={styles.group}>
+          <SettingsRow
+            icon="create-outline"
+            label="Edit profile & costs"
+            caption="Name, baseline consumption, prices"
+            onPress={() => setEditOpen(true)}
+          />
           <SettingsRow
             icon="trophy-outline"
             label="Reward goal"
@@ -155,20 +223,42 @@ export default function SettingsScreen() {
         </Card>
 
         <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
-          Coming in later phases
+          Notifications
         </AppText>
         <Card style={styles.group}>
-          <SettingsRow
-            icon="notifications-outline"
-            label="Notifications"
-            caption="Morning check-ins and risky-hour warnings — Phase 5"
-            disabled
+          <ToggleRow
+            label="Reminders"
+            caption="All notifications live on your device only"
+            value={notifEnabled}
+            onChange={toggleNotifications}
           />
-          <SettingsRow
-            icon="download-outline"
-            label="Export data (CSV)"
-            caption="Phase 5"
-            disabled
+          <ToggleRow
+            label="Morning check-in"
+            caption="8:30 — start the day on purpose"
+            value={notifEnabled && values['notif_morning'] !== 'false'}
+            onChange={(v) => toggleSub('notif_morning', v)}
+            disabled={!notifEnabled}
+          />
+          <ToggleRow
+            label="Evening reflection"
+            caption="21:30 — a 10-second honest log"
+            value={notifEnabled && values['notif_evening'] !== 'false'}
+            onChange={(v) => toggleSub('notif_evening', v)}
+            disabled={!notifEnabled}
+          />
+          <ToggleRow
+            label="Risky-hour warnings"
+            caption="15 min before your personal danger hours"
+            value={notifEnabled && values['notif_risky'] !== 'false'}
+            onChange={(v) => toggleSub('notif_risky', v)}
+            disabled={!notifEnabled}
+          />
+          <ToggleRow
+            label="Milestone celebrations"
+            caption="When your body hits a recovery marker"
+            value={notifEnabled && values['notif_milestones'] !== 'false'}
+            onChange={(v) => toggleSub('notif_milestones', v)}
+            disabled={!notifEnabled}
           />
         </Card>
 
@@ -176,6 +266,12 @@ export default function SettingsScreen() {
           Data
         </AppText>
         <Card style={styles.group}>
+          <SettingsRow
+            icon="download-outline"
+            label="Export data (CSV)"
+            caption="Smoke and craving logs via the share sheet"
+            onPress={() => exportDataCsv().catch(() => {})}
+          />
           <SettingsRow
             icon="chatbubble-ellipses-outline"
             label="Delete all Room conversations"
@@ -214,6 +310,7 @@ export default function SettingsScreen() {
         onClose={() => setGoalOpen(false)}
         currency={profile?.currency ?? 'RM'}
       />
+      <EditProfileSheet visible={editOpen} onClose={() => setEditOpen(false)} />
     </Screen>
   );
 }

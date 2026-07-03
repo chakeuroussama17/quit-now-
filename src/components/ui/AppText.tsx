@@ -42,5 +42,14 @@ const variants = StyleSheet.create<Record<Variant, TextStyle>>({
 });
 
 export function AppText({ variant = 'body', color = colors.text, style, ...rest }: AppTextProps) {
-  return <Text style={[variants[variant], { color }, style]} {...rest} />;
+  // Dynamic type support with a cap on the huge numerals so layouts survive
+  // the largest system font sizes.
+  const maxScale = variant === 'display' || variant === 'stat' ? 1.4 : 2;
+  return (
+    <Text
+      maxFontSizeMultiplier={maxScale}
+      style={[variants[variant], { color }, style]}
+      {...rest}
+    />
+  );
 }

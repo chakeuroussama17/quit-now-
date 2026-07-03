@@ -176,6 +176,38 @@ export async function getRecentSmokeLogs(limit = 20): Promise<SmokeLog[]> {
   return rows.map(rowToSmokeLog);
 }
 
+/** Every smoke log, oldest first — for CSV export. */
+export async function getAllSmokeLogs(): Promise<SmokeLog[]> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<SmokeLogRow>('SELECT * FROM smoke_logs ORDER BY timestamp ASC');
+  return rows.map(rowToSmokeLog);
+}
+
+interface CravingLogRow {
+  id: number;
+  timestamp: string;
+  intensity: number | null;
+  resisted: number;
+  technique_used: string | null;
+  duration_seconds: number | null;
+}
+
+/** Every craving log, oldest first — for CSV export. */
+export async function getAllCravingLogs(): Promise<CravingLog[]> {
+  const db = await getDb();
+  const rows = await db.getAllAsync<CravingLogRow>(
+    'SELECT * FROM craving_logs ORDER BY timestamp ASC',
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    timestamp: r.timestamp,
+    intensity: r.intensity,
+    resisted: r.resisted === 1,
+    techniqueUsed: r.technique_used,
+    durationSeconds: r.duration_seconds,
+  }));
+}
+
 export async function getCravingStats(): Promise<{ resisted: number; total: number }> {
   const db = await getDb();
   const row = await db.getFirstAsync<{ resisted: number; total: number }>(
