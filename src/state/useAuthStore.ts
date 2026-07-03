@@ -3,7 +3,10 @@ import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { create } from 'zustand';
 
+import { wipeAllData } from '@/db/database';
+import { invalidateContextCache } from '@/services/contextBuilder';
 import { supabase } from '@/services/supabase';
+import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import type { UserProfile } from '@/types/models';
@@ -145,13 +148,39 @@ export function landingRoute(): '/' | '/onboarding' | '/auth' | '/intro' {
 }
 
 /**
+ * Local data belongs to exactly one account. When a DIFFERENT account signs
+ * in on this device, the previous user's profile, logs, Room conversations
+ * and settings are wiped before anything else happens — accounts must never
+ * see each other's data or overwrite each other's cloud rows.
+ */
+async function ensureLocalDataOwnership(userId: string): Promise<void> {
+  const settings = useSettingsStore.getState();
+  const owner = settings.values['owner_user_id'];
+  if (owner === userId) return;
+
+  if (owner && owner !== userId) {
+    const introSeen = settings.values['intro_seen'];
+    await wipeAllData();
+    useProfileStore.getState().clearProfile();
+    invalidateContextCache();
+    await useSettingsStore.getState().hydrate();
+    await useLogsStore.getState().refresh();
+    // The device has still seen the intro — that's not account data.
+    if (introSeen === 'true') await useSettingsStore.getState().set('intro_seen', 'true');
+  }
+  await useSettingsStore.getState().set('owner_user_id', userId);
+}
+
+/**
  * Existing account, fresh install: pull the complete profile (profile_json)
  * back from Supabase into local SQLite so the user is NOT re-onboarded and
  * their cloud data is never overwritten by a blank run-through.
+ * Also enforces per-account ownership of the local data (see above).
  */
 export async function restoreProfileFromCloud(): Promise<boolean> {
   const session = useAuthStore.getState().session;
   if (!session) return false;
+  await ensureLocalDataOwnership(session.user.id);
   if (useProfileStore.getState().profile) return false;
   try {
     const { data } = await supabase
