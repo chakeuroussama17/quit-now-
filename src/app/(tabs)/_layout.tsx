@@ -4,6 +4,7 @@ import { Tabs } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { LogSheet } from '@/features/logging/LogSheet';
+import { useAuthStore } from '@/state/useAuthStore';
 import { useUiStore } from '@/state/useUiStore';
 import { accentGlowShadow, colors, font } from '@/theme';
 
@@ -36,6 +37,7 @@ function LogTabButton() {
 export default function TabsLayout() {
   const logSheetOpen = useUiStore((s) => s.logSheetOpen);
   const setLogSheetOpen = useUiStore((s) => s.setLogSheetOpen);
+  const isPremium = useAuthStore((s) => s.isPremium);
 
   return (
     <>
@@ -86,7 +88,9 @@ export default function TabsLayout() {
             title: 'SOS',
             tabBarActiveTintColor: colors.amber,
             tabBarInactiveTintColor: 'rgba(245,166,35,0.55)',
-            tabBarIcon: ({ color, size }) => <Ionicons name="flame" size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name={isPremium ? 'flame' : 'lock-closed'} size={size} color={color} />
+            ),
           }}
         />
         <Tabs.Screen

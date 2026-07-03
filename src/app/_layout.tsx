@@ -11,6 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { syncNotifications } from '@/services/notificationService';
+import { useAuthStore } from '@/state/useAuthStore';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
@@ -40,33 +41,41 @@ export default function RootLayout() {
   });
 
   const profile = useProfileStore((s) => s.profile);
-  const hydrated = useProfileStore((s) => s.hydrated);
+  const profileHydrated = useProfileStore((s) => s.hydrated);
   const hydrateProfile = useProfileStore((s) => s.hydrate);
+  const settingsHydrated = useSettingsStore((s) => s.hydrated);
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
+  const introSeen = useSettingsStore((s) => s.values['intro_seen'] === 'true');
+  const session = useAuthStore((s) => s.session);
+  const authHydrated = useAuthStore((s) => s.hydrated);
+  const hydrateAuth = useAuthStore((s) => s.hydrate);
   const refreshLogs = useLogsStore((s) => s.refresh);
 
   useEffect(() => {
     hydrateProfile();
-    hydrateSettings();
+    hydrateSettings().then(() => hydrateAuth());
     refreshLogs();
-  }, [hydrateProfile, hydrateSettings, refreshLogs]);
+  }, [hydrateProfile, hydrateSettings, hydrateAuth, refreshLogs]);
 
-  const ready = fontsLoaded && hydrated;
+  const ready = fontsLoaded && profileHydrated && settingsHydrated && authHydrated;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
   }, [ready]);
 
   // Keep the local notification schedule fresh (risky hours drift with data).
-  const settingsHydrated = useSettingsStore((s) => s.hydrated);
   useEffect(() => {
     if (!settingsHydrated) return;
+    if (useSettingsStore.getState().values['intro_seen'] !== 'true') return;
     if (useSettingsStore.getState().values['notif_enabled'] === 'true') {
       syncNotifications().catch(() => {});
     }
   }, [settingsHydrated]);
 
   if (!ready) return null;
+
+  const authed = session != null;
+  const onboarded = profile != null;
 
   return (
     <ThemeProvider value={navTheme}>
@@ -77,16 +86,29 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.bg },
         }}
       >
-        <Stack.Protected guard={profile != null}>
+        {/* First run: 3 intro slides */}
+        <Stack.Protected guard={!introSeen && !authed}>
+          <Stack.Screen name="intro" />
+        </Stack.Protected>
+
+        {/* Then: login / register (Google or email) */}
+        <Stack.Protected guard={introSeen && !authed}>
+          <Stack.Screen name="auth" />
+        </Stack.Protected>
+
+        {/* Signed in but no local profile yet → onboarding questionnaire */}
+        <Stack.Protected guard={authed && !onboarded}>
+          <Stack.Screen name="onboarding" />
+        </Stack.Protected>
+
+        {/* The app */}
+        <Stack.Protected guard={authed && onboarded}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen
             name="sos-chat"
             options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
           />
           <Stack.Screen name="settings" />
-        </Stack.Protected>
-        <Stack.Protected guard={profile == null}>
-          <Stack.Screen name="onboarding" />
         </Stack.Protected>
       </Stack>
     </ThemeProvider>

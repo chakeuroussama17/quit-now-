@@ -9,6 +9,7 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { Screen } from '@/components/ui/Screen';
+import { pushProfileToCloud } from '@/state/useAuthStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { colors, durations, spacing } from '@/theme';
 
@@ -83,7 +84,9 @@ export function OnboardingWizard() {
     }
     setSaving(true);
     try {
-      await setProfile(draftToProfile(draft));
+      const profile = draftToProfile(draft);
+      await setProfile(profile);
+      pushProfileToCloud(profile); // best-effort mirror to Supabase
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace('/');
     } finally {

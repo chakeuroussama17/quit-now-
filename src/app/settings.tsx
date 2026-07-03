@@ -14,6 +14,7 @@ import { EditProfileSheet } from '@/features/settings/EditProfileSheet';
 import { RewardGoalSheet } from '@/features/settings/RewardGoalSheet';
 import { exportDataCsv } from '@/services/exportService';
 import { ensureNotificationPermissions, syncNotifications } from '@/services/notificationService';
+import { useAuthStore } from '@/state/useAuthStore';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
@@ -108,6 +109,9 @@ export default function SettingsScreen() {
   const setSetting = useSettingsStore((s) => s.set);
   const values = useSettingsStore((s) => s.values);
   const notifEnabled = values['notif_enabled'] === 'true';
+  const session = useAuthStore((s) => s.session);
+  const isPremium = useAuthStore((s) => s.isPremium);
+  const signOut = useAuthStore((s) => s.signOut);
   const [seeding, setSeeding] = useState(false);
   const [goalOpen, setGoalOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -292,6 +296,28 @@ export default function SettingsScreen() {
             caption="Everything lives only on this device"
             onPress={confirmDeleteAll}
             destructive
+          />
+        </Card>
+
+        <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
+          Account
+        </AppText>
+        <Card style={styles.group}>
+          <SettingsRow
+            icon="person-circle-outline"
+            label={session?.user.email ?? 'Signed in'}
+            caption={isPremium ? 'SOS subscription active' : 'Free plan — SOS locked'}
+          />
+          <SettingsRow
+            icon="log-out-outline"
+            label="Sign out"
+            caption="Your local logs stay on this device"
+            onPress={() =>
+              Alert.alert('Sign out?', 'You can log back in anytime.', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Sign out', style: 'destructive', onPress: () => signOut() },
+              ])
+            }
           />
         </Card>
 

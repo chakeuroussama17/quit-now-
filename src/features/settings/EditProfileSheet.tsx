@@ -8,6 +8,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Stepper } from '@/components/ui/Stepper';
 import { MoneyInput } from '@/features/onboarding/steps/common';
+import { pushProfileToCloud } from '@/state/useAuthStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { colors, spacing } from '@/theme';
 import type { UserProfile } from '@/types/models';
@@ -32,6 +33,7 @@ export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
 
   const save = async () => {
     await setProfile(current);
+    pushProfileToCloud(current); // best-effort mirror to Supabase
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setDraft(null);
     onClose();

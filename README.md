@@ -46,6 +46,22 @@ Add `OPENAI_API_KEY` as an environment variable in the Vercel project settings, 
 
 Leave `EXPO_PUBLIC_AI_PROXY_URL` empty and everything still works — AI features quietly fall back to 50 bundled motivation lines and offline SOS coaching.
 
+## Supabase setup (auth + subscriptions)
+
+1. **Run the schema**: Supabase dashboard → SQL Editor → paste [supabase/schema.sql](supabase/schema.sql) → Run.
+2. **Google login**: Google Cloud Console → create OAuth client (Web application) with authorized redirect URI `https://<project>.supabase.co/auth/v1/callback`. Then Supabase → Authentication → Providers → Google → paste client ID + secret.
+3. **Allow the app redirect**: Supabase → Authentication → URL Configuration → Redirect URLs → add `exhale://**`.
+4. Optional: Authentication → Providers → Email → disable "Confirm email" for frictionless email signup.
+
+## Stripe setup ($3.99/mo SOS subscription)
+
+1. Stripe dashboard → Product ($3.99/month recurring) → create a **Payment Link**.
+2. Set `EXPO_PUBLIC_STRIPE_PAYMENT_LINK` to that link (or paste it in `src/features/paywall/Paywall.tsx`) and rebuild.
+3. Stripe → Developers → Webhooks → add endpoint `https://<your-vercel>.vercel.app/api/stripe-webhook` with events `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`.
+4. In Vercel env vars add: `STRIPE_WEBHOOK_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (from Supabase → Settings → API), then redeploy.
+
+Flow: paywall opens the payment link with `client_reference_id=<user id>` → Stripe webhook marks the user active in `subscriptions` → app unlocks SOS.
+
 ## Status
 
 - ✅ Phase 1 — onboarding, data model, fast logging flow, home dashboard
