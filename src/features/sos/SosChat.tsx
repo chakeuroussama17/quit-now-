@@ -96,7 +96,9 @@ export function SosChat() {
 
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        // 'padding' on BOTH platforms: edge-to-edge Android doesn't resize
+        // the window for the keyboard, so the input must move itself.
+        behavior="padding"
         keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}
       >
         <ScrollView

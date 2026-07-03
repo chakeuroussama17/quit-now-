@@ -1,5 +1,13 @@
 import { useEffect, useState, type PropsWithChildren } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,13 +19,15 @@ interface BottomSheetProps extends PropsWithChildren {
 }
 
 /**
- * Minimal dark bottom sheet (Modal + reanimated slide). Kept dependency-free
- * on purpose — swap for a gesture-driven sheet later if drag-to-dismiss is needed.
+ * Minimal dark bottom sheet (Modal + reanimated slide). Content taller than
+ * ~85% of the screen scrolls inside the sheet instead of crawling up behind
+ * the status bar.
  */
 export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
   // Keep the Modal mounted briefly after close so the exit animation can play.
   const [rendered, setRendered] = useState(visible);
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
 
   // Derived-state adjustment during render (the "you might not need an effect" pattern).
   if (visible && !rendered) setRendered(true);
@@ -32,10 +42,7 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
 
   return (
     <Modal transparent statusBarTranslucent visible onRequestClose={onClose} animationType="none">
-      <KeyboardAvoidingView
-        style={styles.root}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <KeyboardAvoidingView style={styles.root} behavior="padding">
         {visible && (
           <Animated.View
             entering={FadeIn.duration(durations.fast)}
@@ -53,10 +60,22 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
           <Animated.View
             entering={SlideInDown.duration(durations.slow)}
             exiting={SlideOutDown.duration(durations.base)}
-            style={[styles.sheet, { paddingBottom: insets.bottom + spacing.xl }]}
+            style={[
+              styles.sheet,
+              {
+                paddingBottom: insets.bottom + spacing.lg,
+                maxHeight: windowHeight * 0.85,
+              },
+            ]}
           >
             <View style={styles.handle} />
-            {children}
+            <ScrollView
+              bounces={false}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {children}
+            </ScrollView>
           </Animated.View>
         )}
       </KeyboardAvoidingView>

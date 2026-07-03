@@ -9,6 +9,7 @@ import { Screen } from '@/components/ui/Screen';
 import { wipeAllData, wipeRoomData } from '@/db/database';
 import { seedDemoData } from '@/db/seed';
 import { PRODUCT_LABELS } from '@/features/logging/options';
+import { pickAvatar } from '@/features/settings/avatar';
 import { EditProfileSheet } from '@/features/settings/EditProfileSheet';
 import { RewardGoalSheet } from '@/features/settings/RewardGoalSheet';
 import { exportDataCsv } from '@/services/exportService';
@@ -208,6 +209,12 @@ export default function SettingsScreen() {
           Profile & goals
         </AppText>
         <Card style={styles.group}>
+          <SettingsRow
+            icon="image-outline"
+            label="Profile photo"
+            caption={values['avatar_uri'] ? 'Change your photo' : 'Pick a photo from your library'}
+            onPress={() => pickAvatar().catch(() => {})}
+          />
           <SettingsRow
             icon="create-outline"
             label="Edit profile & costs"

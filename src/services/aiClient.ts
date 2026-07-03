@@ -9,7 +9,12 @@ export interface ChatMessage {
   content: string;
 }
 
-const PROXY_URL = (process.env.EXPO_PUBLIC_AI_PROXY_URL ?? '').replace(/\/$/, '');
+// The deployed proxy is the default — a public URL, safe to ship in the
+// bundle (the OpenAI key stays server-side). EXPO_PUBLIC_AI_PROXY_URL
+// overrides it; set it to 'off' to force offline mode.
+const DEFAULT_PROXY_URL = 'https://quit-now.vercel.app';
+const envUrl = (process.env.EXPO_PUBLIC_AI_PROXY_URL ?? '').trim();
+const PROXY_URL = (envUrl === 'off' ? '' : envUrl || DEFAULT_PROXY_URL).replace(/\/$/, '');
 const TIMEOUT_MS = 15_000;
 
 export function aiConfigured(): boolean {

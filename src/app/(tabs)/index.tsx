@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
 import { Screen } from '@/components/ui/Screen';
@@ -11,6 +11,7 @@ import { TilesRow } from '@/features/dashboard/TilesRow';
 import { useEnsureReductionPlan } from '@/features/dashboard/useEnsureReductionPlan';
 import { useProgress } from '@/features/dashboard/useProgress';
 import { useProfileStore } from '@/state/useProfileStore';
+import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, radii, spacing } from '@/theme';
 import { greeting } from '@/utils/time';
 
@@ -25,6 +26,7 @@ export default function HomeScreen() {
 function HomeContent() {
   const router = useRouter();
   const profile = useProfileStore((s) => s.profile)!;
+  const avatarUri = useSettingsStore((s) => s.values['avatar_uri']);
   const progress = useProgress(profile);
   useEnsureReductionPlan(profile);
 
@@ -48,7 +50,11 @@ function HomeContent() {
             accessibilityLabel="Settings"
             style={({ pressed }) => [styles.avatar, pressed && { opacity: 0.8 }]}
           >
-            <Ionicons name="person-outline" size={18} color={colors.textSecondary} />
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+            ) : (
+              <Ionicons name="person-outline" size={18} color={colors.textSecondary} />
+            )}
           </Pressable>
         </View>
 
@@ -88,6 +94,8 @@ const styles = StyleSheet.create({
     borderColor: colors.hairline,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  avatarImage: { width: '100%', height: '100%' },
   section: { marginTop: spacing.lg },
 });
