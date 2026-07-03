@@ -2,7 +2,6 @@ import Slider from '@react-native-community/slider';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { AppText } from '@/components/ui/AppText';
 import { BottomSheet } from '@/components/ui/BottomSheet';
@@ -165,24 +164,26 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
           </View>
         </View>
       ) : (
-        <Animated.View entering={FadeInDown.duration(durations.base)}>
+        // Plain Views on purpose: reanimated entering animations inside a
+        // Modal break Pressable hit-testing on the new architecture.
+        <View>
           <AppText variant="title" color={colors.textSecondary} style={styles.ack}>
             {ackLine}
           </AppText>
           {reflection && (
-            <Animated.View entering={FadeInDown.duration(durations.base)} style={styles.reflection}>
+            <View style={styles.reflection}>
               <AppText variant="micro" color={colors.accent}>
                 Coach
               </AppText>
               <AppText variant="caption" color={colors.textSecondary} style={styles.reflectionText}>
                 {reflection}
               </AppText>
-            </Animated.View>
+            </View>
           )}
           <View style={styles.footer}>
             <PrimaryButton label="Done" onPress={close} />
           </View>
-        </Animated.View>
+        </View>
       )}
     </BottomSheet>
   );
