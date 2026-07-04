@@ -4,6 +4,7 @@ import { AppTextInput } from '@/components/ui/AppTextInput';
 import { Chip } from '@/components/ui/Chip';
 import { Stepper } from '@/components/ui/Stepper';
 import { AppText } from '@/components/ui/AppText';
+import { useT, type TKey } from '@/i18n';
 import { colors, spacing } from '@/theme';
 import type { Gender } from '@/types/models';
 import { ageFromDob } from '@/utils/time';
@@ -12,19 +13,15 @@ import { PRODUCT_OPTIONS } from '../options';
 import { draftDobIso, useOnboardingStore } from '../onboardingStore';
 import { ChipGrid, FieldLabel, MoneyInput, StepScreen } from './common';
 
-const GENDER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
-  { value: 'other', label: 'Other' },
-  { value: 'prefer_not', label: 'Prefer not to say' },
-];
+const GENDERS: Gender[] = ['male', 'female', 'other', 'prefer_not'];
 
 export function NameStep() {
+  const t = useT();
   const { draft, patch } = useOnboardingStore();
   return (
-    <StepScreen title="What should we call you?" subtitle="Just a first name is fine.">
+    <StepScreen title={t('onb.name.title')} subtitle={t('onb.name.subtitle')}>
       <AppTextInput
-        placeholder="Your name"
+        placeholder={t('onb.name.placeholder')}
         defaultValue={draft.name}
         onChangeText={(name) => patch({ name })}
         autoFocus
@@ -37,13 +34,14 @@ export function NameStep() {
 }
 
 export function AboutYouStep() {
+  const t = useT();
   const { draft, patch } = useOnboardingStore();
   const dobIso = draftDobIso(draft);
   const filled = draft.dobDay !== '' && draft.dobMonth !== '' && draft.dobYear.length === 4;
 
   return (
-    <StepScreen title="About you" subtitle="Helps personalize your recovery timeline and coaching.">
-      <FieldLabel>Date of birth</FieldLabel>
+    <StepScreen title={t('onb.about.title')} subtitle={t('onb.about.subtitle')}>
+      <FieldLabel>{t('onb.about.dob')}</FieldLabel>
       <View style={dobStyles.row}>
         <AppTextInput
           placeholder="DD"
@@ -75,20 +73,20 @@ export function AboutYouStep() {
       </View>
       <AppText variant="caption" color={filled && !dobIso ? colors.danger : colors.textMuted}>
         {dobIso
-          ? `You're ${ageFromDob(dobIso)}`
+          ? t('onb.about.age', { age: ageFromDob(dobIso) })
           : filled
-            ? 'That date doesn’t look right — check it once more.'
-            : 'Day / month / year'}
+            ? t('onb.about.dobBad')
+            : t('onb.about.dobHint')}
       </AppText>
 
-      <FieldLabel>Gender</FieldLabel>
+      <FieldLabel>{t('onb.about.gender')}</FieldLabel>
       <ChipGrid>
-        {GENDER_OPTIONS.map((option) => (
+        {GENDERS.map((gender) => (
           <Chip
-            key={option.value}
-            label={option.label}
-            selected={draft.gender === option.value}
-            onPress={() => patch({ gender: option.value })}
+            key={gender}
+            label={t(`gender.${gender}` as TKey)}
+            selected={draft.gender === gender}
+            onPress={() => patch({ gender })}
           />
         ))}
       </ChipGrid>
@@ -103,14 +101,15 @@ const dobStyles = StyleSheet.create({
 });
 
 export function ProductsStep() {
+  const t = useT();
   const { draft, toggleIn } = useOnboardingStore();
   return (
-    <StepScreen title="What do you use?" subtitle="Select everything that applies.">
+    <StepScreen title={t('onb.products.title')} subtitle={t('onb.products.subtitle')}>
       <ChipGrid>
         {PRODUCT_OPTIONS.map((option) => (
           <Chip
             key={option.value}
-            label={option.label}
+            label={t(`product.${option.value}` as TKey)}
             selected={draft.products.includes(option.value)}
             onPress={() => toggleIn('products', option.value)}
           />
@@ -121,42 +120,38 @@ export function ProductsStep() {
 }
 
 export function UsageStep() {
+  const t = useT();
   const { draft, patch } = useOnboardingStore();
   const usesCigs = draft.products.includes('cigarette') || draft.products.includes('rolled');
   const usesVape = draft.products.includes('vape');
   const usesShisha = draft.products.includes('shisha');
 
   return (
-    <StepScreen
-      title="How much do you use?"
-      subtitle="Honest numbers make your savings and progress accurate."
-    >
+    <StepScreen title={t('onb.usage.title')} subtitle={t('onb.usage.subtitle')}>
       {usesCigs && (
         <View style={{ gap: spacing.sm }}>
-          <AppText variant="title">Cigarettes / rolled</AppText>
-          <FieldLabel>Sticks per day</FieldLabel>
+          <AppText variant="title">{t('onb.usage.cigs')}</AppText>
+          <FieldLabel>{t('onb.usage.sticksPerDay')}</FieldLabel>
           <Stepper
             value={draft.cigsPerDay}
             onChange={(cigsPerDay) => patch({ cigsPerDay })}
             min={1}
             max={100}
-            suffix="sticks"
           />
-          <FieldLabel>Price per pack</FieldLabel>
+          <FieldLabel>{t('onb.usage.pricePerPack')}</FieldLabel>
           <MoneyInput
             value={draft.pricePerPack}
             currency={draft.currency}
             onChange={(pricePerPack) => patch({ pricePerPack })}
           />
-          <FieldLabel>Sticks per pack</FieldLabel>
+          <FieldLabel>{t('onb.usage.sticksPerPack')}</FieldLabel>
           <Stepper
             value={draft.sticksPerPack}
             onChange={(sticksPerPack) => patch({ sticksPerPack })}
             min={1}
             max={50}
-            suffix="per pack"
           />
-          <FieldLabel>Brand (optional)</FieldLabel>
+          <FieldLabel>{t('onb.usage.brand')}</FieldLabel>
           <AppTextInput
             placeholder="e.g. Marlboro"
             defaultValue={draft.cigBrand}
@@ -167,8 +162,8 @@ export function UsageStep() {
 
       {usesVape && (
         <View style={{ gap: spacing.sm, marginTop: usesCigs ? spacing.xl : 0 }}>
-          <AppText variant="title">Vape</AppText>
-          <FieldLabel>Nicotine strength (mg/ml)</FieldLabel>
+          <AppText variant="title">{t('onb.usage.vape')}</AppText>
+          <FieldLabel>{t('onb.usage.nicotine')}</FieldLabel>
           <Stepper
             value={draft.vapeNicotineMgMl}
             onChange={(vapeNicotineMgMl) => patch({ vapeNicotineMgMl })}
@@ -176,22 +171,22 @@ export function UsageStep() {
             max={60}
             suffix="mg/ml"
           />
-          <FieldLabel>How do you track it?</FieldLabel>
+          <FieldLabel>{t('onb.usage.trackHow')}</FieldLabel>
           <ChipGrid>
             <Chip
-              label="ml per day"
+              label={t('onb.usage.mlPerDay')}
               selected={draft.vapeAnswerMode === 'ml'}
               onPress={() => patch({ vapeAnswerMode: 'ml' })}
             />
             <Chip
-              label="Pods per week"
+              label={t('onb.usage.podsPerWeek')}
               selected={draft.vapeAnswerMode === 'pods'}
               onPress={() => patch({ vapeAnswerMode: 'pods' })}
             />
           </ChipGrid>
           {draft.vapeAnswerMode === 'ml' ? (
             <>
-              <FieldLabel>ml per day</FieldLabel>
+              <FieldLabel>{t('onb.usage.mlPerDay')}</FieldLabel>
               <Stepper
                 value={draft.vapeMlPerDay}
                 onChange={(vapeMlPerDay) => patch({ vapeMlPerDay })}
@@ -203,17 +198,16 @@ export function UsageStep() {
             </>
           ) : (
             <>
-              <FieldLabel>Pods per week</FieldLabel>
+              <FieldLabel>{t('onb.usage.podsPerWeek')}</FieldLabel>
               <Stepper
                 value={draft.vapePodsPerWeek}
                 onChange={(vapePodsPerWeek) => patch({ vapePodsPerWeek })}
                 min={1}
                 max={30}
-                suffix="pods"
               />
             </>
           )}
-          <FieldLabel>Cost per pod / bottle</FieldLabel>
+          <FieldLabel>{t('onb.usage.costPerPod')}</FieldLabel>
           <MoneyInput
             value={draft.vapeCostPerUnit}
             currency={draft.currency}
@@ -224,16 +218,15 @@ export function UsageStep() {
 
       {usesShisha && (
         <View style={{ gap: spacing.sm, marginTop: usesCigs || usesVape ? spacing.xl : 0 }}>
-          <AppText variant="title">Shisha</AppText>
-          <FieldLabel>Sessions per week</FieldLabel>
+          <AppText variant="title">{t('onb.usage.shisha')}</AppText>
+          <FieldLabel>{t('onb.usage.sessionsPerWeek')}</FieldLabel>
           <Stepper
             value={draft.shishaSessionsPerWeek}
             onChange={(shishaSessionsPerWeek) => patch({ shishaSessionsPerWeek })}
             min={1}
             max={30}
-            suffix="sessions"
           />
-          <FieldLabel>Cost per session</FieldLabel>
+          <FieldLabel>{t('onb.usage.costPerSession')}</FieldLabel>
           <MoneyInput
             value={draft.shishaCostPerSession}
             currency={draft.currency}
@@ -246,27 +239,23 @@ export function UsageStep() {
 }
 
 export function DurationStep() {
+  const t = useT();
   const { draft, patch } = useOnboardingStore();
   return (
-    <StepScreen
-      title="How long have you been using?"
-      subtitle="Roughly is fine — this shapes your recovery timeline."
-    >
-      <FieldLabel>Years</FieldLabel>
+    <StepScreen title={t('onb.duration.title')} subtitle={t('onb.duration.subtitle')}>
+      <FieldLabel>{t('onb.duration.years')}</FieldLabel>
       <Stepper
         value={draft.yearsUsing}
         onChange={(yearsUsing) => patch({ yearsUsing })}
         min={0}
         max={60}
-        suffix="years"
       />
-      <FieldLabel>Months</FieldLabel>
+      <FieldLabel>{t('onb.duration.months')}</FieldLabel>
       <Stepper
         value={draft.monthsUsing}
         onChange={(monthsUsing) => patch({ monthsUsing })}
         min={0}
         max={11}
-        suffix="months"
       />
       <AppText variant="caption" color={colors.textMuted}>
         Combined: {draft.yearsUsing > 0 ? `${draft.yearsUsing}y ` : ''}

@@ -7,6 +7,7 @@ import { AppText } from '@/components/ui/AppText';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Chip } from '@/components/ui/Chip';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { useT, type TKey } from '@/i18n';
 import { getPostLogReflection } from '@/services/aiService';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
@@ -14,7 +15,7 @@ import { colors, durations, spacing } from '@/theme';
 import type { Emotion, ProductType, TriggerType } from '@/types/models';
 
 import { randomAckLine } from './copy';
-import { EMOTION_OPTIONS, PRODUCT_LABELS, TRIGGER_OPTIONS } from './options';
+import { EMOTION_OPTIONS, TRIGGER_OPTIONS } from './options';
 
 interface LogSheetProps {
   visible: boolean;
@@ -35,6 +36,7 @@ function SectionLabel({ children }: { children: string }) {
  * occasionally a short coach reflection.
  */
 export function LogSheet({ visible, onClose }: LogSheetProps) {
+  const t = useT();
   const profile = useProfileStore((s) => s.profile);
   const logSmoke = useLogsStore((s) => s.logSmoke);
 
@@ -86,27 +88,27 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
       {ackLine == null ? (
         <View>
           <AppText variant="h2" style={styles.title}>
-            Log a smoke
+            {t('log.title')}
           </AppText>
 
-          <SectionLabel>What did you use?</SectionLabel>
+          <SectionLabel>{t('log.what')}</SectionLabel>
           <View style={styles.chipRow}>
             {products.map((p) => (
               <Chip
                 key={p}
-                label={PRODUCT_LABELS[p] ?? p}
+                label={t(`product.${p}` as TKey)}
                 selected={selectedProduct === p}
                 onPress={() => setProduct(p)}
               />
             ))}
           </View>
 
-          <SectionLabel>What triggered it?</SectionLabel>
+          <SectionLabel>{t('log.trigger')}</SectionLabel>
           <View style={styles.chipRow}>
             {TRIGGER_OPTIONS.map((option) => (
               <Chip
                 key={option.value}
-                label={option.label}
+                label={t(`trigger.${option.value}` as TKey)}
                 selected={trigger === option.value}
                 onPress={() => {
                   Haptics.selectionAsync();
@@ -116,12 +118,12 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
             ))}
           </View>
 
-          <SectionLabel>How do you feel?</SectionLabel>
+          <SectionLabel>{t('log.feel')}</SectionLabel>
           <View style={styles.chipRow}>
             {EMOTION_OPTIONS.map((option) => (
               <Chip
                 key={option.value}
-                label={option.label}
+                label={t(`emotion.${option.value}` as TKey)}
                 selected={emotion === option.value}
                 onPress={() => {
                   Haptics.selectionAsync();
@@ -131,7 +133,7 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
             ))}
           </View>
 
-          <SectionLabel>Craving intensity</SectionLabel>
+          <SectionLabel>{t('log.intensity')}</SectionLabel>
           <View style={styles.sliderRow}>
             <AppText variant="caption" color={colors.textMuted}>
               1
@@ -160,7 +162,7 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
           </View>
 
           <View style={styles.footer}>
-            <PrimaryButton label="Log it" onPress={logIt} disabled={!canLog} />
+            <PrimaryButton label={t('log.logIt')} onPress={logIt} disabled={!canLog} />
           </View>
         </View>
       ) : (
@@ -173,7 +175,7 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
           {reflection && (
             <View style={styles.reflection}>
               <AppText variant="micro" color={colors.accent}>
-                Coach
+                {t('home.coach')}
               </AppText>
               <AppText variant="caption" color={colors.textSecondary} style={styles.reflectionText}>
                 {reflection}
@@ -181,7 +183,7 @@ export function LogSheet({ visible, onClose }: LogSheetProps) {
             </View>
           )}
           <View style={styles.footer}>
-            <PrimaryButton label="Done" onPress={close} />
+            <PrimaryButton label={t('common.done')} onPress={close} />
           </View>
         </View>
       )}

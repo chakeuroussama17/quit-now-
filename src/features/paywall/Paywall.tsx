@@ -7,6 +7,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Screen } from '@/components/ui/Screen';
+import { useT } from '@/i18n';
 import { useAuthStore } from '@/state/useAuthStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { colors, radii, spacing } from '@/theme';
@@ -19,40 +20,20 @@ import { baselineDailyCost, formatMoney } from '@/utils/baseline';
  */
 const PAYMENT_LINK = (process.env.EXPO_PUBLIC_STRIPE_PAYMENT_LINK ?? '').trim();
 
-const PREMIUM_FEATURES = [
-  {
-    icon: 'flame' as const,
-    title: 'Craving SOS toolkit',
-    detail:
-      '5-minute urge-surf timer with guided 4-7-8 breathing, quick actions, and win logging that proves your cravings are getting shorter.',
-  },
-  {
-    icon: 'chatbubbles' as const,
-    title: 'AI Coach — live, 24/7',
-    detail:
-      'A real-time coach that knows your quit reason, your triggers and your risky hours. It talks you through the wave exactly when it hits.',
-  },
-  {
-    icon: 'heart-circle' as const,
-    title: 'The Room, with Mind',
-    detail:
-      'A private space to vent and untangle the stress behind the urge. Warm but honest — and everything stays on your phone.',
-  },
-];
-
-const FREE_FEATURES = [
-  'Streak, money saved & health milestones',
-  'Fast logging, stats, heatmap & trends',
-  'Ranks, XP and achievements',
-  'Daily coach line & weekly insight',
-];
-
 /** Shown in place of SOS and The Room until the subscription is active. */
 export function Paywall() {
+  const t = useT();
   const session = useAuthStore((s) => s.session);
   const refreshPremium = useAuthStore((s) => s.refreshPremium);
   const profile = useProfileStore((s) => s.profile);
   const [checking, setChecking] = useState(false);
+
+  const features = [
+    { icon: 'flame' as const, title: t('pay.f1.title'), detail: t('pay.f1.detail') },
+    { icon: 'chatbubbles' as const, title: t('pay.f2.title'), detail: t('pay.f2.detail') },
+    { icon: 'heart-circle' as const, title: t('pay.f3.title'), detail: t('pay.f3.detail') },
+  ];
+  const freeFeatures = [t('pay.free1'), t('pay.free2'), t('pay.free3'), t('pay.free4')];
 
   // Their own numbers do the selling: what a day of smoking used to cost.
   const dailyCost = profile ? baselineDailyCost(profile) : 0;
@@ -83,14 +64,13 @@ export function Paywall() {
           <Ionicons name="sparkles" size={28} color={colors.accent} />
         </View>
         <AppText variant="h1" style={styles.title}>
-          Exhale Premium
+          {t('pay.title')}
         </AppText>
         <AppText variant="body" color={colors.textSecondary} style={styles.subtitle}>
-          Quitting is decided in a handful of hard moments. Premium is the support system built for
-          exactly those moments.
+          {t('pay.subtitle')}
         </AppText>
 
-        {PREMIUM_FEATURES.map((feature) => (
+        {features.map((feature) => (
           <Card key={feature.title} style={styles.featureCard}>
             <View style={styles.featureIcon}>
               <Ionicons name={feature.icon} size={20} color={colors.accent} />
@@ -110,27 +90,25 @@ export function Paywall() {
               $3.99
             </AppText>
             <AppText variant="body" color={colors.textMuted}>
-              / month
+              {t('pay.month')}
             </AppText>
           </View>
           {dailyCost > 0.5 ? (
             <AppText variant="caption" color={colors.textSecondary} style={styles.priceNote}>
-              Smoking used to cost you about {formatMoney(dailyCost, currency)} every single day.
-              Premium costs less than most people spent before lunch — and it exists to keep that
-              money in your pocket.
+              {t('pay.anchor', { amount: formatMoney(dailyCost, currency) })}
             </AppText>
           ) : (
             <AppText variant="caption" color={colors.textSecondary} style={styles.priceNote}>
-              Less than a single pack. Cancel anytime, in one tap.
+              {t('pay.cheap')}
             </AppText>
           )}
         </View>
 
-        <PrimaryButton label="Start Premium — $3.99/month" onPress={subscribe} />
+        <PrimaryButton label={t('pay.cta')} onPress={subscribe} />
 
         <View style={styles.trustRow}>
           <AppText variant="caption" color={colors.textMuted}>
-            Cancel anytime · No ads, ever · Your logs never leave your phone
+            {t('pay.trust')}
           </AppText>
         </View>
 
@@ -141,15 +119,15 @@ export function Paywall() {
           disabled={checking}
         >
           <AppText variant="bodyMedium" color={colors.accent}>
-            {checking ? 'Checking…' : 'I already subscribed — refresh'}
+            {checking ? t('pay.checking') : t('pay.refresh')}
           </AppText>
         </Pressable>
 
         <View style={styles.freeBlock}>
           <AppText variant="micro" color={colors.textMuted} style={styles.freeTitle}>
-            Always free, no subscription needed
+            {t('pay.freeTitle')}
           </AppText>
-          {FREE_FEATURES.map((item) => (
+          {freeFeatures.map((item) => (
             <View key={item} style={styles.freeRow}>
               <Ionicons name="checkmark" size={14} color={colors.textMuted} />
               <AppText variant="caption" color={colors.textMuted}>

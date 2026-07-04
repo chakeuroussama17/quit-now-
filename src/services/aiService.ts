@@ -1,4 +1,5 @@
 import { countAiMessagesSince, getAiMessageByMeta, insertAiMessage } from '@/db/aiRepo';
+import { getLang } from '@/i18n';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
@@ -14,13 +15,20 @@ import { fallbackMotivationForDay } from './fallbacks';
 const COACH_SYSTEM = `You are the in-app coach of a quit-smoking app called Exhale. Tone: calm, honest, adult, supportive — like a wise friend, never preachy, never shaming, no toxic positivity. Keep answers under 80 words unless asked for a plan. Always tie motivation back to the user's OWN stated reasons when relevant. Never provide medical diagnoses; suggest seeing a doctor for medical questions. If the user mentions self-harm or severe distress, gently encourage professional support and people they trust.
 A JSON snapshot of the user's situation is provided — use it naturally, never recite it.`;
 
+/** Extra system line so the coach answers in the app's selected language. */
+export function languageInstruction(): string {
+  return getLang() === 'ms'
+    ? 'Reply ONLY in natural, conversational Bahasa Melayu (Malaysia).'
+    : 'Reply in English.';
+}
+
 async function coachMessages(instruction: string): Promise<ChatMessage[]> {
   const profile = useProfileStore.getState().profile;
   if (!profile) throw new Error('no profile');
   const lastSmokeAt = useLogsStore.getState().lastSmokeAt;
   const context = await buildContextJSON(profile, lastSmokeAt);
   return [
-    { role: 'system', content: COACH_SYSTEM },
+    { role: 'system', content: `${COACH_SYSTEM}\n${languageInstruction()}` },
     { role: 'system', content: `User context JSON:\n${JSON.stringify(context)}` },
     { role: 'user', content: instruction },
   ];
@@ -50,21 +58,23 @@ function dayOfYear(date = new Date()): number {
  * words surfacing every third day, handled by the caller).
  */
 export async function getDailyMotivation(): Promise<{ text: string; fromAi: boolean }> {
-  const today = localDayKey();
-  const cached = await getAiMessageByMeta('daily_motivation', today);
+  // Cache per day AND language, so switching language refreshes the line.
+  const cacheKey = `${localDayKey()}:${getLang()}`;
+  const cached = await getAiMessageByMeta('daily_motivation', cacheKey);
   if (cached) return { text: cached.content, fromAi: true };
 
-  if (!aiConfigured()) return { text: fallbackMotivationForDay(dayOfYear()), fromAi: false };
+  if (!aiConfigured())
+    return { text: fallbackMotivationForDay(dayOfYear(), getLang()), fromAi: false };
 
   try {
     const messages = await coachMessages(
       'Write today\'s single motivation line for me (max 30 words). Weave in my own quit reason when it lands naturally. No quotes around it, no "remember", just the line.',
     );
     const text = (await chatCompletion(messages, { maxTokens: 90 })).trim();
-    await insertAiMessage('daily_motivation', text, today);
+    await insertAiMessage('daily_motivation', text, cacheKey);
     return { text, fromAi: true };
   } catch {
-    return { text: fallbackMotivationForDay(dayOfYear()), fromAi: false };
+    return { text: fallbackMotivationForDay(dayOfYear(), getLang()), fromAi: false };
   }
 }
 
@@ -110,7 +120,7 @@ export async function sosChatReply(
   const context = await buildContextJSON(profile, lastSmokeAt);
 
   const messages: ChatMessage[] = [
-    { role: 'system', content: COACH_SYSTEM },
+    { role: 'system', content: `${COACH_SYSTEM}\n${languageInstruction()}` },
     {
       role: 'system',
       content: `The user pressed the SOS button — they are riding a craving RIGHT NOW. Coach them through it in real time: short messages (1-3 sentences), one step at a time. Ground them, buy minutes, remind them the wave passes in ~5 minutes. Use their own quit reason if it helps.\nUser context JSON:\n${JSON.stringify(context)}`,

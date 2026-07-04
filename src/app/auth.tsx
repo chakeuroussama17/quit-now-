@@ -8,12 +8,14 @@ import { AppText } from '@/components/ui/AppText';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Screen } from '@/components/ui/Screen';
+import { useT } from '@/i18n';
 import { landingRoute, useAuthStore } from '@/state/useAuthStore';
 import { colors, radii, spacing } from '@/theme';
 
 type Mode = 'login' | 'register';
 
 export default function AuthScreen() {
+  const t = useT();
   const router = useRouter();
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
@@ -41,10 +43,7 @@ export default function AuthScreen() {
 
   const submitEmail = async () => {
     if (!email.trim() || password.length < 6) {
-      setMessage({
-        text: 'Enter your email and a password of at least 6 characters.',
-        error: true,
-      });
+      setMessage({ text: t('auth.invalid'), error: true });
       return;
     }
     setBusy(true);
@@ -65,10 +64,7 @@ export default function AuthScreen() {
         return;
       }
       if (needsConfirmation) {
-        setMessage({
-          text: 'Check your email to confirm your account, then log in here.',
-          error: false,
-        });
+        setMessage({ text: t('auth.confirmEmail'), error: false });
         return;
       }
       router.replace(landingRoute());
@@ -85,10 +81,10 @@ export default function AuthScreen() {
         >
           <Image source={require('../../assets/images/splash-icon.png')} style={styles.logo} />
           <AppText variant="h1" style={styles.title}>
-            {mode === 'login' ? 'Welcome back' : 'Create your account'}
+            {mode === 'login' ? t('auth.welcomeBack') : t('auth.createAccount')}
           </AppText>
           <AppText variant="body" color={colors.textSecondary} style={styles.subtitle}>
-            Your quit journey, synced to you. Logs stay private on your device.
+            {t('auth.subtitle')}
           </AppText>
 
           <Pressable
@@ -98,19 +94,19 @@ export default function AuthScreen() {
             style={({ pressed }) => [styles.googleButton, (pressed || busy) && { opacity: 0.8 }]}
           >
             <Ionicons name="logo-google" size={19} color={colors.text} />
-            <AppText variant="title">Continue with Google</AppText>
+            <AppText variant="title">{t('auth.google')}</AppText>
           </Pressable>
 
           <View style={styles.dividerRow}>
             <View style={styles.divider} />
             <AppText variant="caption" color={colors.textMuted}>
-              or with email
+              {t('auth.orEmail')}
             </AppText>
             <View style={styles.divider} />
           </View>
 
           <AppTextInput
-            placeholder="Email"
+            placeholder={t('auth.email')}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -120,7 +116,7 @@ export default function AuthScreen() {
             accessibilityLabel="Email"
           />
           <AppTextInput
-            placeholder="Password (min 6 characters)"
+            placeholder={t('auth.password')}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -140,7 +136,7 @@ export default function AuthScreen() {
           )}
 
           <PrimaryButton
-            label={mode === 'login' ? 'Log in' : 'Register'}
+            label={mode === 'login' ? t('auth.login') : t('auth.register')}
             onPress={submitEmail}
             loading={busy}
           />
@@ -154,9 +150,9 @@ export default function AuthScreen() {
             style={styles.switchMode}
           >
             <AppText variant="body" color={colors.textSecondary}>
-              {mode === 'login' ? 'New here? ' : 'Already have an account? '}
+              {mode === 'login' ? t('auth.newHere') : t('auth.haveAccount')}
               <AppText variant="bodyMedium" color={colors.accent}>
-                {mode === 'login' ? 'Create an account' : 'Log in'}
+                {mode === 'login' ? t('auth.createLink') : t('auth.loginLink')}
               </AppText>
             </AppText>
           </Pressable>

@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
+import { useT } from '@/i18n';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, radii, spacing } from '@/theme';
 import type { UserProfile } from '@/types/models';
@@ -41,6 +42,7 @@ function Tile({
 
 /** "Money saved / RM 142 / 18% to new watch" + "Not smoked / 134 / ≈ 24h regained". */
 export function TilesRow({ profile, progress }: { profile: UserProfile; progress: Progress }) {
+  const t = useT();
   const router = useRouter();
   const goalName = useSettingsStore((s) => s.values['reward_goal_name']);
   const goalPriceRaw = useSettingsStore((s) => s.values['reward_goal_price']);
@@ -48,34 +50,37 @@ export function TilesRow({ profile, progress }: { profile: UserProfile; progress
 
   const moneyCaption =
     goalName && goalPrice > 0
-      ? `${Math.min(100, Math.round((progress.moneySaved / goalPrice) * 100))}% to ${goalName.toLowerCase()}`
-      : 'Set a reward goal →';
+      ? t('home.toGoal', {
+          percent: Math.min(100, Math.round((progress.moneySaved / goalPrice) * 100)),
+          goal: goalName.toLowerCase(),
+        })
+      : t('home.setGoal');
 
   const product = primaryProduct(profile);
   const isCig = product === 'cigarette' || product === 'rolled';
   const units = Math.floor(progress.unitsAvoided);
   const minutes = lifeRegainedMinutes(units);
-  const regained =
+  const time =
     minutes >= 1440
-      ? `≈ ${Math.round(minutes / 144) / 10} days regained`
+      ? `${Math.round(minutes / 144) / 10} ${t('common.days')}`
       : minutes >= 60
-        ? `≈ ${Math.round(minutes / 60)}h regained`
-        : `≈ ${minutes} min regained`;
+        ? `${Math.round(minutes / 60)}h`
+        : `${minutes} min`;
   const avoidedCaption = isCig
-    ? regained
+    ? t('home.regained', { time })
     : product === 'vape'
-      ? 'ml of e-liquid avoided'
-      : 'sessions skipped';
+      ? t('home.mlAvoided')
+      : t('home.sessionsSkipped');
 
   return (
     <View style={styles.row}>
       <Tile
-        label="Money saved"
+        label={t('home.moneySaved')}
         value={formatMoney(progress.moneySaved, profile.currency)}
         caption={moneyCaption}
         onPress={() => router.push('/settings')}
       />
-      <Tile label="Not smoked" value={units.toLocaleString()} caption={avoidedCaption} />
+      <Tile label={t('home.notSmoked')} value={units.toLocaleString()} caption={avoidedCaption} />
     </View>
   );
 }

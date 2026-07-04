@@ -9,6 +9,7 @@ import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { Screen } from '@/components/ui/Screen';
+import { useT } from '@/i18n';
 import { pushProfileToCloud } from '@/state/useAuthStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { colors, durations, spacing } from '@/theme';
@@ -71,6 +72,7 @@ const STEPS: StepDef[] = [
 ];
 
 export function OnboardingWizard() {
+  const t = useT();
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -138,7 +140,7 @@ export function OnboardingWizard() {
 
         <View style={styles.footer}>
           <PrimaryButton
-            label={isLast ? 'Start my journey' : 'Continue'}
+            label={isLast ? t('onb.start') : t('common.continue')}
             onPress={goNext}
             disabled={!canContinue}
             loading={saving}

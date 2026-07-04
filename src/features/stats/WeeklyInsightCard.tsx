@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
+import { useT } from '@/i18n';
 import { getWeeklyInsight } from '@/services/aiService';
 import { colors, font, spacing } from '@/theme';
 
@@ -29,6 +30,7 @@ function InsightText({ content }: { content: string }) {
  * lazily when Stats opens. Renders nothing when offline and uncached.
  */
 export function WeeklyInsightCard() {
+  const t = useT();
   const [insight, setInsight] = useState<string | null>(null);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export function WeeklyInsightCard() {
     <Card style={styles.card}>
       <View style={styles.header}>
         <AppText variant="micro" color={colors.accent}>
-          This week, from your coach
+          {t('stats.week')}
         </AppText>
       </View>
       <InsightText content={insight} />

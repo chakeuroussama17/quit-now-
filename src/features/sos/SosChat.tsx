@@ -16,6 +16,7 @@ import { AppText } from '@/components/ui/AppText';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { Chip } from '@/components/ui/Chip';
 import { Screen } from '@/components/ui/Screen';
+import { getLang, t as tStatic, useT } from '@/i18n';
 import { aiConfigured } from '@/services/aiClient';
 import { sosChatReply } from '@/services/aiService';
 import { randomFallbackSos } from '@/services/fallbacks';
@@ -25,16 +26,6 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
-
-const QUICK_REPLIES = [
-  'It’s really bad',
-  'Why am I doing this',
-  'Distract me',
-  'Tell me why I started this',
-];
-
-const GREETING =
-  'I’m right here. The craving is loud, but it’s already dying — most don’t survive 5 minutes. Tell me what’s happening, or grab one of the buttons below.';
 
 function Bubble({ message }: { message: Message }) {
   const isUser = message.role === 'user';
@@ -52,11 +43,15 @@ function Bubble({ message }: { message: Message }) {
 
 /** Craving SOS chat — real-time coaching through the wave. Session is ephemeral. */
 export function SosChat() {
+  const t = useT();
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-  const [messages, setMessages] = useState<Message[]>([{ role: 'assistant', content: GREETING }]);
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'assistant', content: tStatic('soschat.greeting') },
+  ]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const quickReplies = [t('soschat.q1'), t('soschat.q2'), t('soschat.q3'), t('soschat.q4')];
 
   const send = async (text: string) => {
     const content = text.trim();
@@ -67,10 +62,10 @@ export function SosChat() {
     setInput('');
     setBusy(true);
     try {
-      const reply = aiConfigured() ? await sosChatReply(withUser) : randomFallbackSos();
+      const reply = aiConfigured() ? await sosChatReply(withUser) : randomFallbackSos(getLang());
       setMessages([...withUser, { role: 'assistant', content: reply }]);
     } catch {
-      setMessages([...withUser, { role: 'assistant', content: randomFallbackSos() }]);
+      setMessages([...withUser, { role: 'assistant', content: randomFallbackSos(getLang()) }]);
     } finally {
       setBusy(false);
     }
@@ -87,9 +82,9 @@ export function SosChat() {
           <Ionicons name="close" size={22} color={colors.textSecondary} />
         </Pressable>
         <View style={styles.headerText}>
-          <AppText variant="title">Coach</AppText>
+          <AppText variant="title">{t('soschat.title')}</AppText>
           <AppText variant="caption" color={colors.textMuted}>
-            AI support — not medical advice
+            {t('soschat.disclaimer')}
           </AppText>
         </View>
       </View>
@@ -121,14 +116,14 @@ export function SosChat() {
         </ScrollView>
 
         <View style={styles.quickRow}>
-          {QUICK_REPLIES.map((q) => (
+          {quickReplies.map((q) => (
             <Chip key={q} label={q} size="sm" onPress={() => send(q)} disabled={busy} />
           ))}
         </View>
 
         <View style={styles.inputRow}>
           <AppTextInput
-            placeholder="Type it out…"
+            placeholder={t('soschat.placeholder')}
             value={input}
             onChangeText={setInput}
             onSubmitEditing={() => send(input)}

@@ -11,16 +11,13 @@ import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
 import { Screen } from '@/components/ui/Screen';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { EMOTION_OPTIONS, TRIGGER_OPTIONS } from '@/features/logging/options';
 import { WeeklyInsightCard } from '@/features/stats/WeeklyInsightCard';
 import { useStatsData } from '@/features/stats/useStatsData';
+import { useT, type TKey } from '@/i18n';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, spacing } from '@/theme';
 import { getDailyTargetFor } from '@/utils/reduction';
-
-const TRIGGER_LABELS = Object.fromEntries(TRIGGER_OPTIONS.map((o) => [o.value, o.label]));
-const EMOTION_LABELS = Object.fromEntries(EMOTION_OPTIONS.map((o) => [o.value, o.label]));
 
 function Section({
   title,
@@ -60,6 +57,7 @@ function xLabels(days: { day: string }[]): string[] {
 }
 
 export default function StatsScreen() {
+  const t = useT();
   const profile = useProfileStore((s) => s.profile);
   const planJson = useSettingsStore((s) => s.values['reduction_plan']);
   const [range, setRange] = useState<7 | 30>(7);
@@ -91,11 +89,10 @@ export default function StatsScreen() {
             <Ionicons name="pulse-outline" size={32} color={colors.accent} />
           </View>
           <AppText variant="h2" style={styles.emptyTitle}>
-            Your patterns will show here
+            {t('stats.empty.title')}
           </AppText>
           <AppText variant="body" color={colors.textSecondary} style={styles.emptyBody}>
-            Log smokes and cravings and this screen fills with your trends, your risky hours and
-            your win rate.
+            {t('stats.empty.body')}
           </AppText>
         </View>
       </Screen>
@@ -111,7 +108,7 @@ export default function StatsScreen() {
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <AppText variant="h1">Stats</AppText>
+          <AppText variant="h1">{t('stats.title')}</AppText>
           <View style={styles.rangeChips}>
             <Chip label="7d" size="sm" selected={range === 7} onPress={() => setRange(7)} />
             <Chip label="30d" size="sm" selected={range === 30} onPress={() => setRange(30)} />
@@ -121,8 +118,12 @@ export default function StatsScreen() {
         <WeeklyInsightCard />
 
         <Section
-          title="Consumption"
-          caption={`${Math.round(smokedInRange * 10) / 10} ${isVape ? 'ml' : 'units'} over the last ${range} days`}
+          title={t('stats.consumption')}
+          caption={t('stats.consumptionCaption', {
+            amount: Math.round(smokedInRange * 10) / 10,
+            unit: isVape ? 'ml' : t('stats.units'),
+            days: range,
+          })}
         >
           <TrendLine
             data={data.daily.map((d) => d.value)}
@@ -132,7 +133,10 @@ export default function StatsScreen() {
         </Section>
 
         {nicotineMg != null && (
-          <Section title="Nicotine" caption={`mg of nicotine per day at ${nicotineMg} mg/ml`}>
+          <Section
+            title={t('stats.nicotine')}
+            caption={t('stats.nicotineCaption', { mg: nicotineMg })}
+          >
             <TrendLine
               data={data.daily.map((d) => Math.round(d.value * nicotineMg * 10) / 10)}
               labels={xLabels(data.daily)}
@@ -141,44 +145,45 @@ export default function StatsScreen() {
         )}
 
         <Section
-          title="When it happens"
-          caption={
-            data.heatmapSource === 'smoke'
-              ? 'Hour of day × day of week — your risky hours, last 30 days of logs'
-              : 'When cravings hit — hour of day × day of week'
-          }
+          title={t('stats.when')}
+          caption={data.heatmapSource === 'smoke' ? t('stats.whenSmoke') : t('stats.whenCravings')}
         >
           <Heatmap matrix={data.heatmap} />
         </Section>
 
         {data.triggers.length > 0 && (
-          <Section title="What triggers it">
+          <Section title={t('stats.triggers')}>
             <BreakdownBars
-              items={data.triggers.map((t) => ({
-                label: TRIGGER_LABELS[t.key] ?? t.key,
-                count: t.count,
+              items={data.triggers.map((item) => ({
+                label: t(`trigger.${item.key}` as TKey),
+                count: item.count,
               }))}
+              otherLabel={t('stats.other')}
             />
           </Section>
         )}
 
         {data.emotions.length > 0 && (
-          <Section title="How it feels">
+          <Section title={t('stats.emotions')}>
             <BreakdownBars
-              items={data.emotions.map((e) => ({
-                label: EMOTION_LABELS[e.key] ?? e.key,
-                count: e.count,
+              items={data.emotions.map((item) => ({
+                label: t(`emotion.${item.key}` as TKey),
+                count: item.count,
               }))}
+              otherLabel={t('stats.other')}
             />
           </Section>
         )}
 
         {data.winRate.total > 0 && (
-          <Section title="Craving win rate">
+          <Section title={t('stats.winRate')}>
             <Meter
               ratio={data.winRate.resisted / data.winRate.total}
-              label={`${data.winRate.resisted} resisted of ${data.winRate.total} cravings`}
-              detail="Every resisted craving weakens the next one."
+              label={t('stats.winRateLabel', {
+                resisted: data.winRate.resisted,
+                total: data.winRate.total,
+              })}
+              detail={t('stats.winRateDetail')}
             />
           </Section>
         )}

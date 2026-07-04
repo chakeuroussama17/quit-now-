@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
+import { useT } from '@/i18n';
 import { getDailyMotivation } from '@/services/aiService';
 import { colors, spacing } from '@/theme';
 import type { UserProfile } from '@/types/models';
@@ -15,6 +16,7 @@ import { dailyLine } from './motivation';
  * own quit reason, verbatim.
  */
 export function CoachCard({ profile }: { profile: UserProfile }) {
+  const t = useT();
   const fallback = dailyLine(profile);
   const [line, setLine] = useState(fallback);
 
@@ -33,7 +35,7 @@ export function CoachCard({ profile }: { profile: UserProfile }) {
   return (
     <Card style={styles.card}>
       <AppText variant="micro" color={colors.textMuted}>
-        {line.isOwnWords ? 'Your words' : 'Coach'}
+        {line.isOwnWords ? t('home.yourWords') : t('home.coach')}
       </AppText>
       <AppText variant="body" color={colors.textSecondary} style={styles.line}>
         {line.text}

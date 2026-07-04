@@ -12,6 +12,7 @@ import { getCravingStats } from '@/db/logsRepo';
 import { getAllTimeCounts, getLongestGapDays } from '@/db/statsRepo';
 import { ACHIEVEMENT_DEFS, levelFor, RANKS, totalXp, type GameInputs } from '@/features/ranks/game';
 import { useProgress } from '@/features/dashboard/useProgress';
+import { useT, type TKey } from '@/i18n';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { colors, radii, spacing } from '@/theme';
@@ -24,6 +25,7 @@ export default function RanksScreen() {
 }
 
 function RanksContent() {
+  const t = useT();
   const profile = useProfileStore((s) => s.profile)!;
   const lastSmokeAt = useLogsStore((s) => s.lastSmokeAt);
   const progress = useProgress(profile);
@@ -77,28 +79,28 @@ function RanksContent() {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <AppText variant="h1">Ranks</AppText>
+        <AppText variant="h1">{t('ranks.title')}</AppText>
 
         <Card style={styles.levelCard}>
           <View style={styles.levelRow}>
             <View>
               <AppText variant="micro" color={colors.textSecondary}>
-                Level {level}
+                {t('ranks.level', { level })}
               </AppText>
               <AppText variant="stat">{xp.toLocaleString()} XP</AppText>
             </View>
             <AppText variant="caption" color={colors.textMuted}>
-              {toNext} to level {level + 1}
+              {t('ranks.toNext', { xp: toNext, level: level + 1 })}
             </AppText>
           </View>
           <ProgressBar progress={levelProgress} />
           <AppText variant="caption" color={colors.textMuted}>
-            Resisted cravings earn the most. Honest logs count too — honesty beats perfection.
+            {t('ranks.hint')}
           </AppText>
         </Card>
 
         <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
-          The road
+          {t('ranks.road')}
         </AppText>
         <Card style={styles.listCard}>
           {RANKS.map((rank, i) => {
@@ -115,14 +117,14 @@ function RanksContent() {
                 </View>
                 <View style={styles.rankText}>
                   <AppText variant="bodyMedium" color={unlocked ? colors.text : colors.textMuted}>
-                    {rank.name}
+                    {t(`rank.${rank.day}.name` as TKey)}
                   </AppText>
                   <AppText variant="caption" color={colors.textMuted}>
-                    {rank.detail}
+                    {t(`rank.${rank.day}.detail` as TKey)}
                   </AppText>
                 </View>
                 <AppText variant="caption" color={unlocked ? colors.accent : colors.textMuted}>
-                  Day {rank.day}
+                  {t('ranks.dayN', { day: rank.day })}
                 </AppText>
               </View>
             );
@@ -130,7 +132,7 @@ function RanksContent() {
         </Card>
 
         <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
-          Achievements
+          {t('ranks.achievements')}
         </AppText>
         <Card style={styles.listCard}>
           {ACHIEVEMENT_DEFS.map((def) => {
@@ -144,10 +146,10 @@ function RanksContent() {
                 />
                 <View style={styles.rankText}>
                   <AppText variant="bodyMedium" color={unlocked ? colors.text : colors.textMuted}>
-                    {def.title}
+                    {t(`ach.${def.key}.title` as TKey)}
                   </AppText>
                   <AppText variant="caption" color={colors.textMuted}>
-                    {def.detail}
+                    {t(`ach.${def.key}.detail` as TKey)}
                   </AppText>
                 </View>
               </View>

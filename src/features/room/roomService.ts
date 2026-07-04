@@ -1,4 +1,6 @@
+import { getLang } from '@/i18n';
 import { aiConfigured, chatCompletion, type ChatMessage } from '@/services/aiClient';
+import { languageInstruction } from '@/services/aiService';
 import { buildContextJSON } from '@/services/contextBuilder';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
@@ -24,22 +26,35 @@ Rules:
  * Offline listener replies — reflective, one question at a time. Rotated by
  * turn count so a conversation without the AI still moves somewhere.
  */
-const OFFLINE_MIND: string[] = [
-  'I’m here, and I’m listening. What part of it is sitting heaviest on you right now?',
-  'That makes sense. Where do you feel it most — your chest, your jaw, your hands?',
-  'Say more if you want. What happened right before the urge showed up?',
-  'If the cigarette could talk right now, what is it promising you? And does it ever keep that promise?',
-  'You don’t have to fix anything tonight. What would feel like one small kindness to yourself in the next hour?',
-  'What would you say to them if there were no consequences at all?',
-  'You’ve carried this all day. What’s one thing you’d like to put down before bed?',
-];
+const OFFLINE_MIND: Record<'en' | 'ms', string[]> = {
+  en: [
+    'I’m here, and I’m listening. What part of it is sitting heaviest on you right now?',
+    'That makes sense. Where do you feel it most — your chest, your jaw, your hands?',
+    'Say more if you want. What happened right before the urge showed up?',
+    'If the cigarette could talk right now, what is it promising you? And does it ever keep that promise?',
+    'You don’t have to fix anything tonight. What would feel like one small kindness to yourself in the next hour?',
+    'What would you say to them if there were no consequences at all?',
+    'You’ve carried this all day. What’s one thing you’d like to put down before bed?',
+  ],
+  ms: [
+    'Saya di sini, dan saya mendengar. Bahagian mana yang paling berat buat anda sekarang?',
+    'Masuk akal. Di mana anda paling terasa — dada, rahang, atau tangan?',
+    'Ceritakan lagi kalau mahu. Apa yang berlaku sejurus sebelum keinginan itu muncul?',
+    'Kalau rokok itu boleh bercakap sekarang, apa yang ia janjikan? Dan pernahkah ia menunaikannya?',
+    'Anda tak perlu selesaikan apa-apa malam ini. Apa satu kebaikan kecil untuk diri anda dalam sejam ini?',
+    'Apa yang anda akan katakan kepada mereka jika tiada apa-apa akibat langsung?',
+    'Anda memikul ini sepanjang hari. Apa satu perkara yang anda mahu letakkan sebelum tidur?',
+  ],
+};
 
 export async function mindReply(
   history: { role: 'user' | 'assistant'; content: string }[],
 ): Promise<string> {
+  const lang = getLang();
   if (!aiConfigured()) {
+    const pool = OFFLINE_MIND[lang];
     const userTurns = history.filter((m) => m.role === 'user').length;
-    return OFFLINE_MIND[(userTurns - 1 + OFFLINE_MIND.length) % OFFLINE_MIND.length];
+    return pool[(userTurns - 1 + pool.length) % pool.length];
   }
 
   const profile = useProfileStore.getState().profile;
@@ -49,19 +64,9 @@ export async function mindReply(
   const context = await buildContextJSON(profile, lastSmokeAt);
 
   const messages: ChatMessage[] = [
-    { role: 'system', content: MIND_SYSTEM },
+    { role: 'system', content: `${MIND_SYSTEM}\n${languageInstruction()}` },
     { role: 'system', content: `User context JSON (background only):\n${JSON.stringify(context)}` },
     ...history.slice(-16),
   ];
   return (await chatCompletion(messages, { maxTokens: 200 })).trim();
 }
-
-export const ROOM_STARTERS = [
-  'I’m stressed right now',
-  'I had a fight with someone',
-  'I don’t know why I want one',
-  'I just need to vent',
-] as const;
-
-export const ROOM_DISCLAIMER =
-  'This is a supportive space, not a replacement for professional therapy. If you’re in crisis, please reach out to a professional or someone you trust.';

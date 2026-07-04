@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { getHourDowMatrix } from '@/db/statsRepo';
+import { getLang, t, type Lang, type TKey } from '@/i18n';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
@@ -24,26 +25,48 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const MORNING_LINES = [
-  'New day. The only craving that matters is the next one.',
-  'Your streak survived the night. Keep it company today.',
-  'Coffee still works without the other thing. Prove it once today.',
-  'One decision, repeated. Today is one of the repetitions.',
-];
+const MORNING_LINES: Record<Lang, string[]> = {
+  en: [
+    'New day. The only craving that matters is the next one.',
+    'Your streak survived the night. Keep it company today.',
+    'Coffee still works without the other thing. Prove it once today.',
+    'One decision, repeated. Today is one of the repetitions.',
+  ],
+  ms: [
+    'Hari baharu. Satu-satunya keinginan yang penting ialah yang seterusnya.',
+    'Tempoh bebas rokok anda selamat semalaman. Temaninya hari ini.',
+    'Kopi tetap sedap tanpa benda itu. Buktikan sekali hari ini.',
+    'Satu keputusan, diulang-ulang. Hari ini salah satu ulangannya.',
+  ],
+};
 
-const EVENING_LINES = [
-  'How did today actually go? A 10-second log keeps your map honest.',
-  'Before sleep: one win from today worth remembering?',
-  'Day almost done. Log anything you skipped — honesty beats perfection.',
-];
+const EVENING_LINES: Record<Lang, string[]> = {
+  en: [
+    'How did today actually go? A 10-second log keeps your map honest.',
+    'Before sleep: one win from today worth remembering?',
+    'Day almost done. Log anything you skipped — honesty beats perfection.',
+  ],
+  ms: [
+    'Bagaimana hari ini sebenarnya? Catatan 10 saat memastikan peta anda jujur.',
+    'Sebelum tidur: ada satu kemenangan hari ini yang patut diingat?',
+    'Hari hampir tamat. Catat apa yang tertinggal — kejujuran mengalahkan kesempurnaan.',
+  ],
+};
 
 // Static nudges for now; the Phase 3 spec's AI-written weekly batch can
 // replace these bodies later without touching the scheduling.
-const RISKY_LINES = [
-  'Your {time} pattern is coming. Step outside without it — three minutes is enough.',
-  'Heads up: {time} is one of your risky hours. Water first, then decide.',
-  '{time} craving incoming, if history repeats. It peaks in 90 seconds — outlast it.',
-];
+const RISKY_LINES: Record<Lang, string[]> = {
+  en: [
+    'Your {time} pattern is coming. Step outside without it — three minutes is enough.',
+    'Heads up: {time} is one of your risky hours. Water first, then decide.',
+    '{time} craving incoming, if history repeats. It peaks in 90 seconds — outlast it.',
+  ],
+  ms: [
+    'Corak {time} anda semakin hampir. Keluar sebentar tanpanya — tiga minit sudah cukup.',
+    'Perhatian: {time} ialah salah satu waktu berisiko anda. Minum air dulu, kemudian putuskan.',
+    'Keinginan {time} bakal tiba jika sejarah berulang. Ia memuncak dalam 90 saat — bertahanlah.',
+  ],
+};
 
 function dayOfYear(): number {
   const start = new Date(new Date().getFullYear(), 0, 0);
@@ -92,12 +115,13 @@ export async function syncNotifications(): Promise<void> {
 
   const on = (key: string) => settings[key] !== 'false'; // sub-toggles default on
   const day = dayOfYear();
+  const lang = getLang();
 
   if (on('notif_morning')) {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Morning check-in',
-        body: MORNING_LINES[day % MORNING_LINES.length],
+        title: t('notif.morningTitle'),
+        body: MORNING_LINES[lang][day % MORNING_LINES[lang].length],
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -110,8 +134,8 @@ export async function syncNotifications(): Promise<void> {
   if (on('notif_evening')) {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Evening reflection',
-        body: EVENING_LINES[day % EVENING_LINES.length],
+        title: t('notif.eveningTitle'),
+        body: EVENING_LINES[lang][day % EVENING_LINES[lang].length],
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -125,10 +149,10 @@ export async function syncNotifications(): Promise<void> {
   if (on('notif_risky')) {
     const hours = await riskiestHours();
     for (const hour of hours) {
-      const line = RISKY_LINES[(day + hour) % RISKY_LINES.length];
+      const line = RISKY_LINES[lang][(day + hour) % RISKY_LINES[lang].length];
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Risky hour ahead',
+          title: t('notif.riskyTitle'),
           body: line.replace('{time}', formatHour(hour)),
         },
         trigger: {
@@ -155,8 +179,10 @@ export async function syncNotifications(): Promise<void> {
             if (fireAt.getTime() <= Date.now()) continue;
             await Notifications.scheduleNotificationAsync({
               content: {
-                title: `Milestone: ${m.label}`,
-                body: m.description,
+                title: t('notif.milestoneTitle', {
+                  label: t(`health.${m.id}.label` as TKey),
+                }),
+                body: t(`health.${m.id}.desc` as TKey),
               },
               trigger: {
                 type: Notifications.SchedulableTriggerInputTypes.DATE,

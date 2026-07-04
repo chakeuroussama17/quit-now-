@@ -12,6 +12,7 @@ import {
 import { AppText } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Screen } from '@/components/ui/Screen';
+import { useT } from '@/i18n';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, spacing } from '@/theme';
 
@@ -22,29 +23,24 @@ interface Slide {
 }
 
 // Replace assets/images/intro-{1,2,3}.png with real artwork (same filenames).
-const SLIDES: Slide[] = [
-  {
-    image: require('../../assets/images/intro-1.png'),
-    title: 'Breathe easier, day by day',
-    body: 'Track your smoke-free streak, the money you keep, and the exact moment your body hits each recovery milestone.',
-  },
-  {
-    image: require('../../assets/images/intro-2.png'),
-    title: 'Know your patterns',
-    body: 'Every log sharpens your personal map — the hours, triggers and feelings behind the habit. Knowledge is how you beat it.',
-  },
-  {
-    image: require('../../assets/images/intro-3.png'),
-    title: 'Never face a craving alone',
-    body: 'An AI coach for the hard minutes, urge-surfing tools for the waves, and a private room to talk it out.',
-  },
+const IMAGES = [
+  require('../../assets/images/intro-1.png'),
+  require('../../assets/images/intro-2.png'),
+  require('../../assets/images/intro-3.png'),
 ];
 
 export default function IntroScreen() {
+  const t = useT();
   const { width } = useWindowDimensions();
   const listRef = useRef<FlatList<Slide>>(null);
   const [index, setIndex] = useState(0);
   const setSetting = useSettingsStore((s) => s.set);
+
+  const SLIDES: Slide[] = [
+    { image: IMAGES[0], title: t('intro.1.title'), body: t('intro.1.body') },
+    { image: IMAGES[1], title: t('intro.2.title'), body: t('intro.2.body') },
+    { image: IMAGES[2], title: t('intro.3.title'), body: t('intro.3.body') },
+  ];
   const isLast = index === SLIDES.length - 1;
 
   const finish = () => setSetting('intro_seen', 'true'); // guard flips → /auth
@@ -62,7 +58,7 @@ export default function IntroScreen() {
       <View style={styles.skipRow}>
         <Pressable onPress={finish} accessibilityRole="button" hitSlop={12}>
           <AppText variant="bodyMedium" color={colors.textMuted}>
-            Skip
+            {t('common.skip')}
           </AppText>
         </Pressable>
       </View>
@@ -94,7 +90,7 @@ export default function IntroScreen() {
             <View key={i} style={[styles.dot, i === index && styles.dotActive]} />
           ))}
         </View>
-        <PrimaryButton label={isLast ? 'Get started' : 'Next'} onPress={next} />
+        <PrimaryButton label={isLast ? t('common.getStarted') : t('common.next')} onPress={next} />
       </View>
     </Screen>
   );

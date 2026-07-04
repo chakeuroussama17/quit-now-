@@ -4,6 +4,7 @@ import { Tabs } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { LogSheet } from '@/features/logging/LogSheet';
+import { useT } from '@/i18n';
 import { useAuthStore } from '@/state/useAuthStore';
 import { useUiStore } from '@/state/useUiStore';
 import { accentGlowShadow, colors, font } from '@/theme';
@@ -35,6 +36,7 @@ function LogTabButton() {
 }
 
 export default function TabsLayout() {
+  const t = useT();
   const logSheetOpen = useUiStore((s) => s.logSheetOpen);
   const setLogSheetOpen = useUiStore((s) => s.setLogSheetOpen);
   const isPremium = useAuthStore((s) => s.isPremium);
@@ -60,7 +62,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
+            title: t('tabs.home'),
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home-outline" size={size} color={color} />
             ),
@@ -69,7 +71,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="stats"
           options={{
-            title: 'Stats',
+            title: t('tabs.stats'),
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="stats-chart-outline" size={size} color={color} />
             ),
@@ -85,7 +87,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="sos"
           options={{
-            title: 'SOS',
+            title: t('tabs.sos'),
             tabBarActiveTintColor: colors.amber,
             tabBarInactiveTintColor: 'rgba(245,166,35,0.55)',
             tabBarIcon: ({ color, size }) => (
@@ -96,7 +98,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="room"
           options={{
-            title: 'Room',
+            title: t('tabs.room'),
             tabBarIcon: ({ color, size }) => (
               <Ionicons
                 name={isPremium ? 'heart-circle-outline' : 'lock-closed-outline'}
@@ -109,7 +111,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="ranks"
           options={{
-            title: 'Ranks',
+            title: t('tabs.ranks'),
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="trophy-outline" size={size} color={color} />
             ),

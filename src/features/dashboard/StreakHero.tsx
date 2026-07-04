@@ -7,6 +7,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { getCravingWeekDelta, getDailyCravingStats, getLongestGapDays } from '@/db/statsRepo';
+import { useT } from '@/i18n';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, spacing } from '@/theme';
@@ -24,6 +25,7 @@ interface StreakHeroProps {
  * week-over-week delta folded in. Tapping the sparkline area opens Stats.
  */
 export function StreakHero({ profile }: StreakHeroProps) {
+  const t = useT();
   const router = useRouter();
   const lastSmokeAt = useLogsStore((s) => s.lastSmokeAt);
   const todayQuantity = useLogsStore((s) => s.todaySmokedQuantity);
@@ -64,7 +66,7 @@ export function StreakHero({ profile }: StreakHeroProps) {
     return (
       <Card style={styles.card}>
         <AppText variant="micro" color={colors.textSecondary} style={styles.centered}>
-          Today’s target
+          {t('home.todayTarget')}
         </AppText>
         <View style={styles.bigRow}>
           <AppText variant="display" color={over ? colors.amber : colors.accent}>
@@ -77,8 +79,8 @@ export function StreakHero({ profile }: StreakHeroProps) {
         <ProgressBar progress={progress} />
         <AppText variant="caption" color={colors.textSecondary} style={styles.centered}>
           {over
-            ? 'Over target today — it happens. Tomorrow is a clean slate.'
-            : `${Math.max(0, target - todayQuantity)} left within plan. Slower is still forward.`}
+            ? t('home.overTarget')
+            : t('home.underTarget', { left: Math.max(0, target - todayQuantity) })}
         </AppText>
         <SparkSection spark={spark} delta={delta} onPress={() => router.push('/stats')} />
       </Card>
@@ -92,13 +94,13 @@ export function StreakHero({ profile }: StreakHeroProps) {
     return (
       <Card style={styles.card}>
         <AppText variant="micro" color={colors.textSecondary} style={styles.centered}>
-          Quit day
+          {t('home.quitDay')}
         </AppText>
         <AppText variant="display" color={colors.accent} style={styles.centered}>
           {formatShortDate(profile.quitDate!)}
         </AppText>
         <AppText variant="caption" color={colors.textSecondary} style={styles.centered}>
-          Starts in {formatDuration(startMs - now)}. Use the time to notice your triggers.
+          {t('home.quitStartsIn', { duration: formatDuration(startMs - now) })}
         </AppText>
       </Card>
     );
@@ -107,12 +109,14 @@ export function StreakHero({ profile }: StreakHeroProps) {
   const streakMs = Math.max(0, now - startMs);
   const parts = durationParts(streakMs);
   const bigValue = parts.days > 0 ? String(parts.days) : `${parts.hours}h`;
-  const bigUnit = parts.days > 0 ? (parts.days === 1 ? 'day' : 'days') : 'smoke-free';
+  const bigUnit =
+    parts.days > 0 ? (parts.days === 1 ? t('common.day') : t('common.days')) : t('home.streak');
+  const longestShown = Math.max(parts.days, Math.floor(longestDays));
 
   return (
     <Card style={styles.card}>
       <AppText variant="micro" color={colors.textSecondary} style={styles.centered}>
-        Smoke-free streak
+        {t('home.streak')}
       </AppText>
       <View style={styles.bigRow}>
         <AppText variant="display" color={colors.accent}>
@@ -123,8 +127,11 @@ export function StreakHero({ profile }: StreakHeroProps) {
         </AppText>
       </View>
       <AppText variant="caption" color={colors.textSecondary} style={styles.centered}>
-        {formatDuration(streakMs)} · longest {Math.max(parts.days, Math.floor(longestDays))}{' '}
-        {Math.max(parts.days, Math.floor(longestDays)) === 1 ? 'day' : 'days'}
+        {t('home.streakSince', {
+          duration: formatDuration(streakMs),
+          days: longestShown,
+          unit: longestShown === 1 ? t('common.day') : t('common.days'),
+        })}
       </AppText>
       <SparkSection spark={spark} delta={delta} onPress={() => router.push('/stats')} />
     </Card>
@@ -141,13 +148,14 @@ function SparkSection({
   delta: number | null;
   onPress: () => void;
 }) {
+  const t = useT();
   if (spark.length === 0 || spark.every((v) => v === 0)) return null;
   const improving = delta != null && delta < 0;
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel="Open full stats">
       <View style={styles.sparkHeader}>
         <AppText variant="caption" color={colors.textMuted}>
-          Cravings, last 7 days
+          {t('home.cravings7d')}
         </AppText>
         {delta != null && (
           <AppText variant="caption" color={improving ? colors.accent : colors.amber}>

@@ -12,17 +12,19 @@ interface BreakdownBarsProps {
   items: BreakdownItem[];
   /** Rows beyond this fold into "Other". */
   maxRows?: number;
+  /** Localized label for the folded tail row. */
+  otherLabel?: string;
 }
 
 /**
  * Horizontal magnitude bars. Nominal categories, one series → every bar wears
  * the same hue (never a value-ramp); values sit at the tip in text tokens.
  */
-export function BreakdownBars({ items, maxRows = 5 }: BreakdownBarsProps) {
+export function BreakdownBars({ items, maxRows = 5, otherLabel = 'Other' }: BreakdownBarsProps) {
   const shown = items.slice(0, maxRows);
   const rest = items.slice(maxRows);
   if (rest.length > 0) {
-    shown.push({ label: 'Other', count: rest.reduce((sum, i) => sum + i.count, 0) });
+    shown.push({ label: otherLabel, count: rest.reduce((sum, i) => sum + i.count, 0) });
   }
   const max = Math.max(1, ...shown.map((i) => i.count));
 
@@ -39,7 +41,7 @@ export function BreakdownBars({ items, maxRows = 5 }: BreakdownBarsProps) {
                 styles.bar,
                 {
                   width: `${(item.count / max) * 100}%`,
-                  backgroundColor: item.label === 'Other' ? colors.textMuted : colors.accent,
+                  backgroundColor: item.label === otherLabel ? colors.textMuted : colors.accent,
                 },
               ]}
             />

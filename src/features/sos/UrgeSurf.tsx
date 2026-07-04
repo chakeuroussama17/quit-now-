@@ -17,23 +17,21 @@ import Animated, {
 import { AppText } from '@/components/ui/AppText';
 import { Screen } from '@/components/ui/Screen';
 import { randomResistedLine } from '@/features/logging/copy';
+import { useT, type TKey } from '@/i18n';
 import { useLogsStore } from '@/state/useLogsStore';
 import { colors, durations, radii, spacing } from '@/theme';
 
 const SURF_SECONDS = 5 * 60;
 // 4-7-8 breathing: inhale 4s, hold 7s, exhale 8s.
-const BREATH_CYCLE = [
-  { label: 'Breathe in', seconds: 4 },
-  { label: 'Hold', seconds: 7 },
-  { label: 'Let it go', seconds: 8 },
-] as const;
 const CYCLE_SECONDS = 19;
 
-function phaseAt(elapsed: number): string {
+type BreathPhase = 'sos.breatheIn' | 'sos.hold' | 'sos.letGo';
+
+function phaseAt(elapsed: number): BreathPhase {
   const t = elapsed % CYCLE_SECONDS;
-  if (t < 4) return BREATH_CYCLE[0].label;
-  if (t < 11) return BREATH_CYCLE[1].label;
-  return BREATH_CYCLE[2].label;
+  if (t < 4) return 'sos.breatheIn';
+  if (t < 11) return 'sos.hold';
+  return 'sos.letGo';
 }
 
 function QuickAction({
@@ -70,16 +68,17 @@ function QuickAction({
  * breathing circle, quick actions, and a big win button. The wave passes.
  */
 export function UrgeSurf() {
+  const t = useT();
   const router = useRouter();
   const logResistedCraving = useLogsStore((s) => s.logResistedCraving);
 
   const [remaining, setRemaining] = useState(SURF_SECONDS);
-  const [phase, setPhase] = useState(BREATH_CYCLE[0].label as string);
+  const [phase, setPhase] = useState<BreathPhase>('sos.breatheIn');
   const [celebration, setCelebration] = useState<string | null>(null);
   const [waterDone, setWaterDone] = useState(false);
   const [pushupsDone, setPushupsDone] = useState(false);
   const elapsedRef = useRef(0);
-  const lastPhaseRef = useRef<string>(BREATH_CYCLE[0].label);
+  const lastPhaseRef = useRef<BreathPhase>('sos.breatheIn');
 
   const scale = useSharedValue(1);
 
@@ -140,10 +139,10 @@ export function UrgeSurf() {
     <Screen>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <AppText variant="h2">Craving SOS</AppText>
+          <AppText variant="h2">{t('sos.title')}</AppText>
           <View style={styles.modePill}>
             <AppText variant="caption" color={colors.amber}>
-              Urge surfing
+              {t('sos.mode')}
             </AppText>
           </View>
         </View>
@@ -153,7 +152,7 @@ export function UrgeSurf() {
             <View style={styles.circleArea}>
               <Animated.View style={[styles.breathCircle, circleStyle]}>
                 <AppText variant="title" color={colors.accent}>
-                  {phase}
+                  {t(phase as TKey)}
                 </AppText>
               </Animated.View>
             </View>
@@ -162,15 +161,13 @@ export function UrgeSurf() {
               {minutes}:{String(seconds).padStart(2, '0')}
             </AppText>
             <AppText variant="caption" color={colors.textMuted} style={styles.hint}>
-              {remaining === 0
-                ? 'The wave passed. You outlasted it.'
-                : 'This wave peaks in about 90 seconds'}
+              {remaining === 0 ? t('sos.passed') : t('sos.peak')}
             </AppText>
 
             <View style={styles.actionsGrid}>
               <QuickAction
                 icon="water-outline"
-                label="Drink water"
+                label={t('sos.water')}
                 done={waterDone}
                 onPress={() => {
                   Haptics.selectionAsync();
@@ -179,7 +176,7 @@ export function UrgeSurf() {
               />
               <QuickAction
                 icon="fitness-outline"
-                label="5 push-ups"
+                label={t('sos.pushups')}
                 done={pushupsDone}
                 onPress={() => {
                   Haptics.selectionAsync();
@@ -188,12 +185,12 @@ export function UrgeSurf() {
               />
               <QuickAction
                 icon="call-outline"
-                label="Call someone"
+                label={t('sos.call')}
                 onPress={() => Linking.openURL('tel:').catch(() => {})}
               />
               <QuickAction
                 icon="chatbubble-ellipses-outline"
-                label="Talk to coach"
+                label={t('sos.coach')}
                 onPress={() => router.push('/sos-chat')}
               />
             </View>
@@ -201,11 +198,11 @@ export function UrgeSurf() {
             <Pressable
               onPress={logWin}
               accessibilityRole="button"
-              accessibilityLabel="I beat it — log this win"
+              accessibilityLabel={t('sos.beatIt')}
               style={({ pressed }) => [styles.winButton, pressed && { opacity: 0.85 }]}
             >
               <AppText variant="title" color={colors.accent}>
-                I beat it — log this win
+                {t('sos.beatIt')}
               </AppText>
             </Pressable>
           </>
@@ -215,7 +212,7 @@ export function UrgeSurf() {
               <Ionicons name="shield-checkmark" size={28} color={colors.accent} />
             </View>
             <AppText variant="micro" color={colors.accent}>
-              Craving beaten · +40 XP
+              {t('sos.won')}
             </AppText>
             <AppText variant="title" style={styles.celebrationText}>
               {celebration}
@@ -230,7 +227,7 @@ export function UrgeSurf() {
               style={({ pressed }) => [styles.winButton, pressed && { opacity: 0.85 }]}
             >
               <AppText variant="title" color={colors.accent}>
-                Done
+                {t('common.done')}
               </AppText>
             </Pressable>
           </Animated.View>

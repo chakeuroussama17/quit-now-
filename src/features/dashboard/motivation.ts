@@ -1,3 +1,4 @@
+import { getLang } from '@/i18n';
 import { fallbackMotivationForDay } from '@/services/fallbacks';
 import type { UserProfile } from '@/types/models';
 
@@ -12,5 +13,5 @@ export function dailyLine(profile: UserProfile): { text: string; isOwnWords: boo
   if (profile.quitReasonText && day % 3 === 0) {
     return { text: `“${profile.quitReasonText}”`, isOwnWords: true };
   }
-  return { text: fallbackMotivationForDay(day), isOwnWords: false };
+  return { text: fallbackMotivationForDay(day, getLang()), isOwnWords: false };
 }

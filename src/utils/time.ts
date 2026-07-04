@@ -21,10 +21,11 @@ export function formatDuration(ms: number): string {
   return `${minutes}m`;
 }
 
-export function greeting(name: string): string {
+export type DayPart = 'night' | 'morning' | 'afternoon' | 'evening';
+
+export function dayPart(): DayPart {
   const hour = new Date().getHours();
-  const part = hour < 5 ? 'Night' : hour < 12 ? 'Morning' : hour < 18 ? 'Afternoon' : 'Evening';
-  return name ? `${part}, ${name}` : part;
+  return hour < 5 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
 }
 
 export function daysBetween(fromIso: string, to: Date = new Date()): number {

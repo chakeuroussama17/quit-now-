@@ -10,10 +10,11 @@ import { StreakHero } from '@/features/dashboard/StreakHero';
 import { TilesRow } from '@/features/dashboard/TilesRow';
 import { useEnsureReductionPlan } from '@/features/dashboard/useEnsureReductionPlan';
 import { useProgress } from '@/features/dashboard/useProgress';
+import { useT } from '@/i18n';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, radii, spacing } from '@/theme';
-import { greeting } from '@/utils/time';
+import { dayPart } from '@/utils/time';
 
 export default function HomeScreen() {
   const profile = useProfileStore((s) => s.profile);
@@ -24,11 +25,13 @@ export default function HomeScreen() {
 }
 
 function HomeContent() {
+  const t = useT();
   const router = useRouter();
   const profile = useProfileStore((s) => s.profile)!;
   const avatarUri = useSettingsStore((s) => s.values['avatar_uri']);
   const progress = useProgress(profile);
   useEnsureReductionPlan(profile);
+  const greeting = `${t(`home.${dayPart() === 'night' ? 'night' : dayPart()}` as 'home.morning')}, ${profile.name}`;
 
   return (
     <Screen>
@@ -42,7 +45,7 @@ function HomeContent() {
                 month: 'long',
               })}
             </AppText>
-            <AppText variant="h2">{greeting(profile.name)}</AppText>
+            <AppText variant="h2">{greeting}</AppText>
           </View>
           <Pressable
             onPress={() => router.push('/settings')}

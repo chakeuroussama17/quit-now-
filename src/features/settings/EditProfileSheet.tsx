@@ -8,6 +8,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Stepper } from '@/components/ui/Stepper';
 import { MoneyInput } from '@/features/onboarding/steps/common';
+import { useT } from '@/i18n';
 import { pushProfileToCloud } from '@/state/useAuthStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { colors, spacing } from '@/theme';
@@ -20,6 +21,7 @@ interface EditProfileSheetProps {
 
 /** Edit name and the numbers behind money saved (Phase 5 settings). */
 export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
+  const t = useT();
   const profile = useProfileStore((s) => s.profile);
   const setProfile = useProfileStore((s) => s.setProfile);
   const [draft, setDraft] = useState<UserProfile | null>(null);
@@ -47,11 +49,11 @@ export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
   return (
     <BottomSheet visible={visible} onClose={close}>
       <AppText variant="h2" style={styles.title}>
-        Profile & costs
+        {t('edit.title')}
       </AppText>
 
       <AppText variant="caption" color={colors.textSecondary} style={styles.label}>
-        Name
+        {t('edit.name')}
       </AppText>
       <AppTextInput
         defaultValue={current.name}
@@ -141,7 +143,11 @@ export function EditProfileSheet({ visible, onClose }: EditProfileSheetProps) {
       )}
 
       <View style={styles.footer}>
-        <PrimaryButton label="Save" onPress={save} disabled={current.name.trim().length === 0} />
+        <PrimaryButton
+          label={t('common.save')}
+          onPress={save}
+          disabled={current.name.trim().length === 0}
+        />
       </View>
     </BottomSheet>
   );

@@ -1,6 +1,7 @@
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { Chip } from '@/components/ui/Chip';
 import { AppText } from '@/components/ui/AppText';
+import { useT, type TKey } from '@/i18n';
 import { colors, spacing } from '@/theme';
 
 import { QUIT_REASON_OPTIONS, USAGE_MOMENT_OPTIONS } from '../options';
@@ -8,14 +9,15 @@ import { useOnboardingStore } from '../onboardingStore';
 import { ChipGrid, StepScreen } from './common';
 
 export function ReasonsStep() {
+  const t = useT();
   const { draft, toggleIn } = useOnboardingStore();
   return (
-    <StepScreen title="Why do you want to quit?" subtitle="Pick everything that's true for you.">
+    <StepScreen title={t('onb.reasons.title')} subtitle={t('onb.reasons.subtitle')}>
       <ChipGrid>
         {QUIT_REASON_OPTIONS.map((option) => (
           <Chip
             key={option.value}
-            label={option.label}
+            label={t(`reason.${option.value}` as TKey)}
             selected={draft.quitReasons.includes(option.value)}
             onPress={() => toggleIn('quitReasons', option.value)}
           />
@@ -26,40 +28,36 @@ export function ReasonsStep() {
 }
 
 export function ReasonTextStep() {
+  const t = useT();
   const { draft, patch } = useOnboardingStore();
   return (
-    <StepScreen
-      title="In your own words —"
-      subtitle="Write 1–2 sentences about your deepest reason. On the hard days, these exact words will be what pulls you back."
-    >
+    <StepScreen title={t('onb.reasonText.title')} subtitle={t('onb.reasonText.subtitle')}>
       <AppTextInput
-        placeholder='e.g. "I want to be around long enough to see my daughter grow up."'
+        placeholder={t('onb.reasonText.placeholder')}
         defaultValue={draft.quitReasonText}
         onChangeText={(quitReasonText) => patch({ quitReasonText })}
         multiline
         numberOfLines={4}
         style={{ minHeight: 120, textAlignVertical: 'top', paddingTop: spacing.md }}
-        accessibilityLabel="Your deepest reason for quitting"
+        accessibilityLabel={t('onb.reasonText.title')}
       />
       <AppText variant="caption" color={colors.textMuted}>
-        Stored only on your device. Used to personalize your coaching.
+        {t('onb.reasonText.privacy')}
       </AppText>
     </StepScreen>
   );
 }
 
 export function MomentsStep() {
+  const t = useT();
   const { draft, toggleIn } = useOnboardingStore();
   return (
-    <StepScreen
-      title="When do you usually smoke or vape most?"
-      subtitle="This helps spot your risky moments before they hit."
-    >
+    <StepScreen title={t('onb.moments.title')} subtitle={t('onb.moments.subtitle')}>
       <ChipGrid>
         {USAGE_MOMENT_OPTIONS.map((option) => (
           <Chip
             key={option.value}
-            label={option.label}
+            label={t(`moment.${option.value}` as TKey)}
             selected={draft.usageMoments.includes(option.value)}
             onPress={() => toggleIn('usageMoments', option.value)}
           />

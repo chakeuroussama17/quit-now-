@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
+import { useT, type TKey } from '@/i18n';
 import { useLogsStore } from '@/state/useLogsStore';
 import { colors, radii, spacing } from '@/theme';
 import type { UserProfile } from '@/types/models';
@@ -11,6 +12,7 @@ import { streakStart } from '@/utils/streak';
 
 /** Compact "Next · day 14 — Circulation improving" row (mockup 1). */
 export function MilestoneRow({ profile }: { profile: UserProfile }) {
+  const t = useT();
   const lastSmokeAt = useLogsStore((s) => s.lastSmokeAt);
   const [now, setNow] = useState(() => Date.now());
 
@@ -23,17 +25,17 @@ export function MilestoneRow({ profile }: { profile: UserProfile }) {
   const next = pending ? null : getNextMilestone(startMs, now);
 
   const title = pending
-    ? 'Recovery starts on quit day'
+    ? t('home.milestone.pending')
     : next
       ? next.milestone.hours >= 48
-        ? `Next · day ${Math.round(next.milestone.hours / 24)}`
-        : `Next · in ${formatHoursRemaining(next.hoursRemaining)}`
-      : 'Every milestone reached';
+        ? t('home.milestone.next', { day: Math.round(next.milestone.hours / 24) })
+        : t('home.milestone.nextIn', { time: formatHoursRemaining(next.hoursRemaining) })
+      : t('home.milestone.all');
   const caption = pending
-    ? 'The first one lands 20 minutes in.'
+    ? t('home.milestone.pendingHint')
     : next
-      ? next.milestone.label
-      : 'Your body has done its part — you did yours.';
+      ? t(`health.${next.milestone.id}.label` as TKey)
+      : t('home.milestone.allHint');
 
   return (
     <View style={styles.row}>

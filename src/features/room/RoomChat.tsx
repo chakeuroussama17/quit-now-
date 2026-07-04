@@ -14,10 +14,11 @@ import {
   getSessionMessages,
   type RoomMessage,
 } from '@/db/roomRepo';
+import { useT } from '@/i18n';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, durations, radii, spacing } from '@/theme';
 
-import { mindReply, ROOM_DISCLAIMER, ROOM_STARTERS } from './roomService';
+import { mindReply } from './roomService';
 
 /**
  * The Room (mockup 3): a private, judgment-free space with "Mind".
@@ -50,9 +51,11 @@ function Bubble({ message }: { message: UiMessage }) {
 }
 
 export function RoomChat() {
+  const t = useT();
   const scrollRef = useRef<ScrollView>(null);
   const disclaimerSeen = useSettingsStore((s) => s.values['room_disclaimer_seen'] === 'true');
   const setSetting = useSettingsStore((s) => s.set);
+  const starters = [t('room.s1'), t('room.s2'), t('room.s3'), t('room.s4')];
 
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [messages, setMessages] = useState<UiMessage[]>([]);
@@ -87,9 +90,7 @@ export function RoomChat() {
       await appendRoomMessage(sessionId, 'assistant', reply);
       setMessages([...withUser, { role: 'assistant', content: reply }]);
     } catch {
-      const soft =
-        'I’m having trouble hearing you right now — but I’m not going anywhere. Try me again in a moment.';
-      setMessages([...withUser, { role: 'assistant', content: soft }]);
+      setMessages([...withUser, { role: 'assistant', content: t('room.offline') }]);
     } finally {
       setBusy(false);
     }
@@ -99,9 +100,9 @@ export function RoomChat() {
     <Screen style={styles.screen}>
       <View style={styles.header}>
         <View>
-          <AppText variant="h2">The Room</AppText>
+          <AppText variant="h2">{t('room.title')}</AppText>
           <AppText variant="caption" color={colors.textMuted}>
-            Private · just you and Mind
+            {t('room.subtitle')}
           </AppText>
         </View>
         <View style={styles.presenceDot} />
@@ -120,14 +121,14 @@ export function RoomChat() {
           {!disclaimerSeen && (
             <View style={styles.disclaimer}>
               <AppText variant="caption" color={colors.textSecondary} style={styles.disclaimerText}>
-                {ROOM_DISCLAIMER}
+                {t('room.disclaimer')}
               </AppText>
               <Pressable
                 onPress={() => setSetting('room_disclaimer_seen', 'true')}
                 accessibilityRole="button"
               >
                 <AppText variant="caption" color={colors.accent}>
-                  I understand
+                  {t('room.understood')}
                 </AppText>
               </Pressable>
             </View>
@@ -136,9 +137,9 @@ export function RoomChat() {
           {messages.length === 0 && (
             <View style={styles.starters}>
               <AppText variant="caption" color={colors.textMuted}>
-                Start with something…
+                {t('room.startWith')}
               </AppText>
-              {ROOM_STARTERS.map((s) => (
+              {starters.map((s) => (
                 <Chip key={s} label={s} onPress={() => send(s)} disabled={busy} />
               ))}
             </View>
@@ -158,7 +159,7 @@ export function RoomChat() {
 
         <View style={styles.inputRow}>
           <AppTextInput
-            placeholder="Say anything…"
+            placeholder={t('room.placeholder')}
             value={input}
             onChangeText={setInput}
             onSubmitEditing={() => send(input)}

@@ -3,12 +3,20 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { Chip } from '@/components/ui/Chip';
+import { useT, type TKey } from '@/i18n';
 import { colors, radii, spacing } from '@/theme';
 import { formatShortDate, addDaysIso } from '@/utils/time';
 
 import { QUIT_DATE_CHOICES, RELAPSE_CAUSE_OPTIONS } from '../options';
 import { useOnboardingStore } from '../onboardingStore';
 import { ChipGrid, FieldLabel, StepScreen } from './common';
+
+const QUIT_DATE_KEYS: TKey[] = [
+  'quitdate.today',
+  'quitdate.tomorrow',
+  'quitdate.in3',
+  'quitdate.week',
+];
 
 function ModeCard({
   title,
@@ -43,40 +51,40 @@ function ModeCard({
 }
 
 export function ApproachStep() {
+  const t = useT();
   const { draft, patch } = useOnboardingStore();
   return (
-    <StepScreen
-      title="How do you want to do this?"
-      subtitle="Both paths work. Pick the one you can commit to."
-    >
+    <StepScreen title={t('onb.approach.title')} subtitle={t('onb.approach.subtitle')}>
       <ModeCard
-        title="Cold turkey"
-        description="Pick a quit date and stop completely. Fastest recovery, hardest first week."
+        title={t('onb.approach.cold')}
+        description={t('onb.approach.coldDesc')}
         selected={draft.quitMode === 'cold_turkey'}
         onPress={() => patch({ quitMode: 'cold_turkey' })}
       />
       <ModeCard
-        title="Gradual reduction"
-        description="Taper down week by week with daily targets. Slower, gentler on withdrawal."
+        title={t('onb.approach.gradual')}
+        description={t('onb.approach.gradualDesc')}
         selected={draft.quitMode === 'gradual'}
         onPress={() => patch({ quitMode: 'gradual' })}
       />
 
       {draft.quitMode === 'cold_turkey' && (
         <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
-          <FieldLabel>Your quit date</FieldLabel>
+          <FieldLabel>{t('onb.approach.quitDate')}</FieldLabel>
           <ChipGrid>
-            {QUIT_DATE_CHOICES.map((choice) => (
+            {QUIT_DATE_CHOICES.map((choice, i) => (
               <Chip
                 key={choice.offsetDays}
-                label={choice.label}
+                label={t(QUIT_DATE_KEYS[i])}
                 selected={draft.quitDateOffsetDays === choice.offsetDays}
                 onPress={() => patch({ quitDateOffsetDays: choice.offsetDays })}
               />
             ))}
           </ChipGrid>
           <AppText variant="caption" color={colors.textMuted}>
-            Quit day: {formatShortDate(addDaysIso(draft.quitDateOffsetDays))}
+            {t('onb.approach.quitDay', {
+              date: formatShortDate(addDaysIso(draft.quitDateOffsetDays)),
+            })}
           </AppText>
         </View>
       )}
@@ -85,20 +93,18 @@ export function ApproachStep() {
 }
 
 export function HistoryStep() {
+  const t = useT();
   const { draft, patch, toggleIn } = useOnboardingStore();
   return (
-    <StepScreen
-      title="Have you tried quitting before?"
-      subtitle="Past attempts aren't failures — they're data about what to watch for."
-    >
+    <StepScreen title={t('onb.history.title')} subtitle={t('onb.history.subtitle')}>
       <ChipGrid>
         <Chip
-          label="Yes"
+          label={t('onb.history.yes')}
           selected={draft.triedBefore === true}
           onPress={() => patch({ triedBefore: true })}
         />
         <Chip
-          label="No, this is my first try"
+          label={t('onb.history.no')}
           selected={draft.triedBefore === false}
           onPress={() => patch({ triedBefore: false })}
         />
@@ -106,20 +112,20 @@ export function HistoryStep() {
 
       {draft.triedBefore === true && (
         <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
-          <FieldLabel>What made you go back?</FieldLabel>
+          <FieldLabel>{t('onb.history.causes')}</FieldLabel>
           <ChipGrid>
             {RELAPSE_CAUSE_OPTIONS.map((option) => (
               <Chip
                 key={option.value}
-                label={option.label}
+                label={t(`relapse.${option.value}` as TKey)}
                 selected={draft.previousRelapseCauses.includes(option.value)}
                 onPress={() => toggleIn('previousRelapseCauses', option.value)}
               />
             ))}
           </ChipGrid>
-          <FieldLabel>Anything else about it? (optional)</FieldLabel>
+          <FieldLabel>{t('onb.history.more')}</FieldLabel>
           <AppTextInput
-            placeholder="What was happening when you went back?"
+            placeholder={t('onb.history.morePlaceholder')}
             defaultValue={draft.previousRelapseText}
             onChangeText={(previousRelapseText) => patch({ previousRelapseText })}
             multiline

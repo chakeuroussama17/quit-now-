@@ -56,6 +56,25 @@ export const FALLBACK_MOTIVATION: string[] = [
   'Every ex-smoker was exactly where you are. Every single one kept going.',
 ];
 
+/** Bahasa Melayu motivation pool — shorter list, rotates on its own length. */
+export const FALLBACK_MOTIVATION_MS: string[] = [
+  'Keinginan itu ombak. Anda tak perlu lawan lautan — cukup bertahan melepasi yang satu ini.',
+  'Keinginan yang tidak anda layan ialah tabiat yang sedang lupus.',
+  'Paru-paru anda tak minta kesempurnaan. Ia minta masa — dan anda sedang memberikannya.',
+  'Anda sudah selamat melepasi setiap keinginan yang pernah datang. Semuanya.',
+  'Minggu-minggu awal paling bising. Selepas ini semakin senyap.',
+  'Setiap jam bebas rokok, tubuh anda diam-diam membaiki sesuatu.',
+  'Anda bukan melepaskan sesuatu. Anda mengambil semula sesuatu.',
+  'Satu keputusan, diulang-ulang. Itulah sahaja maksud berhenti.',
+  'Tersasar bukan hukuman. Trend yang dikira — dan anda yang membentuknya.',
+  'Keinginan memuncak dalam tiga minit. Anda mampu bertahan tiga minit.',
+  'Rokok tak pernah menyelesaikan masalah. Ia cuma menangguhkan kemampuan anda menghadapinya.',
+  'Hari yang sukar tidak memadam hari yang bersih. Ia membuktikannya.',
+  'Udara segar itu citarasa yang dipelajari. Anda sedang mempelajarinya.',
+  'Anda tak perlu berhenti selamanya hari ini. Cukup untuk hari ini sahaja.',
+  'Setiap bekas perokok pernah berada di tempat anda sekarang. Setiap seorang terus melangkah.',
+];
+
 /** Offline coaching lines for the SOS chat when the API is unreachable. */
 export const FALLBACK_SOS: string[] = [
   'I’m offline right now, but you don’t need me for this: breathe in for 4, hold for 7, out for 8. Three rounds. The craving will crest and fall — they always do, usually within 5 minutes.',
@@ -63,14 +82,18 @@ export const FALLBACK_SOS: string[] = [
   'No connection, but the method still works: name what triggered this (stress? boredom?), say it out loud, and give the craving 5 minutes to die on its own. It will.',
 ];
 
-export function randomFallbackMotivation(): string {
-  return FALLBACK_MOTIVATION[Math.floor(Math.random() * FALLBACK_MOTIVATION.length)];
+export const FALLBACK_SOS_MS: string[] = [
+  'Saya di luar talian sekarang, tapi anda tak perlukan saya untuk ini: tarik nafas 4 saat, tahan 7, hembus 8. Tiga pusingan. Keinginan akan memuncak dan surut — selalunya dalam 5 minit.',
+  'Tak dapat hubungi jurulatih — jadi ini langkahnya: minum segelas air perlahan-lahan, kemudian beredar dari tempat anda sekarang. Pergerakan + masa menewaskan keinginan.',
+  'Tiada sambungan, tapi kaedahnya tetap sama: namakan pencetusnya (tekanan? bosan?), sebut kuat-kuat, dan beri keinginan itu 5 minit untuk mati sendiri. Ia pasti mati.',
+];
+
+export function fallbackMotivationForDay(dayOfYear: number, lang: 'en' | 'ms' = 'en'): string {
+  const pool = lang === 'ms' ? FALLBACK_MOTIVATION_MS : FALLBACK_MOTIVATION;
+  return pool[dayOfYear % pool.length];
 }
 
-export function fallbackMotivationForDay(dayOfYear: number): string {
-  return FALLBACK_MOTIVATION[dayOfYear % FALLBACK_MOTIVATION.length];
-}
-
-export function randomFallbackSos(): string {
-  return FALLBACK_SOS[Math.floor(Math.random() * FALLBACK_SOS.length)];
+export function randomFallbackSos(lang: 'en' | 'ms' = 'en'): string {
+  const pool = lang === 'ms' ? FALLBACK_SOS_MS : FALLBACK_SOS;
+  return pool[Math.floor(Math.random() * pool.length)];
 }

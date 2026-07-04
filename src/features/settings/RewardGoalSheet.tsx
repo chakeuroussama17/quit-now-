@@ -6,6 +6,7 @@ import { AppText } from '@/components/ui/AppText';
 import { AppTextInput } from '@/components/ui/AppTextInput';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { useT } from '@/i18n';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, font, spacing } from '@/theme';
 
@@ -17,6 +18,7 @@ interface RewardGoalSheetProps {
 
 /** "New watch — RM 800": what the saved money is actually for. */
 export function RewardGoalSheet({ visible, onClose, currency }: RewardGoalSheetProps) {
+  const t = useT();
   const values = useSettingsStore((s) => s.values);
   const setSetting = useSettingsStore((s) => s.set);
   const [name, setName] = useState(values['reward_goal_name'] ?? '');
@@ -36,12 +38,12 @@ export function RewardGoalSheet({ visible, onClose, currency }: RewardGoalSheetP
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
-      <AppText variant="h2">Reward goal</AppText>
+      <AppText variant="h2">{t('goal.title')}</AppText>
       <AppText variant="body" color={colors.textSecondary} style={styles.subtitle}>
-        Give the money you’re saving a job. You’ll see progress toward it on your dashboard.
+        {t('goal.subtitle')}
       </AppText>
       <AppTextInput
-        placeholder="e.g. New watch, trip, running shoes"
+        placeholder={t('goal.placeholder')}
         defaultValue={name}
         onChangeText={setName}
         style={styles.field}
@@ -60,7 +62,7 @@ export function RewardGoalSheet({ visible, onClose, currency }: RewardGoalSheetP
           accessibilityLabel="Reward price"
         />
       </View>
-      <PrimaryButton label="Save goal" onPress={save} disabled={!valid} />
+      <PrimaryButton label={t('goal.save')} onPress={save} disabled={!valid} />
     </BottomSheet>
   );
 }
