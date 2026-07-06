@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js';
  * what protects the data) — safe to ship in the bundle. Behavioral logs and
  * Room conversations deliberately stay on-device, NOT here.
  */
-const SUPABASE_URL =
+export const SUPABASE_URL =
   process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://vhmwsqehtohioitevdwh.supabase.co';
 const SUPABASE_ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||

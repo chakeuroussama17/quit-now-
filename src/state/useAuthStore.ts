@@ -185,9 +185,15 @@ export async function restoreProfileFromCloud(): Promise<boolean> {
   try {
     const { data } = await supabase
       .from('profiles')
-      .select('profile_json')
+      .select('profile_json, avatar_url')
       .eq('id', session.user.id)
       .maybeSingle();
+
+    // Restore the profile photo from the cloud (survives reinstall / device swap).
+    if (data?.avatar_url) {
+      await useSettingsStore.getState().set('avatar_uri', data.avatar_url as string);
+    }
+
     const json = data?.profile_json as Partial<UserProfile> | null;
     if (json && json.name && json.programStartDate && Array.isArray(json.products)) {
       const restored: UserProfile = {

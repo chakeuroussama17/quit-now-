@@ -1,4 +1,4 @@
-import { getLang } from '@/i18n';
+import { getLang, pickPool, type Lang } from '@/i18n';
 import { aiConfigured, chatCompletion, type ChatMessage } from '@/services/aiClient';
 import { languageInstruction } from '@/services/aiService';
 import { buildContextJSON } from '@/services/contextBuilder';
@@ -26,7 +26,7 @@ Rules:
  * Offline listener replies — reflective, one question at a time. Rotated by
  * turn count so a conversation without the AI still moves somewhere.
  */
-const OFFLINE_MIND: Record<'en' | 'ms', string[]> = {
+const OFFLINE_MIND: Partial<Record<Lang, string[]>> & { en: string[] } = {
   en: [
     'I’m here, and I’m listening. What part of it is sitting heaviest on you right now?',
     'That makes sense. Where do you feel it most — your chest, your jaw, your hands?',
@@ -45,14 +45,31 @@ const OFFLINE_MIND: Record<'en' | 'ms', string[]> = {
     'Apa yang anda akan katakan kepada mereka jika tiada apa-apa akibat langsung?',
     'Anda memikul ini sepanjang hari. Apa satu perkara yang anda mahu letakkan sebelum tidur?',
   ],
+  fr: [
+    'Je suis là, et j’écoute. Quelle partie pèse le plus lourd sur vous en ce moment ?',
+    'C’est compréhensible. Où le ressentez-vous le plus — la poitrine, la mâchoire, les mains ?',
+    'Dites-m’en plus si vous voulez. Que s’est-il passé juste avant que l’envie apparaisse ?',
+    'Si la cigarette pouvait parler maintenant, que vous promet-elle ? Et tient-elle jamais cette promesse ?',
+    'Vous n’avez rien à régler ce soir. Quelle petite gentillesse pourriez-vous vous offrir dans l’heure qui vient ?',
+    'Que leur diriez-vous s’il n’y avait aucune conséquence ?',
+    'Vous avez porté ça toute la journée. Qu’aimeriez-vous déposer avant de dormir ?',
+  ],
+  ar: [
+    'أنا هنا، وأنا أصغي. أي جزء يثقل عليك أكثر الآن؟',
+    'هذا منطقي. أين تشعر به أكثر — صدرك، فكّك، يداك؟',
+    'أخبرني أكثر إن أردت. ماذا حدث قبل ظهور الرغبة مباشرة؟',
+    'لو كانت السيجارة تتكلم الآن، بماذا تعدك؟ وهل تفي بذلك الوعد يومًا؟',
+    'لست مضطرًا لإصلاح شيء الليلة. ما اللطف الصغير الذي تقدّمه لنفسك في الساعة القادمة؟',
+    'ماذا كنت ستقول لهم لو لم تكن هناك أي عواقب؟',
+    'حملت هذا طوال اليوم. ما الشيء الذي تودّ أن تضعه جانبًا قبل النوم؟',
+  ],
 };
 
 export async function mindReply(
   history: { role: 'user' | 'assistant'; content: string }[],
 ): Promise<string> {
-  const lang = getLang();
   if (!aiConfigured()) {
-    const pool = OFFLINE_MIND[lang];
+    const pool = pickPool(OFFLINE_MIND, getLang());
     const userTurns = history.filter((m) => m.role === 'user').length;
     return pool[(userTurns - 1 + pool.length) % pool.length];
   }

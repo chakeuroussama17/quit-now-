@@ -2,7 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { getHourDowMatrix } from '@/db/statsRepo';
-import { getLang, t, type Lang, type TKey } from '@/i18n';
+import { getLang, pickPool, t, type Lang, type TKey } from '@/i18n';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
@@ -25,7 +25,9 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const MORNING_LINES: Record<Lang, string[]> = {
+type Pool = Partial<Record<Lang, string[]>> & { en: string[] };
+
+const MORNING_LINES: Pool = {
   en: [
     'New day. The only craving that matters is the next one.',
     'Your streak survived the night. Keep it company today.',
@@ -38,9 +40,21 @@ const MORNING_LINES: Record<Lang, string[]> = {
     'Kopi tetap sedap tanpa benda itu. Buktikan sekali hari ini.',
     'Satu keputusan, diulang-ulang. Hari ini salah satu ulangannya.',
   ],
+  fr: [
+    'Nouveau jour. La seule envie qui compte est la prochaine.',
+    'Votre série a survécu à la nuit. Tenez-lui compagnie aujourd’hui.',
+    'Le café marche aussi sans l’autre chose. Prouvez-le une fois aujourd’hui.',
+    'Une décision, répétée. Aujourd’hui en est une répétition.',
+  ],
+  ar: [
+    'يوم جديد. الرغبة الوحيدة التي تهمّ هي التالية.',
+    'نجت فترتك من الليل. رافقها اليوم.',
+    'القهوة تبقى لذيذة بدون الشيء الآخر. أثبت ذلك مرة اليوم.',
+    'قرار واحد، مكرَّر. اليوم إحدى تكراراته.',
+  ],
 };
 
-const EVENING_LINES: Record<Lang, string[]> = {
+const EVENING_LINES: Pool = {
   en: [
     'How did today actually go? A 10-second log keeps your map honest.',
     'Before sleep: one win from today worth remembering?',
@@ -51,11 +65,21 @@ const EVENING_LINES: Record<Lang, string[]> = {
     'Sebelum tidur: ada satu kemenangan hari ini yang patut diingat?',
     'Hari hampir tamat. Catat apa yang tertinggal — kejujuran mengalahkan kesempurnaan.',
   ],
+  fr: [
+    'Comment s’est vraiment passée la journée ? Un journal de 10 secondes garde votre carte honnête.',
+    'Avant de dormir : une victoire d’aujourd’hui à retenir ?',
+    'La journée touche à sa fin. Notez ce que vous avez oublié — l’honnêteté bat la perfection.',
+  ],
+  ar: [
+    'كيف كان يومك فعلًا؟ تسجيل من ١٠ ثوانٍ يبقي خريطتك صادقة.',
+    'قبل النوم: انتصار واحد من اليوم يستحق التذكّر؟',
+    'اليوم كاد ينتهي. سجّل ما تخطّيته — الصدق يغلب الكمال.',
+  ],
 };
 
 // Static nudges for now; the Phase 3 spec's AI-written weekly batch can
 // replace these bodies later without touching the scheduling.
-const RISKY_LINES: Record<Lang, string[]> = {
+const RISKY_LINES: Pool = {
   en: [
     'Your {time} pattern is coming. Step outside without it — three minutes is enough.',
     'Heads up: {time} is one of your risky hours. Water first, then decide.',
@@ -65,6 +89,16 @@ const RISKY_LINES: Record<Lang, string[]> = {
     'Corak {time} anda semakin hampir. Keluar sebentar tanpanya — tiga minit sudah cukup.',
     'Perhatian: {time} ialah salah satu waktu berisiko anda. Minum air dulu, kemudian putuskan.',
     'Keinginan {time} bakal tiba jika sejarah berulang. Ia memuncak dalam 90 saat — bertahanlah.',
+  ],
+  fr: [
+    'Votre schéma de {time} approche. Sortez sans elle — trois minutes suffisent.',
+    'Attention : {time} est une de vos heures à risque. De l’eau d’abord, puis décidez.',
+    'Envie de {time} en approche, si l’histoire se répète. Elle culmine en 90 secondes — tenez.',
+  ],
+  ar: [
+    'نمط {time} قادم. اخرج قليلًا بدونها — ثلاث دقائق تكفي.',
+    'انتبه: {time} إحدى ساعاتك الخطرة. الماء أولًا، ثم قرّر.',
+    'رغبة {time} قادمة إن تكرّر التاريخ. تبلغ ذروتها في ٩٠ ثانية — اصمد.',
   ],
 };
 
@@ -118,10 +152,11 @@ export async function syncNotifications(): Promise<void> {
   const lang = getLang();
 
   if (on('notif_morning')) {
+    const morning = pickPool(MORNING_LINES, lang);
     await Notifications.scheduleNotificationAsync({
       content: {
         title: t('notif.morningTitle'),
-        body: MORNING_LINES[lang][day % MORNING_LINES[lang].length],
+        body: morning[day % morning.length],
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -132,10 +167,11 @@ export async function syncNotifications(): Promise<void> {
   }
 
   if (on('notif_evening')) {
+    const evening = pickPool(EVENING_LINES, lang);
     await Notifications.scheduleNotificationAsync({
       content: {
         title: t('notif.eveningTitle'),
-        body: EVENING_LINES[lang][day % EVENING_LINES[lang].length],
+        body: evening[day % evening.length],
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -147,9 +183,10 @@ export async function syncNotifications(): Promise<void> {
 
   // Pattern warnings: 15 minutes before each locally-computed risky hour.
   if (on('notif_risky')) {
+    const risky = pickPool(RISKY_LINES, lang);
     const hours = await riskiestHours();
     for (const hour of hours) {
-      const line = RISKY_LINES[lang][(day + hour) % RISKY_LINES[lang].length];
+      const line = risky[(day + hour) % risky.length];
       await Notifications.scheduleNotificationAsync({
         content: {
           title: t('notif.riskyTitle'),

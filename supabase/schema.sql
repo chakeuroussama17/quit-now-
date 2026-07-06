@@ -19,6 +19,8 @@ create table if not exists public.profiles (
   quit_reason_text text,
   baseline_per_day numeric,
   currency text,
+  -- Public URL of the profile photo stored in the "avatars" bucket.
+  avatar_url text,
   -- Complete profile snapshot: lets a returning user restore on a new device
   -- instead of being re-onboarded (and overwriting this row with blanks).
   profile_json jsonb,
@@ -30,6 +32,7 @@ create table if not exists public.profiles (
 -- alter table public.profiles
 --   add column if not exists dob date,
 --   add column if not exists gender text,
+--   add column if not exists avatar_url text,
 --   add column if not exists profile_json jsonb;
 
 alter table public.profiles enable row level security;
@@ -79,3 +82,24 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- 4. Avatars bucket: public read, each user writes only their own <uid>.jpg.
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+create policy "avatar public read"
+  on storage.objects for select
+  using (bucket_id = 'avatars');
+
+create policy "avatar owner write"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] is null
+    and name = auth.uid()::text || '.jpg'
+  );
+
+create policy "avatar owner update"
+  on storage.objects for update
+  using (bucket_id = 'avatars' and name = auth.uid()::text || '.jpg');

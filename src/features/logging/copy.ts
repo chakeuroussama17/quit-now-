@@ -1,10 +1,10 @@
-import { getLang, type Lang } from '@/i18n';
+import { getLang, pickPool, type Lang } from '@/i18n';
 
 /**
  * Post-log acknowledgments. Calm, adult, zero shame — the log itself is the win.
  * Phase 3 occasionally replaces these with a short AI reflection.
  */
-const ACK_LINES: Record<Lang, string[]> = {
+const ACK_LINES: Partial<Record<Lang, string[]>> & { en: string[] } = {
   en: [
     'Logged. The pattern matters more than this one moment.',
     'Noted. Honesty is the whole game here.',
@@ -19,13 +19,27 @@ const ACK_LINES: Record<Lang, string[]> = {
     'Direkod. Mengenal pencetus ialah cara menewaskannya.',
     'Dicatat. Setiap catatan menajamkan peta tabiat anda.',
   ],
+  fr: [
+    'Enregistré. Le motif compte plus que ce seul moment.',
+    'Noté. L’honnêteté est tout le jeu ici.',
+    'D’accord. Une entrée, aucun jugement.',
+    'Enregistré. Connaître ses déclencheurs, c’est ainsi qu’on les bat.',
+    'Enregistré. Chaque entrée affine votre carte de cette habitude.',
+  ],
+  ar: [
+    'سُجّلت. النمط أهم من هذه اللحظة الواحدة.',
+    'حسنًا. الصدق هو كل اللعبة هنا.',
+    'تمام. تسجيل واحد، بلا أحكام.',
+    'دُوّنت. معرفة محفزاتك هي طريقك للتغلب عليها.',
+    'سُجّلت. كل إدخال يجعل خريطة هذه العادة أوضح.',
+  ],
 };
 
 /**
  * Resisted-craving lines. Deliberately warmer than the smoke acknowledgments —
  * wins get celebrated more than slips get discouraged.
  */
-const RESISTED_LINES: Record<Lang, string[]> = {
+const RESISTED_LINES: Partial<Record<Lang, string[]>> & { en: string[] } = {
   en: [
     'That’s the muscle. Most cravings die within 5 minutes — you outlasted this one.',
     'One craving down. Each one you surf makes the next one weaker.',
@@ -40,14 +54,28 @@ const RESISTED_LINES: Record<Lang, string[]> = {
     'Hebat. Otak anda baru belajar bahawa keinginan bukan arahan.',
     'Anda bertahan. Itu satu latihan untuk diri yang sedang anda bina.',
   ],
+  fr: [
+    'C’est ça, le muscle. La plupart des envies meurent en 5 minutes — vous avez tenu plus longtemps.',
+    'Une envie de moins. Chacune que vous surfez affaiblit la suivante.',
+    'Victoire enregistrée. C’est exactement comme ça qu’on arrête vraiment.',
+    'Solide. Votre cerveau vient d’apprendre qu’une envie n’est pas un ordre.',
+    'Vous avez tenu. Une répétition de plus pour la personne que vous devenez.',
+  ],
+  ar: [
+    'هذه هي العضلة. معظم الرغبات تموت خلال ٥ دقائق — وقد صمدت أطول منها.',
+    'رغبة واحدة سقطت. كل واحدة تركبها تُضعف التي بعدها.',
+    'سُجّل الانتصار. هكذا يحدث الإقلاع فعلًا.',
+    'قوي. تعلّم دماغك للتو أن الرغبة ليست أمرًا.',
+    'ثبتّ على الخط. هذه تمرينة للشخص الذي تصبحه.',
+  ],
 };
 
 export function randomAckLine(): string {
-  const pool = ACK_LINES[getLang()];
+  const pool = pickPool(ACK_LINES, getLang());
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
 export function randomResistedLine(): string {
-  const pool = RESISTED_LINES[getLang()];
+  const pool = pickPool(RESISTED_LINES, getLang());
   return pool[Math.floor(Math.random() * pool.length)];
 }

@@ -17,9 +17,16 @@ A JSON snapshot of the user's situation is provided — use it naturally, never 
 
 /** Extra system line so the coach answers in the app's selected language. */
 export function languageInstruction(): string {
-  return getLang() === 'ms'
-    ? 'Reply ONLY in natural, conversational Bahasa Melayu (Malaysia).'
-    : 'Reply in English.';
+  switch (getLang()) {
+    case 'ms':
+      return 'Reply ONLY in natural, conversational Bahasa Melayu (Malaysia).';
+    case 'ar':
+      return 'Reply ONLY in natural, conversational Modern Standard Arabic.';
+    case 'fr':
+      return 'Reply ONLY in natural, conversational French.';
+    default:
+      return 'Reply in English.';
+  }
 }
 
 async function coachMessages(instruction: string): Promise<ChatMessage[]> {

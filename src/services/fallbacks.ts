@@ -1,6 +1,10 @@
+import { pickPool, type Lang } from '@/i18n';
+
 /**
  * Bundled offline fallbacks. The app must feel complete with no network and
  * no proxy configured — AI is an enhancement, never a dependency.
+ * Motivation pools exist in en/ms (fr/ar fall back to English — the AI path
+ * covers those languages in practice); SOS lines exist in all four.
  */
 
 export const FALLBACK_MOTIVATION: string[] = [
@@ -82,18 +86,36 @@ export const FALLBACK_SOS: string[] = [
   'No connection, but the method still works: name what triggered this (stress? boredom?), say it out loud, and give the craving 5 minutes to die on its own. It will.',
 ];
 
-export const FALLBACK_SOS_MS: string[] = [
-  'Saya di luar talian sekarang, tapi anda tak perlukan saya untuk ini: tarik nafas 4 saat, tahan 7, hembus 8. Tiga pusingan. Keinginan akan memuncak dan surut — selalunya dalam 5 minit.',
-  'Tak dapat hubungi jurulatih — jadi ini langkahnya: minum segelas air perlahan-lahan, kemudian beredar dari tempat anda sekarang. Pergerakan + masa menewaskan keinginan.',
-  'Tiada sambungan, tapi kaedahnya tetap sama: namakan pencetusnya (tekanan? bosan?), sebut kuat-kuat, dan beri keinginan itu 5 minit untuk mati sendiri. Ia pasti mati.',
-];
+const FALLBACK_SOS_POOLS: Partial<Record<Lang, string[]>> & { en: string[] } = {
+  en: FALLBACK_SOS,
+  ms: [
+    'Saya di luar talian sekarang, tapi anda tak perlukan saya untuk ini: tarik nafas 4 saat, tahan 7, hembus 8. Tiga pusingan. Keinginan akan memuncak dan surut — selalunya dalam 5 minit.',
+    'Tak dapat hubungi jurulatih — jadi ini langkahnya: minum segelas air perlahan-lahan, kemudian beredar dari tempat anda sekarang. Pergerakan + masa menewaskan keinginan.',
+    'Tiada sambungan, tapi kaedahnya tetap sama: namakan pencetusnya (tekanan? bosan?), sebut kuat-kuat, dan beri keinginan itu 5 minit untuk mati sendiri. Ia pasti mati.',
+  ],
+  fr: [
+    'Je suis hors ligne, mais vous n’avez pas besoin de moi pour ça : inspirez 4 secondes, retenez 7, expirez 8. Trois tours. L’envie va monter puis retomber — toujours, souvent en 5 minutes.',
+    'Impossible de joindre le coach — alors voici le plan : buvez un verre d’eau lentement, puis éloignez-vous d’où vous êtes. Mouvement + minutes battent l’envie.',
+    'Pas de connexion, mais la méthode marche quand même : nommez le déclencheur (stress ? ennui ?), dites-le à voix haute, et laissez à l’envie 5 minutes pour mourir seule. Elle mourra.',
+  ],
+  ar: [
+    'أنا خارج الاتصال الآن، لكنك لا تحتاجني لهذا: استنشق ٤ ثوانٍ، احبس ٧، أخرج الهواء في ٨. ثلاث جولات. سترتفع الرغبة ثم تنحسر — دائمًا، وغالبًا خلال ٥ دقائق.',
+    'تعذّر الوصول للمدرب — إليك الخطة: اشرب كوب ماء ببطء، ثم ابتعد عن مكانك الحالي. الحركة + الدقائق تهزم الرغبة.',
+    'لا يوجد اتصال، لكن الطريقة تعمل: سمِّ المحفز (توتر؟ ملل؟)، قله بصوت عالٍ، وامنح الرغبة ٥ دقائق لتموت وحدها. ستموت.',
+  ],
+};
 
-export function fallbackMotivationForDay(dayOfYear: number, lang: 'en' | 'ms' = 'en'): string {
-  const pool = lang === 'ms' ? FALLBACK_MOTIVATION_MS : FALLBACK_MOTIVATION;
+const MOTIVATION_POOLS: Partial<Record<Lang, string[]>> & { en: string[] } = {
+  en: FALLBACK_MOTIVATION,
+  ms: FALLBACK_MOTIVATION_MS,
+};
+
+export function fallbackMotivationForDay(dayOfYear: number, lang: Lang = 'en'): string {
+  const pool = pickPool(MOTIVATION_POOLS, lang);
   return pool[dayOfYear % pool.length];
 }
 
-export function randomFallbackSos(lang: 'en' | 'ms' = 'en'): string {
-  const pool = lang === 'ms' ? FALLBACK_SOS_MS : FALLBACK_SOS;
+export function randomFallbackSos(lang: Lang = 'en'): string {
+  const pool = pickPool(FALLBACK_SOS_POOLS, lang);
   return pool[Math.floor(Math.random() * pool.length)];
 }
