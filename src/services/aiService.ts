@@ -142,9 +142,11 @@ export async function sosChatReply(
  * one concrete tactic, one win. Null when uncached and unreachable.
  */
 export async function getWeeklyInsight(force = false): Promise<string | null> {
-  const week = isoWeekKey();
+  // Cache per ISO week AND language, so switching language regenerates the
+  // report in the new language instead of serving a stale one.
+  const cacheKey = `${isoWeekKey()}:${getLang()}`;
   if (!force) {
-    const cached = await getAiMessageByMeta('weekly_report', week);
+    const cached = await getAiMessageByMeta('weekly_report', cacheKey);
     if (cached) return cached.content;
   }
   if (!aiConfigured()) return null;
@@ -154,7 +156,7 @@ export async function getWeeklyInsight(force = false): Promise<string | null> {
       'Write my weekly insight report from the context (max 120 words), as four short parts with these exact bold headers: **Trend**, **One honest observation**, **Try this week**, **A win to keep**. Be specific to my numbers, not generic.',
     );
     const text = (await chatCompletion(messages, { maxTokens: 300 })).trim();
-    await insertAiMessage('weekly_report', text, week);
+    await insertAiMessage('weekly_report', text, cacheKey);
     return text;
   } catch {
     return null;

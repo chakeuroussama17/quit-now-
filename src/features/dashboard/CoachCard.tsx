@@ -5,6 +5,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { useT } from '@/i18n';
 import { getDailyMotivation } from '@/services/aiService';
+import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, spacing } from '@/theme';
 import type { UserProfile } from '@/types/models';
 
@@ -17,20 +18,27 @@ import { dailyLine } from './motivation';
  */
 export function CoachCard({ profile }: { profile: UserProfile }) {
   const t = useT();
+  const lang = useSettingsStore((s) => s.values['language']) ?? 'en';
   const fallback = dailyLine(profile);
-  const [line, setLine] = useState(fallback);
+  const [ai, setAi] = useState<{ text: string; lang: string } | null>(null);
 
+  // Re-fetch the AI line when the language changes.
   useEffect(() => {
     if (fallback.isOwnWords) return;
     let cancelled = false;
     getDailyMotivation().then(({ text }) => {
-      if (!cancelled && text) setLine({ text, isOwnWords: false });
+      if (!cancelled && text) setAi({ text, lang });
     });
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile.createdAt]);
+  }, [profile.createdAt, lang]);
+
+  // Show the AI line only if it matches the current language; otherwise the
+  // (already-localized) fallback carries it until the fetch lands.
+  const line =
+    ai && ai.lang === lang && !fallback.isOwnWords ? { text: ai.text, isOwnWords: false } : fallback;
 
   return (
     <Card style={styles.card}>
