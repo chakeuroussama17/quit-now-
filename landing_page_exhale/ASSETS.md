@@ -54,7 +54,18 @@ The Google Play badge must be the **official** asset (don't AI-generate it).
 > (Drink water, 5 push-ups, Call someone, Talk to coach), and a full-width teal
 > button "I beat it — log this win". Calm, meditative, dark.
 
-## 5 — `hero_bg.jpg`  (optional atmospheric background behind the hero)
+## 5 — `room.png`  (The Room spotlight section)
+**Prompt (after style block):**
+> the "The Room" chat screen of a quit-smoking app — a calm, slightly warmer dark
+> tone than the rest of the app. A header "The Room" with a subtitle
+> "Private · just you and Mind". A conversation: a charcoal assistant bubble
+> ("Say more if you want. What happened right before the urge showed up?"), a
+> teal user bubble on the right ("I had a rough day at work"), another gentle
+> charcoal assistant reply. A row of conversation-starter chips near the bottom
+> ("I'm stressed", "I just need to vent"). A text input bar "Say anything…".
+> No stats, no gamification — deliberately calm and private.
+
+## 6 — `hero_bg.jpg`  (optional atmospheric background behind the hero)
 **Landscape, ≥1920×1080. Optional** — if absent, the hero removes it and looks
 great on the teal glow alone. Keep it moody and low-contrast; the page darkens
 it and keeps the left side readable. Prompt:
