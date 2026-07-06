@@ -361,6 +361,11 @@ export const fr: Partial<Record<TKey, string>> = {
   'pay.trust':
     'Annulable à tout moment · Zéro pub · Vos journaux ne quittent jamais votre téléphone',
   'pay.refresh': 'Déjà abonné — actualiser',
+  'pay.restore': 'Restaurer l’achat',
+  'pay.restoreNone': 'Aucun achat précédent trouvé sur ce compte.',
+  'pay.error': 'Une erreur s’est produite. Veuillez réessayer.',
+  'pay.soon': 'Presque prêt',
+  'pay.soonBody': 'Les achats intégrés s’activent une fois l’app installée depuis le Play Store.',
   'pay.checking': 'Vérification…',
   'pay.freeTitle': 'Toujours gratuit, sans abonnement',
   'pay.free1': 'Série, économies & étapes santé',

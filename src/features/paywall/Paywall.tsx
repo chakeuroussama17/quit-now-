@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import * as WebBrowser from 'expo-web-browser';
-import { useState } from 'react';
+import * as Haptics from 'expo-haptics';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
@@ -8,25 +8,37 @@ import { Card } from '@/components/ui/Card';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Screen } from '@/components/ui/Screen';
 import { useT } from '@/i18n';
+import {
+  getPremiumOffer,
+  purchasePremium,
+  purchasesConfigured,
+  restorePremium,
+  type PremiumOffer,
+} from '@/services/purchases';
 import { useAuthStore } from '@/state/useAuthStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { colors, radii, spacing } from '@/theme';
 import { baselineDailyCost, formatMoney } from '@/utils/baseline';
 
-/**
- * Stripe Payment Link for the $3.99/month Premium subscription. Create it in
- * the Stripe dashboard and set EXPO_PUBLIC_STRIPE_PAYMENT_LINK.
- * client_reference_id carries the Supabase user id to the webhook.
- */
-const PAYMENT_LINK = (process.env.EXPO_PUBLIC_STRIPE_PAYMENT_LINK ?? '').trim();
-
 /** Shown in place of SOS and The Room until the subscription is active. */
 export function Paywall() {
   const t = useT();
-  const session = useAuthStore((s) => s.session);
   const refreshPremium = useAuthStore((s) => s.refreshPremium);
   const profile = useProfileStore((s) => s.profile);
-  const [checking, setChecking] = useState(false);
+  const [offer, setOffer] = useState<PremiumOffer | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+
+  // Load the localized price/package from Google Play via RevenueCat.
+  useEffect(() => {
+    let cancelled = false;
+    getPremiumOffer().then((o) => {
+      if (!cancelled) setOffer(o);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const features = [
     { icon: 'flame' as const, title: t('pay.f1.title'), detail: t('pay.f1.detail') },
@@ -38,23 +50,33 @@ export function Paywall() {
   // Their own numbers do the selling: what a day of smoking used to cost.
   const dailyCost = profile ? baselineDailyCost(profile) : 0;
   const currency = profile?.currency ?? 'RM';
+  // Real Google Play price when available, else the intended $3.99.
+  const priceLabel = offer?.priceString ?? '$3.99';
 
   const subscribe = async () => {
-    if (!PAYMENT_LINK) {
-      Alert.alert(
-        'Payments not connected yet',
-        'The Stripe payment link has not been configured. Set EXPO_PUBLIC_STRIPE_PAYMENT_LINK and rebuild.',
-      );
+    if (!purchasesConfigured() || !offer) {
+      Alert.alert(t('pay.soon'), t('pay.soonBody'));
       return;
     }
-    const url = `${PAYMENT_LINK}?client_reference_id=${session?.user.id ?? ''}&prefilled_email=${encodeURIComponent(session?.user.email ?? '')}`;
-    await WebBrowser.openBrowserAsync(url);
+    setBusy(true);
+    const result = await purchasePremium(offer.package);
+    setBusy(false);
+    if (result === 'success') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await refreshPremium();
+    } else if (result === 'error') {
+      Alert.alert(t('pay.error'));
+    }
+    // 'cancelled' → the user backed out; stay silent.
   };
 
-  const checkAgain = async () => {
-    setChecking(true);
+  const restore = async () => {
+    setRestoring(true);
+    const ok = await restorePremium();
     await refreshPremium();
-    setChecking(false);
+    setRestoring(false);
+    if (ok) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    else Alert.alert(t('pay.restoreNone'));
   };
 
   return (
@@ -87,7 +109,7 @@ export function Paywall() {
         <View style={styles.priceBlock}>
           <View style={styles.priceRow}>
             <AppText variant="display" color={colors.accent}>
-              $3.99
+              {priceLabel}
             </AppText>
             <AppText variant="body" color={colors.textMuted}>
               {t('pay.month')}
@@ -104,7 +126,7 @@ export function Paywall() {
           )}
         </View>
 
-        <PrimaryButton label={t('pay.cta')} onPress={subscribe} />
+        <PrimaryButton label={t('pay.cta')} onPress={subscribe} loading={busy} />
 
         <View style={styles.trustRow}>
           <AppText variant="caption" color={colors.textMuted}>
@@ -113,13 +135,13 @@ export function Paywall() {
         </View>
 
         <Pressable
-          onPress={checkAgain}
+          onPress={restore}
           accessibilityRole="button"
           style={styles.refresh}
-          disabled={checking}
+          disabled={restoring}
         >
           <AppText variant="bodyMedium" color={colors.accent}>
-            {checking ? t('pay.checking') : t('pay.refresh')}
+            {restoring ? t('pay.checking') : t('pay.restore')}
           </AppText>
         </Pressable>
 

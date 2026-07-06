@@ -5,12 +5,31 @@ import { create } from 'zustand';
 
 import { wipeAllData } from '@/db/database';
 import { invalidateContextCache } from '@/services/contextBuilder';
+import {
+  configurePurchases,
+  getPremiumFromRC,
+  logoutPurchases,
+  onPremiumChange,
+  purchasesConfigured,
+} from '@/services/purchases';
 import { supabase } from '@/services/supabase';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import type { UserProfile } from '@/types/models';
 import { baselinePerDay } from '@/utils/baseline';
+
+let premiumListenerBound = false;
+
+/** Bind the RevenueCat entitlement listener once, after configure() has run. */
+function bindPremiumListener(set: (partial: Partial<AuthState>) => void): void {
+  if (premiumListenerBound || !purchasesConfigured()) return;
+  premiumListenerBound = true;
+  onPremiumChange((isPremium) => {
+    set({ isPremium });
+    useSettingsStore.getState().set('premium_cached', String(isPremium));
+  });
+}
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -50,9 +69,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { data } = await supabase.auth.getSession();
     set({ session: data.session, isPremium: cached });
 
-    // Existing account on a fresh device: pull their profile down BEFORE the
-    // router decides between onboarding and the app.
+    // Existing account on a fresh device: configure billing + pull profile
+    // BEFORE the router decides between onboarding and the app.
     if (data.session) {
+      await configurePurchases(data.session.user.id);
+      bindPremiumListener(set);
       await restoreProfileFromCloud();
       get().refreshPremium();
     }
@@ -60,7 +81,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     supabase.auth.onAuthStateChange((_event, session) => {
       set({ session });
-      if (session) get().refreshPremium();
+      if (session) {
+        configurePurchases(session.user.id).then(() => bindPremiumListener(set));
+        get().refreshPremium();
+      }
     });
   },
 
@@ -112,6 +136,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
+    await logoutPurchases();
     await supabase.auth.signOut();
     set({ session: null, isPremium: false });
     useSettingsStore.getState().set('premium_cached', 'false');
@@ -120,6 +145,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshPremium: async () => {
     const userId = get().session?.user.id;
     if (!userId) return;
+
+    // RevenueCat (Google Play Billing) is the source of truth when configured.
+    if (purchasesConfigured()) {
+      const active = await getPremiumFromRC();
+      set({ isPremium: active });
+      useSettingsStore.getState().set('premium_cached', String(active));
+      return;
+    }
+
+    // Fallback: the Supabase subscriptions table (e.g. a Stripe webhook path).
     try {
       const { data } = await supabase
         .from('subscriptions')

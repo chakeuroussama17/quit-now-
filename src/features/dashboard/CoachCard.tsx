@@ -38,7 +38,9 @@ export function CoachCard({ profile }: { profile: UserProfile }) {
   // Show the AI line only if it matches the current language; otherwise the
   // (already-localized) fallback carries it until the fetch lands.
   const line =
-    ai && ai.lang === lang && !fallback.isOwnWords ? { text: ai.text, isOwnWords: false } : fallback;
+    ai && ai.lang === lang && !fallback.isOwnWords
+      ? { text: ai.text, isOwnWords: false }
+      : fallback;
 
   return (
     <Card style={styles.card}>
