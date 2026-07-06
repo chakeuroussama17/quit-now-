@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exhale — Quit smoking, one breath at a time.</title>
+  <meta name="description" content="Exhale helps you quit smoking and vaping for good — track your smoke-free streak, understand your triggers, and get an AI coach for the moments that decide everything. Private, offline-first, in your language." />
+
+  <!-- Open Graph (social sharing) -->
+  <meta property="og:title" content="Exhale — Quit smoking, one breath at a time." />
+  <meta property="og:description" content="Track your streak, understand your triggers, and never face a craving alone." />
+  <meta property="og:image" content="pictures/og_image.png" />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0A0A0C" />
+
+  <link rel="icon" type="image/png" href="pictures/favicon.png" />
+
+  <!-- Fonts (same family as the app) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind (Play CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:   '#0A0A0C',
+            ink2:  '#141418',
+            teal:  '#4ADEB5',
+            amber: '#F5A623',
+          },
+          fontFamily: { body: ['Inter', '"Noto Sans Arabic"', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body class="bg-ink text-white font-body antialiased overflow-x-hidden">
+
+  <!-- Ambient glow + grain -->
+  <div class="blob blob--teal"></div>
+  <div class="blob blob--amber"></div>
+  <div class="grain"></div>
+
+  <!-- ══════════ NAV ══════════ -->
+  <header class="fixed top-0 inset-x-0 z-50">
+    <nav class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-2.5">
+        <img class="ph h-9 w-9 rounded-xl object-contain" src="pictures/app_icon.png"
+             alt="Exhale" data-ratio="1/1" data-mini
+             data-ph="LOGO ICON (app_icon.png) — square, transparent" onerror="placeholder(this)">
+        <span class="font-extrabold text-lg tracking-tight">Exhale</span>
+      </a>
+
+      <div class="flex items-center gap-3">
+        <!-- Language switcher -->
+        <div class="lang-switch" id="langSwitch">
+          <button class="lang-btn" data-lang="en" aria-label="English">EN</button>
+          <button class="lang-btn" data-lang="ms" aria-label="Bahasa Melayu">MS</button>
+          <button class="lang-btn" data-lang="ar" aria-label="العربية">ع</button>
+          <button class="lang-btn" data-lang="fr" aria-label="Français">FR</button>
+        </div>
+        <a href="#get" class="btn-solid text-sm px-5 py-2.5 rounded-full font-bold hidden sm:inline-block" data-i18n="nav.cta">Get the app</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ══════════ HERO ══════════ -->
+  <section id="top" class="relative min-h-screen flex items-center pt-32 pb-16">
+    <div class="relative z-10 mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-12 items-center w-full">
+      <!-- Left: copy -->
+      <div>
+        <span class="chip" data-i18n="hero.chip">🫁 Your calmest path to quitting</span>
+        <h1 class="mt-5 font-extrabold leading-[0.98] tracking-tight text-5xl sm:text-6xl xl:text-7xl">
+          <span data-i18n="hero.title1">Quit smoking,</span><br>
+          <span class="gradient-text" data-i18n="hero.title2">one breath at a time.</span>
+        </h1>
+        <p class="mt-6 text-white/75 text-lg max-w-md" data-i18n="hero.sub">
+          Track your smoke-free streak, understand the triggers behind every craving, and get an AI coach for the moments that decide everything. Calm, honest, and always in your pocket.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-4 items-center">
+          <a href="#get" class="btn-solid px-7 py-3.5 rounded-full font-bold" data-i18n="hero.cta1">Get it on Android</a>
+          <a href="#how" class="btn-ghost px-7 py-3.5 rounded-full font-bold" data-i18n="hero.cta2">See how it works</a>
+        </div>
+        <!-- Trust chips -->
+        <div class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/55">
+          <span class="trust">🔒 <span data-i18n="hero.trust1">Private — logs stay on your phone</span></span>
+          <span class="trust">📵 <span data-i18n="hero.trust2">Works offline</span></span>
+          <span class="trust">🚫 <span data-i18n="hero.trust3">No ads, ever</span></span>
+        </div>
+      </div>
+
+      <!-- Right: phone -->
+      <div class="flex justify-center lg:justify-end">
+        <div class="phone tilt" data-tilt>
+          <div class="screen-intro"></div>
+          <img class="ph phone-screen" src="pictures/home.png" alt="Exhale home screen"
+               data-ratio="9/19.5"
+               data-ph="SCREENSHOT — home.png (Home: smoke-free streak counter + money saved + next health milestone, DARK mode)"
+               onerror="placeholder(this)">
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-cue" data-i18n="hero.scroll">scroll ↓</div>
+  </section>
+
+  <!-- ══════════ HEALTH TIMELINE (unique hook) ══════════ -->
+  <section id="timeline" class="relative py-24">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="text-center max-w-2xl mx-auto" data-reveal>
+        <span class="chip" data-i18n="tl.chip">Backed by science</span>
+        <h2 class="mt-4 font-extrabold tracking-tight text-4xl sm:text-5xl" data-i18n="tl.title">Your body starts healing in 20 minutes</h2>
+        <p class="mt-4 text-white/60" data-i18n="tl.sub">The real WHO recovery timeline — Exhale shows you the exact moment you reach each one.</p>
+      </div>
+
+      <div class="mt-16 timeline">
+        <div class="tl-item" data-reveal>
+          <div class="tl-time gradient-text">20<span class="tl-unit" data-i18n="tl.min">min</span></div>
+          <div class="tl-label" data-i18n="tl.t1">Heart rate &amp; blood pressure drop back toward normal</div>
+        </div>
+        <div class="tl-item" data-reveal>
+          <div class="tl-time gradient-text">12<span class="tl-unit" data-i18n="tl.hr">hrs</span></div>
+          <div class="tl-label" data-i18n="tl.t2">Carbon monoxide clears — oxygen flows properly again</div>
+        </div>
+        <div class="tl-item" data-reveal>
+          <div class="tl-time gradient-text">2<span class="tl-unit" data-i18n="tl.days">days</span></div>
+          <div class="tl-label" data-i18n="tl.t3">Taste and smell start coming back to life</div>
+        </div>
+        <div class="tl-item" data-reveal>
+          <div class="tl-time gradient-text">2<span class="tl-unit" data-i18n="tl.wks">wks</span></div>
+          <div class="tl-label" data-i18n="tl.t4">Circulation and lung function measurably improve</div>
+        </div>
+        <div class="tl-item" data-reveal>
+          <div class="tl-time gradient-text">1<span class="tl-unit" data-i18n="tl.yr">yr</span></div>
+          <div class="tl-label" data-i18n="tl.t5">Your risk of heart disease is cut in half</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ HOW IT WORKS ══════════ -->
+  <section id="how" class="relative py-28">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="text-center max-w-2xl mx-auto" data-reveal>
+        <span class="chip" data-i18n="how.chip">How it works</span>
+        <h2 class="mt-4 font-extrabold tracking-tight text-4xl sm:text-5xl" data-i18n="how.title">Three things, done well</h2>
+      </div>
+
+      <div class="mt-16 grid md:grid-cols-3 gap-10">
+        <div class="step" data-reveal>
+          <div class="step-num">01</div>
+          <div class="phone phone--sm tilt" data-tilt>
+            <img class="ph phone-screen" src="pictures/log.png" alt="Log a craving"
+                 data-ratio="9/19.5"
+                 data-ph="SCREENSHOT — log.png (the fast log sheet: product + trigger + emotion chips + intensity slider)"
+                 onerror="placeholder(this)">
+          </div>
+          <h3 class="step-title" data-i18n="how.s1t">Log in seconds</h3>
+          <p class="step-text" data-i18n="how.s1d">A craving or a slip — three taps, zero shame. Honesty is the whole game.</p>
+        </div>
+        <div class="step" data-reveal>
+          <div class="step-num">02</div>
+          <div class="phone phone--sm tilt" data-tilt>
+            <img class="ph phone-screen" src="pictures/stats.png" alt="See your patterns"
+                 data-ratio="9/19.5"
+                 data-ph="SCREENSHOT — stats.png (Stats: hour×weekday heatmap + trigger breakdown)"
+                 onerror="placeholder(this)">
+          </div>
+          <h3 class="step-title" data-i18n="how.s2t">See your patterns</h3>
+          <p class="step-text" data-i18n="how.s2d">Your risky hours, triggers and emotions — mapped. Knowledge is how you beat it.</p>
+        </div>
+        <div class="step" data-reveal>
+          <div class="step-num">03</div>
+          <div class="phone phone--sm tilt" data-tilt>
+            <img class="ph phone-screen" src="pictures/sos.png" alt="Never alone"
+                 data-ratio="9/19.5"
+                 data-ph="SCREENSHOT — sos.png (Craving SOS: breathing circle + timer + 'I beat it' button)"
+                 onerror="placeholder(this)">
+          </div>
+          <h3 class="step-title" data-i18n="how.s3t">Never face it alone</h3>
+          <p class="step-text" data-i18n="how.s3d">A breathing timer for the wave, and an AI coach that knows your reasons.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ FEATURES (bento) ══════════ -->
+  <section id="features" class="relative py-28">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="text-center max-w-2xl mx-auto" data-reveal>
+        <span class="chip" data-i18n="ft.chip">Everything you need</span>
+        <h2 class="mt-4 font-extrabold tracking-tight text-4xl sm:text-5xl" data-i18n="ft.title">More than a streak counter</h2>
+      </div>
+
+      <div class="mt-16 grid lg:grid-cols-3 gap-6">
+        <!-- Big: SOS -->
+        <div class="feature feature--tall lg:col-span-2" data-reveal>
+          <div class="feature-copy">
+            <div class="feature-badge">🔥</div>
+            <h3 class="feature-title" data-i18n="ft.f1t">Craving <span class="gradient-text">SOS</span></h3>
+            <p class="feature-text" data-i18n="ft.f1d">One tap opens a 5-minute urge-surfing timer with guided 4-7-8 breathing, quick actions, and a coach that talks you through the wave in real time. Every craving you outlast is logged as a win.</p>
+          </div>
+          <div class="phone phone--sm tilt mt-6 self-center lg:self-end" data-tilt>
+            <img class="ph phone-screen" src="pictures/sos.png" alt="Craving SOS"
+                 data-ratio="9/19.5"
+                 data-ph="SCREENSHOT — sos.png (breathing circle + urge-surf timer)"
+                 onerror="placeholder(this)">
+          </div>
+        </div>
+
+        <div class="grid gap-6">
+          <!-- The Room -->
+          <div class="feature" data-reveal>
+            <div class="feature-badge">💬</div>
+            <h3 class="feature-title" data-i18n="ft.f2t">The <span class="gradient-text">Room</span></h3>
+            <p class="feature-text" data-i18n="ft.f2d">A private, judgment-free space to talk through the stress behind the urge — with Mind, a gentle listener. It never leaves your phone.</p>
+          </div>
+          <!-- Ranks -->
+          <div class="feature" data-reveal>
+            <div class="feature-badge">🏆</div>
+            <h3 class="feature-title" data-i18n="ft.f3t">Ranks &amp; <span class="gradient-text">XP</span></h3>
+            <p class="feature-text" data-i18n="ft.f3d">Mature, Whoop-style progress. Resisting a craving earns the most — because honesty beats perfection.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Small features -->
+      <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="mini" data-reveal>
+          <div class="mini-icon">📊</div>
+          <h4 class="mini-title" data-i18n="ft.m1t">Trigger heatmap</h4>
+          <p class="mini-text" data-i18n="ft.m1d">See exactly when and why you reach for one.</p>
+        </div>
+        <div class="mini" data-reveal>
+          <div class="mini-icon">💰</div>
+          <h4 class="mini-title" data-i18n="ft.m2t">Money saved</h4>
+          <p class="mini-text" data-i18n="ft.m2d">Watch it add up toward a reward you choose.</p>
+        </div>
+        <div class="mini" data-reveal>
+          <div class="mini-icon">🧠</div>
+          <h4 class="mini-title" data-i18n="ft.m3t">AI coach</h4>
+          <p class="mini-text" data-i18n="ft.m3d">Personal, honest, tied to your own reasons.</p>
+        </div>
+        <div class="mini" data-reveal>
+          <div class="mini-icon">🌍</div>
+          <h4 class="mini-title" data-i18n="ft.m4t">Your language</h4>
+          <p class="mini-text" data-i18n="ft.m4d">English, Malay, Arabic and French — coach included.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ PRICING ══════════ -->
+  <section id="pricing" class="relative py-28">
+    <div class="mx-auto max-w-5xl px-6">
+      <div class="text-center max-w-2xl mx-auto" data-reveal>
+        <span class="chip" data-i18n="pr.chip">Simple pricing</span>
+        <h2 class="mt-4 font-extrabold tracking-tight text-4xl sm:text-5xl" data-i18n="pr.title">Start free. Upgrade if it helps.</h2>
+      </div>
+
+      <div class="mt-14 grid md:grid-cols-2 gap-6">
+        <!-- Free -->
+        <div class="price-card" data-reveal>
+          <h3 class="price-name" data-i18n="pr.freeName">Free</h3>
+          <div class="price-amount">RM 0</div>
+          <p class="price-note" data-i18n="pr.freeNote">Everything you need to quit.</p>
+          <ul class="price-list">
+            <li class="check" data-i18n="pr.f1">Smoke-free streak &amp; money saved</li>
+            <li class="check" data-i18n="pr.f2">Fast logging, stats &amp; trigger heatmap</li>
+            <li class="check" data-i18n="pr.f3">Health milestones &amp; ranks</li>
+            <li class="check" data-i18n="pr.f4">Daily coach line &amp; weekly insight</li>
+          </ul>
+        </div>
+        <!-- Premium -->
+        <div class="price-card price-card--pro" data-reveal>
+          <div class="price-tag" data-i18n="pr.popular">Most popular</div>
+          <h3 class="price-name" data-i18n="pr.proName">Premium</h3>
+          <div class="price-amount">$3.99<span class="price-per" data-i18n="pr.perMonth">/month</span></div>
+          <p class="price-note" data-i18n="pr.proNote">For the moments that decide everything.</p>
+          <ul class="price-list">
+            <li class="check" data-i18n="pr.p1">Everything in Free</li>
+            <li class="check" data-i18n="pr.p2">Craving SOS toolkit &amp; breathing timer</li>
+            <li class="check" data-i18n="pr.p3">Live AI coach, 24/7</li>
+            <li class="check" data-i18n="pr.p4">The Room with Mind</li>
+          </ul>
+          <a href="#get" class="btn-solid w-full text-center mt-7 py-3 rounded-full font-bold block" data-i18n="pr.cta">Get Premium</a>
+        </div>
+      </div>
+      <p class="text-center text-white/35 text-sm mt-6" data-i18n="pr.foot">Cancel anytime · No ads · Your data never leaves your phone</p>
+    </div>
+  </section>
+
+  <!-- ══════════ FAQ ══════════ -->
+  <section id="faq" class="relative py-28">
+    <div class="mx-auto max-w-3xl px-6">
+      <div class="text-center" data-reveal>
+        <span class="chip" data-i18n="fq.chip">Questions</span>
+        <h2 class="mt-4 font-extrabold tracking-tight text-4xl sm:text-5xl" data-i18n="fq.title">Good to know</h2>
+      </div>
+
+      <div class="mt-12 space-y-4">
+        <details class="faq" data-reveal>
+          <summary data-i18n="fq.q1">Is my data really private?</summary>
+          <p data-i18n="fq.a1">Yes. Your logs, cravings and Room conversations live only on your phone — they're never uploaded. Only your account and subscription are stored in the cloud, so you can sign in on a new device.</p>
+        </details>
+        <details class="faq" data-reveal>
+          <summary data-i18n="fq.q2">Does it work offline?</summary>
+          <p data-i18n="fq.a2">Completely. Tracking, stats, ranks and the breathing timer all work with no connection. Only the live AI chat needs internet.</p>
+        </details>
+        <details class="faq" data-reveal>
+          <summary data-i18n="fq.q3">Which languages are supported?</summary>
+          <p data-i18n="fq.a3">English, Bahasa Melayu, Arabic and French — across the whole app, including the AI coach, which replies in your chosen language.</p>
+        </details>
+        <details class="faq" data-reveal>
+          <summary data-i18n="fq.q4">What does it cost?</summary>
+          <p data-i18n="fq.a4">The core app is free forever. Premium ($3.99/month) unlocks the Craving SOS toolkit, the live AI coach and The Room. Cancel anytime.</p>
+        </details>
+        <details class="faq" data-reveal>
+          <summary data-i18n="fq.q5">Does it work for vaping too?</summary>
+          <p data-i18n="fq.a5">Yes — cigarettes, vaping, rolled tobacco and shisha. The stats and savings adapt to what you use.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ FINAL CTA ══════════ -->
+  <section id="get" class="relative py-24">
+    <div class="mx-auto max-w-4xl px-6">
+      <div class="cta text-center" data-reveal>
+        <h2 class="font-extrabold tracking-tight text-4xl sm:text-5xl" data-i18n="cta.title">Your first smoke-free day starts now.</h2>
+        <p class="mt-4 text-white/70 max-w-lg mx-auto" data-i18n="cta.sub">Download Exhale and take the first breath toward getting your lungs — and your money — back.</p>
+        <div class="mt-8 flex flex-wrap gap-4 justify-center items-center">
+          <a href="#" class="inline-block">
+            <img class="ph store-badge" src="pictures/google_play.png" alt="Get it on Google Play"
+                 data-ratio="3/1" data-mini
+                 data-ph="Google Play badge (google_play.png). Get the official badge from Google's brand page. Replace # with your Play Store link."
+                 onerror="placeholder(this)">
+          </a>
+          <a href="#" class="btn-ghost px-7 py-3.5 rounded-full font-bold" data-i18n="cta.apk">Download APK</a>
+        </div>
+        <p class="mt-5 text-white/35 text-sm" data-i18n="cta.note">Free to start · Android · English · Malay · Arabic · French</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <footer class="relative border-t border-white/10 py-12">
+    <div class="mx-auto max-w-7xl px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-2.5">
+        <img class="ph h-8 w-8 rounded-lg object-contain" src="pictures/app_icon.png" alt=""
+             data-ratio="1/1" data-mini data-ph="ICON" onerror="placeholder(this)">
+        <span class="font-bold">Exhale</span>
+      </div>
+      <p class="text-white/40 text-sm" data-i18n="footer.tag">© 2026 Exhale. Quit smoking, one breath at a time.</p>
+      <div class="flex gap-4 text-white/60">
+        <a href="#" class="hover:text-white transition" data-i18n="footer.privacy">Privacy</a>
+        <a href="#" class="hover:text-white transition" data-i18n="footer.contact">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
