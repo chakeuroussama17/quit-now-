@@ -73,6 +73,11 @@
 
   <!-- ══════════ HERO ══════════ -->
   <section id="top" class="relative min-h-screen flex items-center pt-32 pb-16">
+    <!-- Optional atmospheric background. If pictures/hero_bg.jpg is absent it
+         simply removes itself — the hero still looks great on the glow alone. -->
+    <img class="hero-bg" src="pictures/hero_bg.jpg" alt="" onerror="this.remove()">
+    <div class="hero-veil"></div>
+
     <div class="relative z-10 mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-12 items-center w-full">
       <!-- Left: copy -->
       <div>

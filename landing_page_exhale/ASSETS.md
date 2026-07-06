@@ -54,7 +54,20 @@ The Google Play badge must be the **official** asset (don't AI-generate it).
 > (Drink water, 5 push-ups, Call someone, Talk to coach), and a full-width teal
 > button "I beat it — log this win". Calm, meditative, dark.
 
-## 5 — `og_image.png`  (social share preview — optional)
+## 5 — `hero_bg.jpg`  (optional atmospheric background behind the hero)
+**Landscape, ≥1920×1080. Optional** — if absent, the hero removes it and looks
+great on the teal glow alone. Keep it moody and low-contrast; the page darkens
+it and keeps the left side readable. Prompt:
+> A cinematic, moody, dark atmospheric background, landscape 1920×1080, near-black
+> #0A0A0C. A person's silhouette from the side breathing out slowly, the exhale
+> turning into soft glowing mint-teal (#4ADEB5) light particles that drift and
+> rise and fade. Lots of empty dark space on the LEFT for text. No face detail,
+> calm, premium, wellness mood. Cinematic haze, shallow depth of field.
+
+Alt idea (no person): *abstract dark teal smoke/mist dissolving into clean air,
+left side very dark and empty, subtle glow — calm and premium.*
+
+## 6 — `og_image.png`  (social share preview — optional)
 **Size 1200×630 (landscape).** Prompt:
 > A social share banner, 1200×630, near-black #0A0A0C background with a soft
 > teal radial glow. Centered: a minimal mint-teal "breath" logo mark (an open
