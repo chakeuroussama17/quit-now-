@@ -18,6 +18,10 @@ jobs:
       # Variables → EXPO_PUBLIC_AI_PROXY_URL = https://<project>.vercel.app
       # Baked into the JS bundle at build time. Empty = offline fallbacks.
       EXPO_PUBLIC_AI_PROXY_URL: ${{ vars.EXPO_PUBLIC_AI_PROXY_URL }}
+      # RevenueCat Android public SDK key (starts with "goog_"). Add it as a
+      # GitHub Variable named EXPO_PUBLIC_REVENUECAT_ANDROID_KEY — then every
+      # build ships with in-app Premium purchasing enabled. Empty = locked.
+      EXPO_PUBLIC_REVENUECAT_ANDROID_KEY: ${{ vars.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
