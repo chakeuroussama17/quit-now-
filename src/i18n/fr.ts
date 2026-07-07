@@ -184,6 +184,8 @@ export const fr: Partial<Record<TKey, string>> = {
   'home.evening': 'Bonsoir',
   'home.night': 'Bonne nuit',
   'home.streak': 'Série sans tabac',
+  'home.toRank': '{days}j avant {rank}',
+  'home.topRank': 'Rang maximal atteint — Libre',
   'home.streakSince': '{duration} · record {days} {unit}',
   'home.cravings7d': 'Envies, 7 derniers jours',
   'home.quitDay': 'Jour J',

@@ -183,6 +183,8 @@ export const ms: Partial<Record<TKey, string>> = {
   'home.evening': 'Selamat petang',
   'home.night': 'Selamat malam',
   'home.streak': 'Tempoh bebas rokok',
+  'home.toRank': '{days} hari ke {rank}',
+  'home.topRank': 'Pangkat tertinggi dicapai — Bebas',
   'home.streakSince': '{duration} · terpanjang {days} {unit}',
   'home.cravings7d': 'Keinginan, 7 hari lepas',
   'home.quitDay': 'Hari berhenti',

@@ -6,8 +6,10 @@ import { TrendLine } from '@/components/charts/TrendLine';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { ProgressRing } from '@/components/ui/ProgressRing';
 import { getCravingWeekDelta, getDailyCravingStats, getLongestGapDays } from '@/db/statsRepo';
-import { useT } from '@/i18n';
+import { rankProgress } from '@/features/ranks/rankProgress';
+import { useT, type TKey } from '@/i18n';
 import { useLogsStore } from '@/state/useLogsStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, spacing } from '@/theme';
@@ -113,20 +115,35 @@ export function StreakHero({ profile }: StreakHeroProps) {
     parts.days > 0 ? (parts.days === 1 ? t('common.day') : t('common.days')) : t('home.streak');
   const longestShown = Math.max(parts.days, Math.floor(longestDays));
 
+  const rank = rankProgress(parts.days);
+
   return (
     <Card style={styles.card}>
       <AppText variant="micro" color={colors.textSecondary} style={styles.centered}>
         {t('home.streak')}
       </AppText>
-      <View style={styles.bigRow}>
-        <AppText variant="display" color={colors.accent}>
-          {bigValue}
-        </AppText>
-        <AppText variant="h2" color={colors.text} style={styles.bigSuffix}>
-          {bigUnit}
-        </AppText>
+
+      <View style={styles.ringWrap}>
+        <ProgressRing progress={rank.progress} size={192}>
+          <AppText variant="display" color={colors.accent}>
+            {bigValue}
+          </AppText>
+          <AppText variant="caption" color={colors.textSecondary} style={styles.ringUnit}>
+            {bigUnit}
+          </AppText>
+        </ProgressRing>
       </View>
-      <AppText variant="caption" color={colors.textSecondary} style={styles.centered}>
+
+      <AppText variant="caption" color={colors.accent} style={styles.centered}>
+        {rank.next
+          ? t('home.toRank', {
+              days: rank.daysToNext,
+              rank: t(`rank.${rank.next.day}.name` as TKey),
+            })
+          : t('home.topRank')}
+      </AppText>
+
+      <AppText variant="caption" color={colors.textMuted} style={styles.centered}>
         {t('home.streakSince', {
           duration: formatDuration(streakMs),
           days: longestShown,
@@ -172,6 +189,8 @@ function SparkSection({
 const styles = StyleSheet.create({
   card: { gap: spacing.sm },
   centered: { textAlign: 'center' },
+  ringWrap: { alignItems: 'center', marginVertical: spacing.md },
+  ringUnit: { marginTop: -2 },
   bigRow: {
     flexDirection: 'row',
     alignItems: 'baseline',

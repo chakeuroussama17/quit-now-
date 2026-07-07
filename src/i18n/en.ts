@@ -182,6 +182,8 @@ export const en = {
   'home.evening': 'Evening',
   'home.night': 'Night',
   'home.streak': 'Smoke-free streak',
+  'home.toRank': '{days}d to {rank}',
+  'home.topRank': 'Top rank reached — Free',
   'home.streakSince': '{duration} · longest {days} {unit}',
   'home.cravings7d': 'Cravings, last 7 days',
   'home.quitDay': 'Quit day',

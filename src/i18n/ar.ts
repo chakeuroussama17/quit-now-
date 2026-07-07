@@ -181,6 +181,8 @@ export const ar: Partial<Record<TKey, string>> = {
   'home.evening': 'مساء الخير',
   'home.night': 'ليلة هادئة',
   'home.streak': 'مدة بلا تدخين',
+  'home.toRank': '{days} يوم إلى {rank}',
+  'home.topRank': 'بلغت أعلى رتبة — حرّ',
   'home.streakSince': '{duration} · الأطول {days} {unit}',
   'home.cravings7d': 'الرغبات، آخر ٧ أيام',
   'home.quitDay': 'يوم الإقلاع',

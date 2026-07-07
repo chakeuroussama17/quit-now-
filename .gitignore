@@ -42,3 +42,6 @@ example
 # generated native folders
 /ios
 /android
+
+# Reference landing page (has its own git repo)
+landing_page_dreaming_ball/
