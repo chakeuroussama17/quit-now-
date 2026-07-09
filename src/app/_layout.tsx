@@ -33,12 +33,14 @@ const navTheme = {
 };
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  // If a font fails to load we still render (system font) — never a blank app.
+  const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const fontsReady = fontsLoaded || fontError != null;
 
   const profile = useProfileStore((s) => s.profile);
   const profileHydrated = useProfileStore((s) => s.hydrated);
@@ -46,6 +48,7 @@ export default function RootLayout() {
   const settingsHydrated = useSettingsStore((s) => s.hydrated);
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
   const introSeen = useSettingsStore((s) => s.values['intro_seen'] === 'true');
+  const offerSeen = useSettingsStore((s) => s.values['welcome_offer_seen'] === 'true');
   const session = useAuthStore((s) => s.session);
   const authHydrated = useAuthStore((s) => s.hydrated);
   const hydrateAuth = useAuthStore((s) => s.hydrate);
@@ -53,15 +56,20 @@ export default function RootLayout() {
 
   useEffect(() => {
     // Profile + settings first: auth hydration restores the cloud profile
-    // only when the LOCAL profile is genuinely absent.
+    // only when the LOCAL profile is genuinely absent. Each hydrate() swallows
+    // its own errors and still flips `hydrated`, so startup can never hang.
     (async () => {
-      await Promise.all([hydrateProfile(), hydrateSettings()]);
-      await hydrateAuth();
-      refreshLogs();
+      try {
+        await Promise.all([hydrateProfile(), hydrateSettings()]);
+        await hydrateAuth();
+        await refreshLogs();
+      } catch (err) {
+        console.error('[startup] hydration failed', err);
+      }
     })();
   }, [hydrateProfile, hydrateSettings, hydrateAuth, refreshLogs]);
 
-  const ready = fontsLoaded && profileHydrated && settingsHydrated && authHydrated;
+  const ready = fontsReady && profileHydrated && settingsHydrated && authHydrated;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
@@ -105,8 +113,13 @@ export default function RootLayout() {
           <Stack.Screen name="onboarding" />
         </Stack.Protected>
 
+        {/* One-time upsell between onboarding and the dashboard (skippable) */}
+        <Stack.Protected guard={authed && onboarded && !offerSeen}>
+          <Stack.Screen name="welcome-offer" options={{ animation: 'fade' }} />
+        </Stack.Protected>
+
         {/* The app */}
-        <Stack.Protected guard={authed && onboarded}>
+        <Stack.Protected guard={authed && onboarded && offerSeen}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen
             name="sos-chat"

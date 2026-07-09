@@ -33,7 +33,14 @@ export const useLogsStore = create<LogsState>((set, get) => ({
   lastSmokeAt: null,
 
   refresh: async () => {
-    const [today, lastSmokeAt] = await Promise.all([getTodaySummary(), getLastSmokeTimestamp()]);
+    // Never let a transient DB error bubble into app startup (see useProfileStore).
+    let today, lastSmokeAt;
+    try {
+      [today, lastSmokeAt] = await Promise.all([getTodaySummary(), getLastSmokeTimestamp()]);
+    } catch (err) {
+      console.error('[logs] refresh failed', err);
+      return;
+    }
     set({
       todaySmokedCount: today.smokedCount,
       todaySmokedQuantity: today.smokedQuantity,

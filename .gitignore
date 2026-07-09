@@ -45,3 +45,12 @@ example
 
 # Reference landing page (has its own git repo)
 landing_page_dreaming_ball/
+
+# Big media / build artifacts dropped into the landing page folder.
+# GitHub rejects files >100MB, and these don't belong in source control.
+landing_page_exhale/pictures/*.mp4
+landing_page_exhale/pictures/*.apk
+landing_page_exhale/pictures/*.pdf
+
+# Watermarked stock image — kept locally, never committed (licensing).
+assets/images/lungs.webp

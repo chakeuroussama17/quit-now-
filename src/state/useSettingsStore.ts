@@ -15,8 +15,14 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   hydrated: false,
 
   hydrate: async () => {
-    const values = await getAllSettings();
-    set({ values, hydrated: true });
+    // Always mark hydrated — the router gates the app on it (see useProfileStore).
+    try {
+      const values = await getAllSettings();
+      set({ values, hydrated: true });
+    } catch (err) {
+      console.error('[settings] hydrate failed', err);
+      set({ hydrated: true });
+    }
   },
 
   set: async (key, value) => {

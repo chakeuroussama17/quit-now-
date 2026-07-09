@@ -5,16 +5,15 @@ import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { Screen } from '@/components/ui/Screen';
 import { CoachCard } from '@/features/dashboard/CoachCard';
+import { LungsHero } from '@/features/dashboard/LungsHero';
 import { MilestoneRow } from '@/features/dashboard/MilestoneRow';
+import { OverallProgress } from '@/features/dashboard/OverallProgress';
 import { StreakHero } from '@/features/dashboard/StreakHero';
-import { TilesRow } from '@/features/dashboard/TilesRow';
 import { useEnsureReductionPlan } from '@/features/dashboard/useEnsureReductionPlan';
 import { useProgress } from '@/features/dashboard/useProgress';
-import { useT } from '@/i18n';
 import { useProfileStore } from '@/state/useProfileStore';
 import { useSettingsStore } from '@/state/useSettingsStore';
 import { colors, radii, spacing } from '@/theme';
-import { dayPart } from '@/utils/time';
 
 export default function HomeScreen() {
   const profile = useProfileStore((s) => s.profile);
@@ -25,28 +24,22 @@ export default function HomeScreen() {
 }
 
 function HomeContent() {
-  const t = useT();
   const router = useRouter();
   const profile = useProfileStore((s) => s.profile)!;
   const avatarUri = useSettingsStore((s) => s.values['avatar_uri']);
   const progress = useProgress(profile);
   useEnsureReductionPlan(profile);
-  const greeting = `${t(`home.${dayPart() === 'night' ? 'night' : dayPart()}` as 'home.morning')}, ${profile.name}`;
+
+  const isGradual = profile.quitMode === 'gradual';
 
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Brand bar */}
         <View style={styles.topRow}>
-          <View>
-            <AppText variant="caption" color={colors.textMuted}>
-              {new Date().toLocaleDateString(undefined, {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-              })}
-            </AppText>
-            <AppText variant="h2">{greeting}</AppText>
-          </View>
+          <AppText variant="h2" style={styles.brand}>
+            EXHALE
+          </AppText>
           <Pressable
             onPress={() => router.push('/settings')}
             accessibilityRole="button"
@@ -61,12 +54,13 @@ function HomeContent() {
           </Pressable>
         </View>
 
+        {/* Hero: filling lungs (cold turkey) or today's target ring (gradual) */}
         <View style={styles.section}>
-          <StreakHero profile={profile} />
+          {isGradual ? <StreakHero profile={profile} /> : <LungsHero profile={profile} />}
         </View>
 
         <View style={styles.section}>
-          <TilesRow profile={profile} progress={progress} />
+          <OverallProgress profile={profile} progress={progress} />
         </View>
 
         <View style={styles.section}>
@@ -88,6 +82,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  brand: { letterSpacing: 2, fontSize: 18 },
   avatar: {
     width: 38,
     height: 38,

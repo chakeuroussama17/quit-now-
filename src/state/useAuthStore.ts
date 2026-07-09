@@ -64,28 +64,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isPremium: false,
 
   hydrate: async () => {
-    // Last known entitlement first, so premium users aren't locked out offline.
-    const cached = useSettingsStore.getState().values['premium_cached'] === 'true';
-    const { data } = await supabase.auth.getSession();
-    set({ session: data.session, isPremium: cached });
+    // Always mark hydrated — the router gates the app on it (see useProfileStore).
+    try {
+      // Last known entitlement first, so premium users aren't locked out offline.
+      const cached = useSettingsStore.getState().values['premium_cached'] === 'true';
+      const { data } = await supabase.auth.getSession();
+      set({ session: data.session, isPremium: cached });
 
-    // Existing account on a fresh device: configure billing + pull profile
-    // BEFORE the router decides between onboarding and the app.
-    if (data.session) {
-      await configurePurchases(data.session.user.id);
-      bindPremiumListener(set);
-      await restoreProfileFromCloud();
-      get().refreshPremium();
-    }
-    set({ hydrated: true });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      set({ session });
-      if (session) {
-        configurePurchases(session.user.id).then(() => bindPremiumListener(set));
+      // Existing account on a fresh device: configure billing + pull profile
+      // BEFORE the router decides between onboarding and the app.
+      if (data.session) {
+        await configurePurchases(data.session.user.id);
+        bindPremiumListener(set);
+        await restoreProfileFromCloud();
         get().refreshPremium();
       }
-    });
+
+      supabase.auth.onAuthStateChange((_event, session) => {
+        set({ session });
+        if (session) {
+          configurePurchases(session.user.id).then(() => bindPremiumListener(set));
+          get().refreshPremium();
+        }
+      });
+    } catch (err) {
+      console.error('[auth] hydrate failed', err);
+    } finally {
+      set({ hydrated: true });
+    }
   },
 
   signInWithGoogle: async () => {
@@ -173,12 +179,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 }));
 
 /** Where should the user land right now? Single source of truth for redirects. */
-export function landingRoute(): '/' | '/onboarding' | '/auth' | '/intro' {
+export function landingRoute(): '/' | '/onboarding' | '/auth' | '/intro' | '/welcome-offer' {
+  const settings = useSettingsStore.getState().values;
   const session = useAuthStore.getState().session;
   const profile = useProfileStore.getState().profile;
-  const introSeen = useSettingsStore.getState().values['intro_seen'] === 'true';
-  if (!session) return introSeen ? '/auth' : '/intro';
+  if (!session) return settings['intro_seen'] === 'true' ? '/auth' : '/intro';
   if (!profile) return '/onboarding';
+  // One-time upsell between onboarding and the dashboard.
+  if (settings['welcome_offer_seen'] !== 'true') return '/welcome-offer';
   return '/';
 }
 

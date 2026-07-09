@@ -112,7 +112,14 @@ let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 async function init(): Promise<SQLite.SQLiteDatabase> {
   const db = await SQLite.openDatabaseAsync('exhale.db');
-  await db.execAsync('PRAGMA journal_mode = WAL;');
+
+  // WAL is a big win on device, but the web (wa-sqlite) build rejects it.
+  // Never let a journal-mode hiccup take the whole app down.
+  try {
+    await db.execAsync('PRAGMA journal_mode = WAL;');
+  } catch {
+    // Non-fatal: the default journal mode is fine.
+  }
 
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   let version = row?.user_version ?? 0;
@@ -126,7 +133,14 @@ async function init(): Promise<SQLite.SQLiteDatabase> {
 
 /** Single shared connection. Safe to call from anywhere, any number of times. */
 export function getDb(): Promise<SQLite.SQLiteDatabase> {
-  if (!dbPromise) dbPromise = init();
+  if (!dbPromise) {
+    // Clear the cached promise on failure so a later call can retry instead of
+    // inheriting a permanently-rejected one.
+    dbPromise = init().catch((err) => {
+      dbPromise = null;
+      throw err;
+    });
+  }
   return dbPromise;
 }
 

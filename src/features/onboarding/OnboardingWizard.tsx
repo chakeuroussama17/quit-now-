@@ -100,7 +100,8 @@ export function OnboardingWizard() {
       await setProfile(profile);
       pushProfileToCloud(profile); // best-effort mirror to Supabase
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace('/');
+      // The one-time Premium offer sits between onboarding and the dashboard.
+      router.replace('/welcome-offer');
     } finally {
       setSaving(false);
     }

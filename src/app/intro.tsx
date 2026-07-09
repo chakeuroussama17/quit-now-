@@ -50,7 +50,12 @@ export default function IntroScreen() {
       finish();
       return;
     }
-    listRef.current?.scrollToIndex({ index: index + 1, animated: true });
+    // Advance the index ourselves: react-native-web doesn't fire
+    // onMomentumScrollEnd after a programmatic scrollToIndex, so relying on it
+    // alone leaves the button stuck on the first slide.
+    const target = index + 1;
+    setIndex(target);
+    listRef.current?.scrollToIndex({ index: target, animated: true });
   };
 
   return (

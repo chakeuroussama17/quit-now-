@@ -17,8 +17,15 @@ export const useProfileStore = create<ProfileState>((set) => ({
   hydrated: false,
 
   hydrate: async () => {
-    const profile = await getProfile();
-    set({ profile, hydrated: true });
+    // Must ALWAYS mark hydrated: the router gates the whole app on it, so a
+    // DB failure here would otherwise leave a permanently blank screen.
+    try {
+      const profile = await getProfile();
+      set({ profile, hydrated: true });
+    } catch (err) {
+      console.error('[profile] hydrate failed', err);
+      set({ profile: null, hydrated: true });
+    }
   },
 
   setProfile: async (profile) => {
