@@ -27,10 +27,22 @@ function Stat({
       <View style={[styles.iconWrap, { backgroundColor: `${tint}22`, borderColor: `${tint}55` }]}>
         <Ionicons name={icon} size={18} color={tint} />
       </View>
-      <AppText variant="stat" style={styles.value}>
+      {/* Money can be long ("RM 60.78") — shrink to fit rather than wrap. */}
+      <AppText
+        variant="stat"
+        style={styles.value}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}
+      >
         {value}
       </AppText>
-      <AppText variant="caption" color={colors.textSecondary} style={styles.label}>
+      <AppText
+        variant="caption"
+        color={colors.textSecondary}
+        style={styles.label}
+        numberOfLines={2}
+      >
         {label}
       </AppText>
     </View>
@@ -93,16 +105,19 @@ export function OverallProgress({
 
 const styles = StyleSheet.create({
   card: { gap: spacing.lg },
-  row: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.xs },
-  stat: { flex: 1, alignItems: 'center', gap: spacing.xs },
+  // No gap between cells: each flexes evenly and pads itself, so a long value
+  // has the full column width instead of being squeezed into a wrap.
+  row: { flexDirection: 'row', alignItems: 'flex-start' },
+  stat: { flex: 1, alignItems: 'center', gap: spacing.xs, paddingHorizontal: 2 },
   iconWrap: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: radii.pill,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  value: { fontSize: 20, lineHeight: 26 },
-  label: { textAlign: 'center', fontSize: 11 },
+  value: { fontSize: 19, lineHeight: 25, textAlign: 'center', width: '100%' },
+  // Fixed height keeps the four labels baseline-aligned even when one wraps.
+  label: { textAlign: 'center', fontSize: 11, lineHeight: 14, height: 28 },
 });

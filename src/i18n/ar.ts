@@ -189,6 +189,7 @@ export const ar: Partial<Record<TKey, string>> = {
   'home.uSeconds': 'ثوانٍ',
   'home.lungsPct': '{pct}% من تعافي الرئتين',
   'home.lungsFull': 'تعافت الرئتان بالكامل',
+  'home.lungsCutDown': 'رئتاك تتعافى كلما قلّلت — وتتراجع مع كل سيجارة.',
   'home.overall': 'التقدّم الإجمالي',
   'home.daysQuit': 'أيام الإقلاع',
   'home.cigsAvoided': 'سجائر تُجُنِّبت',

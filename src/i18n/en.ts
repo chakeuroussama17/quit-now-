@@ -190,6 +190,7 @@ export const en = {
   'home.uSeconds': 'seconds',
   'home.lungsPct': '{pct}% lung recovery',
   'home.lungsFull': 'Lungs fully recovered',
+  'home.lungsCutDown': 'Your lungs heal as you cut down — and slip back with each cigarette.',
   'home.overall': 'Overall Progress',
   'home.daysQuit': 'days quit',
   'home.cigsAvoided': 'cigarettes avoided',

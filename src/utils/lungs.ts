@@ -16,3 +16,28 @@ export function lungFillProgress(streakMs: number): number {
 export function lungFillPercent(streakMs: number): number {
   return Math.floor(lungFillProgress(streakMs) * 100);
 }
+
+const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+
+/**
+ * Lung recovery for GRADUAL reduction, where a clean streak barely exists.
+ * Two honest signals, weighted:
+ *
+ *   • how far below baseline they've cut (last 7 days)  — the real progress
+ *   • how long since the last cigarette (up to 48h)     — the immediate repair
+ *
+ * So the lungs fill steadily as they smoke less, and visibly drop back the
+ * moment they log a cigarette (the gap term resets to zero).
+ */
+export function gradualLungProgress(params: {
+  baselinePerDay: number;
+  avgPerDayLast7: number;
+  msSinceLastSmoke: number;
+}): number {
+  const { baselinePerDay, avgPerDayLast7, msSinceLastSmoke } = params;
+
+  const reduction = baselinePerDay > 0 ? clamp01(1 - avgPerDayLast7 / baselinePerDay) : 0;
+  const gap = clamp01(msSinceLastSmoke / (48 * 3_600_000));
+
+  return clamp01(0.75 * reduction + 0.25 * gap);
+}

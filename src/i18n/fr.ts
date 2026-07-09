@@ -192,6 +192,8 @@ export const fr: Partial<Record<TKey, string>> = {
   'home.uSeconds': 'secondes',
   'home.lungsPct': '{pct}% de récupération pulmonaire',
   'home.lungsFull': 'Poumons entièrement récupérés',
+  'home.lungsCutDown':
+    'Vos poumons guérissent quand vous réduisez — et reculent à chaque cigarette.',
   'home.overall': 'Progression globale',
   'home.daysQuit': 'jours sans tabac',
   'home.cigsAvoided': 'cigarettes évitées',

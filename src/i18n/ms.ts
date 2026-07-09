@@ -191,6 +191,8 @@ export const ms: Partial<Record<TKey, string>> = {
   'home.uSeconds': 'saat',
   'home.lungsPct': '{pct}% pemulihan paru-paru',
   'home.lungsFull': 'Paru-paru pulih sepenuhnya',
+  'home.lungsCutDown':
+    'Paru-paru anda pulih apabila anda kurangkan — dan surut semula dengan setiap batang rokok.',
   'home.overall': 'Kemajuan Keseluruhan',
   'home.daysQuit': 'hari berhenti',
   'home.cigsAvoided': 'rokok dielakkan',
