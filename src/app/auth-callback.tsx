@@ -24,7 +24,13 @@ export default function AuthCallbackScreen() {
     // tokens and always land back on /auth, so wait for a link — but never
     // longer than this, or a stray navigation strands the user on a spinner.
     const timer = setTimeout(() => {
-      if (!cancelled) setTarget(landingRoute());
+      if (cancelled) return;
+      // Reaching this screen with no deep link at all means the redirect never
+      // made it back from the browser. Say so rather than bouncing in silence.
+      useAuthStore.setState({
+        authError: `No sign-in link reached the app within ${URL_TIMEOUT_MS / 1000}s.`,
+      });
+      setTarget(landingRoute());
     }, URL_TIMEOUT_MS);
 
     (async () => {
@@ -35,6 +41,9 @@ export default function AuthCallbackScreen() {
         if (cancelled || !link) return;
 
         const outcome = await absorbAuthTokens(link);
+        // Also goes to logcat: `adb logcat -s ReactNativeJS`. Carries param
+        // names and provider errors only, never token values.
+        if (outcome.kind !== 'session') console.warn('[auth-callback]', JSON.stringify(outcome));
         // Bouncing back to /auth with no explanation is how this bug hid.
         if (outcome.kind === 'error') {
           useAuthStore.setState({ authError: outcome.message });
