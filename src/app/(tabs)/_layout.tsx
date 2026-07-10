@@ -83,6 +83,17 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
+          name="ranks"
+          options={{
+            title: t('tabs.ranks'),
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="trophy-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        {/* Centre slot: three tabs each side. Everything left of the "+" is
+            your own data; everything right of it is somewhere to turn. */}
+        <Tabs.Screen
           name="log"
           options={{
             title: '',
@@ -119,15 +130,6 @@ export default function TabsLayout() {
             title: t('tabs.community'),
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="people-outline" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="ranks"
-          options={{
-            title: t('tabs.ranks'),
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="trophy-outline" size={size} color={color} />
             ),
           }}
         />

@@ -111,6 +111,11 @@ export default function SettingsScreen() {
   const setSetting = useSettingsStore((s) => s.set);
   const values = useSettingsStore((s) => s.values);
   const notifEnabled = values['notif_enabled'] === 'true';
+  // Mirrors getLang(): an unset or unknown code falls back to English, exactly
+  // as the dictionary lookup does — so the radio can't disagree with the UI.
+  const activeLang = LANGUAGES.some((l) => l.code === values['language'])
+    ? values['language']
+    : 'en';
   const session = useAuthStore((s) => s.session);
   const isPremium = useAuthStore((s) => s.isPremium);
   const signOut = useAuthStore((s) => s.signOut);
@@ -230,17 +235,14 @@ export default function SettingsScreen() {
           {t('set.language')}
         </AppText>
         <Card style={styles.group}>
-          {LANGUAGES.map((lang) => {
-            const active = (values['language'] === 'ms' ? 'ms' : 'en') === lang.code;
-            return (
-              <SettingsRow
-                key={lang.code}
-                icon={active ? 'radio-button-on' : 'radio-button-off'}
-                label={lang.label}
-                onPress={() => setSetting('language', lang.code)}
-              />
-            );
-          })}
+          {LANGUAGES.map((lang) => (
+            <SettingsRow
+              key={lang.code}
+              icon={activeLang === lang.code ? 'radio-button-on' : 'radio-button-off'}
+              label={lang.label}
+              onPress={() => setSetting('language', lang.code)}
+            />
+          ))}
         </Card>
 
         <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
