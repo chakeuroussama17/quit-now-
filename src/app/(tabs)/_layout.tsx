@@ -55,7 +55,12 @@ export default function TabsLayout() {
             borderTopColor: colors.hairline,
             paddingTop: 4,
           },
-          tabBarLabelStyle: { fontFamily: font.medium, fontSize: 10 },
+          // Six tabs plus the "+" leaves ~50dp per slot on a 360dp phone.
+          // Shrink the label and drop the item padding so nothing truncates,
+          // and refuse system font scaling here — it has nowhere to grow.
+          tabBarLabelStyle: { fontFamily: font.medium, fontSize: 9 },
+          tabBarItemStyle: { paddingHorizontal: 0 },
+          tabBarAllowFontScaling: false,
           sceneStyle: { backgroundColor: colors.bg },
         }}
       >
@@ -105,6 +110,15 @@ export default function TabsLayout() {
                 size={size}
                 color={color}
               />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="community"
+          options={{
+            title: t('tabs.community'),
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="people-outline" size={size} color={color} />
             ),
           }}
         />

@@ -20,6 +20,7 @@ export const en = {
   'tabs.stats': 'Stats',
   'tabs.sos': 'SOS',
   'tabs.room': 'Room',
+  'tabs.community': 'Community',
   'tabs.ranks': 'Ranks',
 
   // Intro slides
@@ -468,6 +469,45 @@ export const en = {
     'Give the money you’re saving a job. You’ll see progress toward it on your dashboard.',
   'goal.placeholder': 'e.g. New watch, trip, running shoes',
   'goal.save': 'Save goal',
+
+  // Community — public country rooms
+  'community.title': 'Community',
+  'community.postingAs': 'Posting as {name}',
+  'community.gateTitle': 'Join the community',
+  'community.gateSubtitle':
+    'Thousands of people are quitting right now. Pick a public name — the one on your profile stays private.',
+  'community.namePlaceholder': 'Choose a public name',
+  'community.nameHint': '3–20 characters. Everyone in the room sees this.',
+  'community.nameTaken': 'That name is taken. Try another.',
+  'community.nameInvalid': 'Use 3–20 letters, numbers, spaces, . _ or -',
+  'community.joinFailed': 'Could not join right now. Check your connection.',
+  'community.join': 'Enter the community',
+  'community.rulesTitle': 'House rules',
+  'community.rule1': 'Support people. No abuse, hate, or harassment.',
+  'community.rule2': 'No selling, spam, or links to buy nicotine.',
+  'community.rule3': 'This is not medical advice. In a crisis, call your local emergency number.',
+  'community.consent': 'By joining you agree to these rules. Breaking them can get you removed.',
+  'community.chooseRoom': 'Choose a room',
+  'community.chooseRoomHint':
+    'Every room is open to everyone. Pick who you want to talk to, not where you live.',
+  'community.searchCountry': 'Search countries',
+  'community.worldwide': 'Worldwide',
+  'community.noCountry': 'No country matches that.',
+  'community.placeholder': 'Type a message',
+  'community.send': 'Send',
+  'community.now': 'now',
+  'community.emptyTitle': 'Nobody has spoken in {room} yet.',
+  'community.emptyBody': 'Say hello — someone else is about to open this room.',
+  'community.notSent': 'Message not sent',
+  'community.tooFast': 'You’re sending messages too quickly. Wait a few seconds.',
+  'community.offline': 'You appear to be offline. Try again in a moment.',
+  'community.longPressHint': 'Long press for options',
+  'community.messageActions': 'Your message',
+  'community.delete': 'Delete',
+  'community.report': 'Report message',
+  'community.reported': 'Thank you',
+  'community.reportedBody': 'We’ll review this message. You can also block this person.',
+  'community.block': 'Block this person',
 } as const;
 
 export type TKey = keyof typeof en;

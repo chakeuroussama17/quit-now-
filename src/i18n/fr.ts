@@ -19,6 +19,7 @@ export const fr: Partial<Record<TKey, string>> = {
   'tabs.stats': 'Stats',
   'tabs.sos': 'SOS',
   'tabs.room': 'Refuge',
+  'tabs.community': 'Communauté',
   'tabs.ranks': 'Rangs',
 
   // Intro
@@ -475,4 +476,46 @@ export const fr: Partial<Record<TKey, string>> = {
     'Donnez un rôle à l’argent que vous économisez. Vous verrez la progression sur votre tableau de bord.',
   'goal.placeholder': 'ex. Nouvelle montre, voyage, chaussures de course',
   'goal.save': 'Enregistrer l’objectif',
+
+  // Community
+  'community.title': 'Communauté',
+  'community.postingAs': 'Vous publiez en tant que {name}',
+  'community.gateTitle': 'Rejoignez la communauté',
+  'community.gateSubtitle':
+    'Des milliers de personnes arrêtent en ce moment. Choisissez un nom public — celui de votre profil reste privé.',
+  'community.namePlaceholder': 'Choisissez un nom public',
+  'community.nameHint': '3 à 20 caractères. Tout le monde dans le salon le verra.',
+  'community.nameTaken': 'Ce nom est déjà pris. Essayez-en un autre.',
+  'community.nameInvalid': 'Utilisez 3 à 20 lettres, chiffres, espaces, . _ ou -',
+  'community.joinFailed': 'Impossible de vous connecter. Vérifiez votre connexion.',
+  'community.join': 'Entrer dans la communauté',
+  'community.rulesTitle': 'Règles du salon',
+  'community.rule1': 'Soutenez les autres. Aucune insulte, haine ou harcèlement.',
+  'community.rule2': 'Ni vente, ni spam, ni lien pour acheter de la nicotine.',
+  'community.rule3':
+    'Ceci n’est pas un avis médical. En cas d’urgence, appelez votre numéro d’urgence local.',
+  'community.consent':
+    'En entrant, vous acceptez ces règles. Les enfreindre peut entraîner votre exclusion.',
+  'community.chooseRoom': 'Choisir un salon',
+  'community.chooseRoomHint':
+    'Chaque salon est ouvert à tous. Choisissez à qui vous voulez parler, pas où vous habitez.',
+  'community.searchCountry': 'Rechercher un pays',
+  'community.worldwide': 'Monde entier',
+  'community.noCountry': 'Aucun pays ne correspond.',
+  'community.placeholder': 'Écrivez un message',
+  'community.send': 'Envoyer',
+  'community.now': 'à l’instant',
+  'community.emptyTitle': 'Personne n’a encore parlé dans {room}.',
+  'community.emptyBody': 'Dites bonjour — quelqu’un va ouvrir ce salon d’un instant à l’autre.',
+  'community.notSent': 'Message non envoyé',
+  'community.tooFast': 'Vous envoyez des messages trop vite. Attendez quelques secondes.',
+  'community.offline': 'Vous semblez hors ligne. Réessayez dans un instant.',
+  'community.longPressHint': 'Appui long pour les options',
+  'community.messageActions': 'Votre message',
+  'community.delete': 'Supprimer',
+  'community.report': 'Signaler le message',
+  'community.reported': 'Merci',
+  'community.reportedBody':
+    'Nous examinerons ce message. Vous pouvez aussi bloquer cette personne.',
+  'community.block': 'Bloquer cette personne',
 };

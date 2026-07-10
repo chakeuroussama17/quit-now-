@@ -19,6 +19,7 @@ export const ms: Partial<Record<TKey, string>> = {
   'tabs.stats': 'Statistik',
   'tabs.sos': 'SOS',
   'tabs.room': 'Bilik',
+  'tabs.community': 'Komuniti',
   'tabs.ranks': 'Pangkat',
 
   // Intro
@@ -474,4 +475,45 @@ export const ms: Partial<Record<TKey, string>> = {
     'Beri tugas kepada wang yang anda simpan. Anda akan nampak kemajuannya di papan pemuka.',
   'goal.placeholder': 'cth. Jam tangan baharu, percutian, kasut lari',
   'goal.save': 'Simpan matlamat',
+
+  // Community
+  'community.title': 'Komuniti',
+  'community.postingAs': 'Menghantar sebagai {name}',
+  'community.gateTitle': 'Sertai komuniti',
+  'community.gateSubtitle':
+    'Ribuan orang sedang berhenti sekarang. Pilih nama awam — nama pada profil anda kekal peribadi.',
+  'community.namePlaceholder': 'Pilih nama awam',
+  'community.nameHint': '3–20 aksara. Semua orang dalam bilik nampak nama ini.',
+  'community.nameTaken': 'Nama itu sudah diambil. Cuba yang lain.',
+  'community.nameInvalid': 'Guna 3–20 huruf, nombor, ruang, . _ atau -',
+  'community.joinFailed': 'Tidak dapat menyertai sekarang. Semak sambungan anda.',
+  'community.join': 'Masuk ke komuniti',
+  'community.rulesTitle': 'Peraturan',
+  'community.rule1': 'Sokong orang lain. Tiada penderaan, kebencian atau gangguan.',
+  'community.rule2': 'Tiada jualan, spam, atau pautan untuk membeli nikotin.',
+  'community.rule3':
+    'Ini bukan nasihat perubatan. Dalam kecemasan, hubungi nombor kecemasan tempatan anda.',
+  'community.consent':
+    'Dengan menyertai, anda bersetuju dengan peraturan ini. Melanggarnya boleh menyebabkan anda disingkirkan.',
+  'community.chooseRoom': 'Pilih bilik',
+  'community.chooseRoomHint':
+    'Setiap bilik terbuka kepada semua. Pilih dengan siapa anda mahu berbual, bukan tempat tinggal anda.',
+  'community.searchCountry': 'Cari negara',
+  'community.worldwide': 'Seluruh dunia',
+  'community.noCountry': 'Tiada negara yang sepadan.',
+  'community.placeholder': 'Taip mesej',
+  'community.send': 'Hantar',
+  'community.now': 'sekarang',
+  'community.emptyTitle': 'Belum ada sesiapa bercakap di {room}.',
+  'community.emptyBody': 'Ucap helo — seseorang akan membuka bilik ini sebentar lagi.',
+  'community.notSent': 'Mesej tidak dihantar',
+  'community.tooFast': 'Anda menghantar mesej terlalu pantas. Tunggu beberapa saat.',
+  'community.offline': 'Anda nampaknya di luar talian. Cuba lagi sebentar.',
+  'community.longPressHint': 'Tekan lama untuk pilihan',
+  'community.messageActions': 'Mesej anda',
+  'community.delete': 'Padam',
+  'community.report': 'Laporkan mesej',
+  'community.reported': 'Terima kasih',
+  'community.reportedBody': 'Kami akan menyemak mesej ini. Anda juga boleh sekat orang ini.',
+  'community.block': 'Sekat orang ini',
 };
