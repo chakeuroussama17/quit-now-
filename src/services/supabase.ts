@@ -10,10 +10,10 @@ import { createClient } from '@supabase/supabase-js';
  * Room conversations deliberately stay on-device, NOT here.
  */
 export const SUPABASE_URL =
-  process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://vhmwsqehtohioitevdwh.supabase.co';
+  process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://vrfkgykjivjvswlfzhkc.supabase.co';
 const SUPABASE_ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZobXdzcWVodG9oaW9pdGV2ZHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5NDc4MDQsImV4cCI6MjA5ODUyMzgwNH0.G60pKxzFGb1X-_cQARoT2XoaVJfttmsNaWAZ4TuDmsI';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZyZmtneWtqaXZqdnN3bGZ6aGtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjMzNTUsImV4cCI6MjA5OTE5OTM1NX0.10eKGJW-GDHyJ7uZNHZ5tqfRdrhNLul8yzsh9GtWmTc';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
