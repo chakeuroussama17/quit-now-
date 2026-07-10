@@ -20,6 +20,9 @@ export default function AuthScreen() {
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle);
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
   const signUpWithEmail = useAuthStore((s) => s.signUpWithEmail);
+  // A deep-link sign-in that failed dumps the user back here. Say why.
+  const authError = useAuthStore((s) => s.authError);
+  const clearAuthError = useAuthStore((s) => s.clearAuthError);
 
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -27,9 +30,12 @@ export default function AuthScreen() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
 
+  const banner = message ?? (authError ? { text: authError, error: true } : null);
+
   const google = async () => {
     setBusy(true);
     setMessage(null);
+    clearAuthError();
     const { error } = await signInWithGoogle();
     setBusy(false);
     if (error) {
@@ -48,6 +54,7 @@ export default function AuthScreen() {
     }
     setBusy(true);
     setMessage(null);
+    clearAuthError();
     if (mode === 'login') {
       const { error } = await signInWithEmail(email.trim(), password);
       setBusy(false);
@@ -125,13 +132,13 @@ export default function AuthScreen() {
             accessibilityLabel="Password"
           />
 
-          {message && (
+          {banner && (
             <AppText
               variant="caption"
-              color={message.error ? colors.danger : colors.accent}
+              color={banner.error ? colors.danger : colors.accent}
               style={styles.message}
             >
-              {message.text}
+              {banner.text}
             </AppText>
           )}
 

@@ -38,6 +38,9 @@ interface AuthState {
   hydrated: boolean;
   /** Premium entitlement — driven by the subscriptions table (Stripe webhook). */
   isPremium: boolean;
+  /** Why the last deep-link sign-in failed. Surfaced on the auth screen. */
+  authError: string | null;
+  clearAuthError: () => void;
   hydrate: () => Promise<void>;
   signInWithGoogle: () => Promise<{ error?: string }>;
   signInWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
@@ -49,39 +52,81 @@ interface AuthState {
   refreshPremium: () => Promise<void>;
 }
 
-/** Tokens arrive in the OAuth redirect URL fragment (implicit flow). */
-function tokensFromUrl(url: string): { accessToken: string; refreshToken: string } | null {
-  const fragment = url.includes('#') ? url.split('#')[1] : (url.split('?')[1] ?? '');
-  const params = new URLSearchParams(fragment);
-  const accessToken = params.get('access_token');
-  const refreshToken = params.get('refresh_token');
-  return accessToken && refreshToken ? { accessToken, refreshToken } : null;
+/**
+ * The provider may answer in the fragment (implicit flow) or the query string
+ * (PKCE, or an error bounce). Read both — they never both carry a session.
+ */
+function callbackParams(url: string): URLSearchParams {
+  const hash = url.includes('#') ? url.slice(url.indexOf('#') + 1) : '';
+  const query = url.includes('?') ? url.slice(url.indexOf('?') + 1).split('#')[0] : '';
+  return new URLSearchParams(hash || query);
 }
+
+/** Param names only — never log or display the tokens themselves. */
+function describeCallback(url: string): string {
+  const keys = [...callbackParams(url).keys()];
+  const path = url.split(/[?#]/)[0];
+  return keys.length ? `${path} [${keys.join(', ')}]` : `${path} (no parameters)`;
+}
+
+export type CallbackOutcome =
+  | { kind: 'session' }
+  | { kind: 'error'; message: string }
+  | { kind: 'none'; detail: string };
 
 /**
  * Turn an OAuth redirect (exhale://auth-callback#access_token=…) into a live
  * session. Writes the session into the store SYNCHRONOUSLY on completion:
  * onAuthStateChange only fires on a later tick, and landingRoute() reads the
  * store — without this it sees a null session and bounces back to /auth.
- * Returns false when the URL carried no tokens.
+ *
+ * Never fails silently: a provider error, or a callback carrying neither
+ * tokens nor a code, is reported so the auth screen can say what went wrong.
  */
-export async function absorbAuthTokens(url: string): Promise<boolean> {
-  const tokens = tokensFromUrl(url);
-  if (!tokens) return false;
-  const { data, error } = await supabase.auth.setSession({
-    access_token: tokens.accessToken,
-    refresh_token: tokens.refreshToken,
-  });
-  if (error || !data.session) return false;
-  useAuthStore.setState({ session: data.session });
-  await restoreProfileFromCloud();
-  return true;
+export async function absorbAuthTokens(url: string): Promise<CallbackOutcome> {
+  const params = callbackParams(url);
+
+  // The provider refused. This is the case that used to vanish without trace.
+  const providerError = params.get('error_description') ?? params.get('error');
+  if (providerError) return { kind: 'error', message: providerError.replace(/\+/g, ' ') };
+
+  const accessToken = params.get('access_token');
+  const refreshToken = params.get('refresh_token');
+  if (accessToken && refreshToken) {
+    const { data, error } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+    if (error) return { kind: 'error', message: error.message };
+    if (!data.session) return { kind: 'error', message: 'Supabase accepted the tokens but returned no session.' };
+    useAuthStore.setState({ session: data.session, authError: null });
+    await restoreProfileFromCloud();
+    return { kind: 'session' };
+  }
+
+  // Supabase answered with a PKCE code even though the client asked for the
+  // implicit flow. Exchange it rather than dropping the sign-in on the floor.
+  const code = params.get('code');
+  if (code) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) return { kind: 'error', message: error.message };
+    if (data.session) {
+      useAuthStore.setState({ session: data.session, authError: null });
+      await restoreProfileFromCloud();
+      return { kind: 'session' };
+    }
+  }
+
+  return { kind: 'none', detail: describeCallback(url) };
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   hydrated: false,
   isPremium: false,
+  authError: null,
+
+  clearAuthError: () => set({ authError: null }),
 
   hydrate: async () => {
     // Always mark hydrated — the router gates the app on it (see useProfileStore).
@@ -124,20 +169,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (error || !data.url) return { error: error?.message ?? 'Could not start Google sign-in' };
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-      if (result.type === 'success' && (await absorbAuthTokens(result.url))) return {};
+      let outcome: CallbackOutcome | null = null;
+      if (result.type === 'success') {
+        outcome = await absorbAuthTokens(result.url);
+        if (outcome.kind === 'session') return {};
+      }
 
       // Android hands the deep link to the app, which can dismiss the custom
       // tab before it reports success. The auth-callback screen may already
       // have absorbed the tokens — trust the session, not the browser.
       const { data: existing } = await supabase.auth.getSession();
       if (existing.session) {
-        set({ session: existing.session });
+        set({ session: existing.session, authError: null });
         await restoreProfileFromCloud();
         return {};
       }
-      return {
-        error: result.type === 'success' ? 'Google did not return a session' : 'Sign-in was cancelled',
-      };
+
+      if (outcome?.kind === 'error') return { error: outcome.message };
+      if (outcome?.kind === 'none') return { error: `Google returned no session — ${outcome.detail}` };
+      return { error: 'Sign-in was cancelled' };
     } catch (err) {
       return { error: String(err) };
     }

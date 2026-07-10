@@ -3,7 +3,7 @@ import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { absorbAuthTokens, landingRoute } from '@/state/useAuthStore';
+import { absorbAuthTokens, landingRoute, useAuthStore } from '@/state/useAuthStore';
 import { colors } from '@/theme';
 
 /** Never strand the user on a spinner if the deep link never materialises. */
@@ -33,9 +33,16 @@ export default function AuthCallbackScreen() {
         // Nothing yet: leave the timer running. This effect re-runs the moment
         // useURL() delivers the deep link.
         if (cancelled || !link) return;
-        await absorbAuthTokens(link);
-      } catch {
-        // Bad or missing tokens — landingRoute() sends us back to /auth.
+
+        const outcome = await absorbAuthTokens(link);
+        // Bouncing back to /auth with no explanation is how this bug hid.
+        if (outcome.kind === 'error') {
+          useAuthStore.setState({ authError: outcome.message });
+        } else if (outcome.kind === 'none') {
+          useAuthStore.setState({ authError: `Callback carried no session — ${outcome.detail}` });
+        }
+      } catch (err) {
+        useAuthStore.setState({ authError: String(err) });
       }
       if (cancelled) return;
       clearTimeout(timer);
