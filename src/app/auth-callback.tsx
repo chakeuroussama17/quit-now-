@@ -1,9 +1,13 @@
 import * as Linking from 'expo-linking';
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { supabase } from '@/services/supabase';
-import { landingRoute, restoreProfileFromCloud } from '@/state/useAuthStore';
+import { absorbAuthTokens, landingRoute } from '@/state/useAuthStore';
+import { colors } from '@/theme';
+
+/** Never strand the user on a spinner if the deep link never materialises. */
+const URL_TIMEOUT_MS = 5000;
 
 /**
  * Deep-link landing for OAuth/email flows (exhale://auth-callback#access_token=…).
@@ -15,28 +19,45 @@ export default function AuthCallbackScreen() {
   const [target, setTarget] = useState<ReturnType<typeof landingRoute> | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    // useURL() is null on the first render. Redirecting here would race the
+    // tokens and always land back on /auth, so wait for a link — but never
+    // longer than this, or a stray navigation strands the user on a spinner.
+    const timer = setTimeout(() => {
+      if (!cancelled) setTarget(landingRoute());
+    }, URL_TIMEOUT_MS);
+
     (async () => {
       try {
-        if (url) {
-          const fragment = url.includes('#') ? url.split('#')[1] : (url.split('?')[1] ?? '');
-          const params = new URLSearchParams(fragment);
-          const accessToken = params.get('access_token');
-          const refreshToken = params.get('refresh_token');
-          if (accessToken && refreshToken) {
-            await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
-            await restoreProfileFromCloud();
-          }
-        }
+        const link = url ?? (await Linking.getInitialURL());
+        // Nothing yet: leave the timer running. This effect re-runs the moment
+        // useURL() delivers the deep link.
+        if (cancelled || !link) return;
+        await absorbAuthTokens(link);
       } catch {
-        // No tokens or bad tokens — landingRoute() sends us to /auth.
+        // Bad or missing tokens — landingRoute() sends us back to /auth.
       }
+      if (cancelled) return;
+      clearTimeout(timer);
       setTarget(landingRoute());
     })();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [url]);
 
-  if (!target) return null;
+  if (!target) {
+    return (
+      <View style={styles.root}>
+        <ActivityIndicator color={colors.accent} />
+      </View>
+    );
+  }
   return <Redirect href={target} />;
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
+});

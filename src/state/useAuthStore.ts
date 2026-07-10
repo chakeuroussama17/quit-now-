@@ -58,6 +58,26 @@ function tokensFromUrl(url: string): { accessToken: string; refreshToken: string
   return accessToken && refreshToken ? { accessToken, refreshToken } : null;
 }
 
+/**
+ * Turn an OAuth redirect (exhale://auth-callback#access_token=…) into a live
+ * session. Writes the session into the store SYNCHRONOUSLY on completion:
+ * onAuthStateChange only fires on a later tick, and landingRoute() reads the
+ * store — without this it sees a null session and bounces back to /auth.
+ * Returns false when the URL carried no tokens.
+ */
+export async function absorbAuthTokens(url: string): Promise<boolean> {
+  const tokens = tokensFromUrl(url);
+  if (!tokens) return false;
+  const { data, error } = await supabase.auth.setSession({
+    access_token: tokens.accessToken,
+    refresh_token: tokens.refreshToken,
+  });
+  if (error || !data.session) return false;
+  useAuthStore.setState({ session: data.session });
+  await restoreProfileFromCloud();
+  return true;
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   hydrated: false,
@@ -104,19 +124,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (error || !data.url) return { error: error?.message ?? 'Could not start Google sign-in' };
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-      if (result.type !== 'success') return { error: 'Sign-in was cancelled' };
+      if (result.type === 'success' && (await absorbAuthTokens(result.url))) return {};
 
-      const tokens = tokensFromUrl(result.url);
-      if (!tokens) return { error: 'Google did not return a session' };
-
-      const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken,
-      });
-      if (sessionError) return { error: sessionError.message };
-      set({ session: sessionData.session });
-      await restoreProfileFromCloud();
-      return {};
+      // Android hands the deep link to the app, which can dismiss the custom
+      // tab before it reports success. The auth-callback screen may already
+      // have absorbed the tokens — trust the session, not the browser.
+      const { data: existing } = await supabase.auth.getSession();
+      if (existing.session) {
+        set({ session: existing.session });
+        await restoreProfileFromCloud();
+        return {};
+      }
+      return {
+        error: result.type === 'success' ? 'Google did not return a session' : 'Sign-in was cancelled',
+      };
     } catch (err) {
       return { error: String(err) };
     }
