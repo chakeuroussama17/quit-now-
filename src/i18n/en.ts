@@ -429,6 +429,9 @@ export const en = {
   'set.riskyCaption': '15 min before your personal danger hours',
   'set.milestones': 'Milestone celebrations',
   'set.milestonesCaption': 'When your body hits a recovery marker',
+  'set.support': 'Support',
+  'set.feedback': 'Send feedback',
+  'set.feedbackCaption': 'Report a bug, suggest an idea, or complain',
   'set.data': 'Data',
   'set.export': 'Export data (CSV)',
   'set.exportCaption': 'Smoke and craving logs via the share sheet',
@@ -508,6 +511,20 @@ export const en = {
   'community.reported': 'Thank you',
   'community.reportedBody': 'We’ll review this message. You can also block this person.',
   'community.block': 'Block this person',
+
+  // Feedback
+  'feedback.heading': 'What’s on your mind?',
+  'feedback.cat.bug': 'Bug',
+  'feedback.cat.idea': 'Idea',
+  'feedback.cat.complaint': 'Complaint',
+  'feedback.cat.other': 'Other',
+  'feedback.placeholder': 'Tell us what happened, or what would make this better…',
+  'feedback.attach':
+    'Attached: your app version, Android version and language. Nothing else — no logs, no Room conversations.',
+  'feedback.send': 'Send feedback',
+  'feedback.thanks': 'Thank you',
+  'feedback.thanksBody': 'A person reads every message. If you reported a bug, we may reply by email.',
+  'feedback.failed': 'Could not send. Check your connection and try again.',
 } as const;
 
 export type TKey = keyof typeof en;

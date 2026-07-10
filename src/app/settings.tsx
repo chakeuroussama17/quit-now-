@@ -11,6 +11,7 @@ import { wipeAllData, wipeRoomData } from '@/db/database';
 import { seedDemoData } from '@/db/seed';
 import { pickAvatar } from '@/features/settings/avatar';
 import { EditProfileSheet } from '@/features/settings/EditProfileSheet';
+import { FeedbackSheet } from '@/features/settings/FeedbackSheet';
 import { RewardGoalSheet } from '@/features/settings/RewardGoalSheet';
 import { LANGUAGES, useT, type TKey } from '@/i18n';
 import { exportDataCsv } from '@/services/exportService';
@@ -122,6 +123,7 @@ export default function SettingsScreen() {
   const [seeding, setSeeding] = useState(false);
   const [goalOpen, setGoalOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const toggleNotifications = async (value: boolean) => {
     if (value) {
@@ -286,6 +288,18 @@ export default function SettingsScreen() {
         </Card>
 
         <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
+          {t('set.support')}
+        </AppText>
+        <Card style={styles.group}>
+          <SettingsRow
+            icon="mail-outline"
+            label={t('set.feedback')}
+            caption={t('set.feedbackCaption')}
+            onPress={() => setFeedbackOpen(true)}
+          />
+        </Card>
+
+        <AppText variant="micro" color={colors.textMuted} style={styles.sectionLabel}>
           {t('set.data')}
         </AppText>
         <Card style={styles.group}>
@@ -361,6 +375,7 @@ export default function SettingsScreen() {
         currency={profile?.currency ?? 'RM'}
       />
       <EditProfileSheet visible={editOpen} onClose={() => setEditOpen(false)} />
+      <FeedbackSheet visible={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
     </Screen>
   );
 }

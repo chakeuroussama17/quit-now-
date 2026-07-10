@@ -436,6 +436,9 @@ export const fr: Partial<Record<TKey, string>> = {
   'set.riskyCaption': '15 min avant vos heures dangereuses personnelles',
   'set.milestones': 'Célébration des étapes',
   'set.milestonesCaption': 'Quand votre corps atteint un jalon de récupération',
+  'set.support': 'Assistance',
+  'set.feedback': 'Envoyer un retour',
+  'set.feedbackCaption': 'Signaler un bug, proposer une idée ou déposer une plainte',
   'set.data': 'Données',
   'set.export': 'Exporter les données (CSV)',
   'set.exportCaption': 'Journaux de cigarettes et d’envies via le partage',
@@ -518,4 +521,19 @@ export const fr: Partial<Record<TKey, string>> = {
   'community.reportedBody':
     'Nous examinerons ce message. Vous pouvez aussi bloquer cette personne.',
   'community.block': 'Bloquer cette personne',
+
+  // Feedback
+  'feedback.heading': 'Qu’avez-vous en tête ?',
+  'feedback.cat.bug': 'Bug',
+  'feedback.cat.idea': 'Idée',
+  'feedback.cat.complaint': 'Plainte',
+  'feedback.cat.other': 'Autre',
+  'feedback.placeholder': 'Dites-nous ce qui s’est passé, ou ce qui rendrait l’app meilleure…',
+  'feedback.attach':
+    'Joint : la version de l’app, votre version d’Android et votre langue. Rien d’autre — aucun journal, aucune conversation du Refuge.',
+  'feedback.send': 'Envoyer',
+  'feedback.thanks': 'Merci',
+  'feedback.thanksBody':
+    'Une personne lit chaque message. Si vous avez signalé un bug, nous pourrons répondre par e-mail.',
+  'feedback.failed': 'Envoi impossible. Vérifiez votre connexion et réessayez.',
 };

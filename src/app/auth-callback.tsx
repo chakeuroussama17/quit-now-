@@ -1,77 +1,49 @@
-import * as Linking from 'expo-linking';
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { absorbAuthTokens, landingRoute, useAuthStore } from '@/state/useAuthStore';
+import { landingRoute, useAuthStore } from '@/state/useAuthStore';
 import { colors } from '@/theme';
 
-/** Never strand the user on a spinner if the deep link never materialises. */
-const URL_TIMEOUT_MS = 5000;
+/** Never strand the user on a spinner if the sign-in never completes. */
+const TIMEOUT_MS = 8000;
 
 /**
- * Deep-link landing for OAuth/email flows (exhale://auth-callback#access_token=…).
- * Absorbs the tokens into a session, restores the cloud profile for returning
- * users, then routes to wherever the guards say the user belongs.
+ * Deep-link landing for OAuth flows (exhale://auth-callback#access_token=…).
+ *
+ * It does NOT read the URL: the `url` event that routed us here fires before
+ * this screen mounts, so a listener here would always miss it. useAuthStore
+ * binds that listener at startup and absorbs the tokens; this screen just
+ * waits for the session to appear, then hands over to the guards.
  */
 export default function AuthCallbackScreen() {
-  const url = Linking.useURL();
-  const [target, setTarget] = useState<ReturnType<typeof landingRoute> | null>(null);
+  const session = useAuthStore((s) => s.session);
+  const authError = useAuthStore((s) => s.authError);
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    // useURL() is null on the first render. Redirecting here would race the
-    // tokens and always land back on /auth, so wait for a link — but never
-    // longer than this, or a stray navigation strands the user on a spinner.
     const timer = setTimeout(() => {
-      if (cancelled) return;
-      // Reaching this screen with no deep link at all means the redirect never
-      // made it back from the browser. Say so rather than bouncing in silence.
+      // Nothing absorbed the link, so nothing set an error. Say that plainly
+      // instead of bouncing back to the login screen in silence.
       useAuthStore.setState({
-        authError: `No sign-in link reached the app within ${URL_TIMEOUT_MS / 1000}s.`,
+        authError: `No sign-in link reached the app within ${TIMEOUT_MS / 1000}s.`,
       });
-      setTarget(landingRoute());
-    }, URL_TIMEOUT_MS);
+      setTimedOut(true);
+    }, TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
-    (async () => {
-      try {
-        const link = url ?? (await Linking.getInitialURL());
-        // Nothing yet: leave the timer running. This effect re-runs the moment
-        // useURL() delivers the deep link.
-        if (cancelled || !link) return;
+  // The sign-in landed: the guards decide where this user belongs.
+  if (session) return <Redirect href={landingRoute()} />;
+  // It failed, and the auth screen will say why.
+  if (authError) return <Redirect href="/auth" />;
+  if (timedOut) return <Redirect href={landingRoute()} />;
 
-        const outcome = await absorbAuthTokens(link);
-        // Also goes to logcat: `adb logcat -s ReactNativeJS`. Carries param
-        // names and provider errors only, never token values.
-        if (outcome.kind !== 'session') console.warn('[auth-callback]', JSON.stringify(outcome));
-        // Bouncing back to /auth with no explanation is how this bug hid.
-        if (outcome.kind === 'error') {
-          useAuthStore.setState({ authError: outcome.message });
-        } else if (outcome.kind === 'none') {
-          useAuthStore.setState({ authError: `Callback carried no session — ${outcome.detail}` });
-        }
-      } catch (err) {
-        useAuthStore.setState({ authError: String(err) });
-      }
-      if (cancelled) return;
-      clearTimeout(timer);
-      setTarget(landingRoute());
-    })();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [url]);
-
-  if (!target) {
-    return (
-      <View style={styles.root}>
-        <ActivityIndicator color={colors.accent} />
-      </View>
-    );
-  }
-  return <Redirect href={target} />;
+  return (
+    <View style={styles.root}>
+      <ActivityIndicator color={colors.accent} />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

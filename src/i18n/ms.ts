@@ -435,6 +435,9 @@ export const ms: Partial<Record<TKey, string>> = {
   'set.riskyCaption': '15 minit sebelum waktu bahaya peribadi anda',
   'set.milestones': 'Raikan pencapaian',
   'set.milestonesCaption': 'Apabila tubuh anda mencapai penanda pemulihan',
+  'set.support': 'Sokongan',
+  'set.feedback': 'Hantar maklum balas',
+  'set.feedbackCaption': 'Laporkan pepijat, cadangkan idea, atau buat aduan',
   'set.data': 'Data',
   'set.export': 'Eksport data (CSV)',
   'set.exportCaption': 'Log rokok dan keinginan melalui helaian kongsi',
@@ -516,4 +519,19 @@ export const ms: Partial<Record<TKey, string>> = {
   'community.reported': 'Terima kasih',
   'community.reportedBody': 'Kami akan menyemak mesej ini. Anda juga boleh sekat orang ini.',
   'community.block': 'Sekat orang ini',
+
+  // Feedback
+  'feedback.heading': 'Apa yang anda fikirkan?',
+  'feedback.cat.bug': 'Pepijat',
+  'feedback.cat.idea': 'Idea',
+  'feedback.cat.complaint': 'Aduan',
+  'feedback.cat.other': 'Lain-lain',
+  'feedback.placeholder': 'Beritahu kami apa yang berlaku, atau apa yang boleh diperbaiki…',
+  'feedback.attach':
+    'Disertakan: versi aplikasi, versi Android dan bahasa anda. Tiada yang lain — tiada log, tiada perbualan Bilik.',
+  'feedback.send': 'Hantar maklum balas',
+  'feedback.thanks': 'Terima kasih',
+  'feedback.thanksBody':
+    'Setiap mesej dibaca oleh manusia. Jika anda melaporkan pepijat, kami mungkin membalas melalui e-mel.',
+  'feedback.failed': 'Tidak dapat dihantar. Semak sambungan anda dan cuba lagi.',
 };

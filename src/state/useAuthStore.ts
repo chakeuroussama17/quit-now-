@@ -20,6 +20,39 @@ import type { UserProfile } from '@/types/models';
 import { baselinePerDay } from '@/utils/baseline';
 
 let premiumListenerBound = false;
+let deepLinkListenerBound = false;
+
+/**
+ * Absorb an OAuth redirect the moment it lands, from anywhere in the app.
+ *
+ * This CANNOT live in the auth-callback screen: the `url` event is what routes
+ * us there, so by the time the screen mounts and subscribes, the event has
+ * already fired and is gone. Bind at startup instead, before any sign-in can
+ * begin, and the tokens are never missed.
+ */
+async function consumeAuthDeepLink(url: string): Promise<void> {
+  if (!url.includes('auth-callback')) return;
+  const outcome = await absorbAuthTokens(url);
+  if (outcome.kind === 'session') return;
+  // Visible in `adb logcat -s ReactNativeJS`. Parameter names only.
+  console.warn('[auth deep link]', JSON.stringify(outcome));
+  useAuthStore.setState({
+    authError:
+      outcome.kind === 'error'
+        ? outcome.message
+        : `Callback carried no session — ${outcome.detail}`,
+  });
+}
+
+function bindDeepLinkAuth(): void {
+  if (deepLinkListenerBound) return;
+  deepLinkListenerBound = true;
+  Linking.addEventListener('url', ({ url }) => void consumeAuthDeepLink(url));
+  // Cold start straight from the link (app was killed).
+  Linking.getInitialURL().then((url) => {
+    if (url) void consumeAuthDeepLink(url);
+  });
+}
 
 /** Bind the RevenueCat entitlement listener once, after configure() has run. */
 function bindPremiumListener(set: (partial: Partial<AuthState>) => void): void {
@@ -129,6 +162,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   clearAuthError: () => set({ authError: null }),
 
   hydrate: async () => {
+    // Before anything else: a returning OAuth redirect must never arrive
+    // while nobody is listening.
+    bindDeepLinkAuth();
     // Always mark hydrated — the router gates the app on it (see useProfileStore).
     try {
       // Last known entitlement first, so premium users aren't locked out offline.

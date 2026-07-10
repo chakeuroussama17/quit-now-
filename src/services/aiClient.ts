@@ -21,6 +21,11 @@ export function aiConfigured(): boolean {
   return PROXY_URL.length > 0;
 }
 
+/** The same deployment serves /api/chat and /api/feedback. '' when disabled. */
+export function proxyBaseUrl(): string {
+  return PROXY_URL;
+}
+
 export class AiUnavailableError extends Error {
   constructor(message: string) {
     super(message);

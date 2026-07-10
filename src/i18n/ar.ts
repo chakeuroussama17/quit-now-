@@ -425,6 +425,9 @@ export const ar: Partial<Record<TKey, string>> = {
   'set.riskyCaption': 'قبل ١٥ دقيقة من ساعاتك الخطرة',
   'set.milestones': 'الاحتفال بالمراحل',
   'set.milestonesCaption': 'عندما يبلغ جسمك علامة تعافٍ',
+  'set.support': 'الدعم',
+  'set.feedback': 'أرسل ملاحظاتك',
+  'set.feedbackCaption': 'أبلغ عن خلل، اقترح فكرة، أو قدّم شكوى',
   'set.data': 'البيانات',
   'set.export': 'تصدير البيانات (CSV)',
   'set.exportCaption': 'سجلات السجائر والرغبات عبر المشاركة',
@@ -500,4 +503,18 @@ export const ar: Partial<Record<TKey, string>> = {
   'community.reported': 'شكرًا لك',
   'community.reportedBody': 'سنراجع هذه الرسالة. يمكنك أيضًا حظر هذا الشخص.',
   'community.block': 'حظر هذا الشخص',
+
+  // Feedback
+  'feedback.heading': 'ما الذي يشغل بالك؟',
+  'feedback.cat.bug': 'خلل',
+  'feedback.cat.idea': 'فكرة',
+  'feedback.cat.complaint': 'شكوى',
+  'feedback.cat.other': 'أخرى',
+  'feedback.placeholder': 'أخبرنا بما حدث، أو بما قد يجعل التطبيق أفضل…',
+  'feedback.attach':
+    'المرفق: إصدار التطبيق وإصدار أندرويد ولغتك. لا شيء غير ذلك — لا سجلات ولا محادثات الغرفة.',
+  'feedback.send': 'أرسل الملاحظات',
+  'feedback.thanks': 'شكرًا لك',
+  'feedback.thanksBody': 'يقرأ إنسان كل رسالة. إن أبلغت عن خلل، فقد نرد عليك بالبريد الإلكتروني.',
+  'feedback.failed': 'تعذّر الإرسال. تحقق من اتصالك وحاول مجددًا.',
 };
