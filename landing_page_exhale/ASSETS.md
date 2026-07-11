@@ -20,7 +20,30 @@ The Google Play badge must be the **official** asset (don't AI-generate it).
 
 ---
 
+## 0 — `lungs.png`  ★ NEW (Lungs spotlight section)
+**Best: a real screenshot.** Open the Home tab on a cold-turkey profile a few
+days in, so the lungs are partly filled, and screenshot it. AI prompt otherwise
+(after style block):
+> the Home screen of a quit-smoking app centred on a pair of anatomical lungs
+> drawn in thin outline, filled about 40% from the bottom with luminous
+> mint-green liquid that has a gently waving surface and a soft glow. Below the
+> lungs: "38% lung recovery" in teal, then a large live counter "3d 14h 22m"
+> labelled "smoke-free", and a small teal sparkline card. Bottom tab bar with a
+> raised teal "+" in the middle.
+
+## 0b — `community.png`  ★ NEW (Community spotlight section)
+**Best: a real screenshot.** Open the Community tab in a room with a few
+messages. AI prompt otherwise (after style block):
+> a country chat room screen titled "Community", caption "Posting as
+> Nightshift", and a small pill button "🇲🇾 Malaysia ▾" in the top corner. Chat
+> bubbles with teal nicknames above each message ("Aiman21: day 4, the coffee
+> craving is the worst one", "Nur_F: day 12 here — it fades, hold on") and one
+> teal bubble on the right ("thanks, needed that"). A message input bar at the
+> bottom with a round teal send arrow. Dark, calm, supportive.
+
 ## 1 — `home.png`  (hero + How-it-works)
+**⚠ Re-capture suggested:** Home now opens on the lungs hero, not the plain
+streak counter — a fresh screenshot keeps the page honest.
 **Prompt (after style block):**
 > the Home screen of a quit-smoking app: a top greeting "Evening, Sam", a large
 > centered live counter "9 days" labelled "Smoke-free streak", a small teal

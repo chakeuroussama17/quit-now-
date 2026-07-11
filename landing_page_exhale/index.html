@@ -15,6 +15,10 @@
 
   <link rel="icon" type="image/png" href="pictures/favicon.png" />
 
+  <!-- Early stub: <img onerror="placeholder(this)"> can fire before main.js
+       loads (a missing asset fails fast). Queue those; main.js drains them. -->
+  <script>function placeholder(img){(window.__phQueue=window.__phQueue||[]).push(img);}</script>
+
   <!-- Fonts (same family as the app) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -81,13 +85,13 @@
     <div class="relative z-10 mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-12 items-center w-full">
       <!-- Left: copy -->
       <div>
-        <span class="chip" data-i18n="hero.chip">🫁 Your calmest path to quitting</span>
+        <span class="chip" data-i18n="hero.chip"> Your calmest path to quitting</span>
         <h1 class="mt-5 font-extrabold leading-[0.98] tracking-tight text-5xl sm:text-6xl xl:text-7xl">
           <span data-i18n="hero.title1">Quit smoking,</span><br>
           <span class="gradient-text" data-i18n="hero.title2">one breath at a time.</span>
         </h1>
         <p class="mt-6 text-white/75 text-lg max-w-md" data-i18n="hero.sub">
-          Track your smoke-free streak, understand the triggers behind every craving, and get an AI coach for the moments that decide everything. Calm, honest, and always in your pocket.
+          Watch your lungs fill back up with life, understand the triggers behind every craving, and never face a hard moment alone — an AI coach and a worldwide community, calm and honest, in your pocket.
         </p>
         <div class="mt-8 flex flex-wrap gap-4 items-center">
           <a href="#get" class="btn-solid px-7 py-3.5 rounded-full font-bold" data-i18n="hero.cta1">Get it on Android</a>
@@ -145,6 +149,32 @@
         <div class="tl-item" data-reveal>
           <div class="tl-time gradient-text">1<span class="tl-unit" data-i18n="tl.yr">yr</span></div>
           <div class="tl-label" data-i18n="tl.t5">Your risk of heart disease is cut in half</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ LUNGS (spotlight — the app's centerpiece) ══════════ -->
+  <section id="lungs" class="relative py-28">
+    <div class="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-14 items-center">
+      <!-- copy -->
+      <div data-reveal>
+        <span class="chip" data-i18n="lu.chip">New · Your lungs, live</span>
+        <h2 class="mt-4 font-extrabold tracking-tight text-4xl sm:text-5xl" data-i18n="lu.title">Watch your lungs <span class="gradient-text">come back to life</span>.</h2>
+        <p class="mt-5 text-white/70 text-lg max-w-md" data-i18n="lu.sub">The heart of Exhale: a pair of lungs that fill with clean, glowing green as you heal — a little more every smoke-free hour, full at 30 days. Slip, and you'll see them dip. Honest, never punishing.</p>
+        <ul class="mt-7 space-y-3 max-w-md">
+          <li class="check" data-i18n="lu.p1">Fills a little every hour you stay smoke-free — full at day 30</li>
+          <li class="check" data-i18n="lu.p2">Quitting gradually? They recover as you cut down — and dip when you slip</li>
+          <li class="check" data-i18n="lu.p3">One glance tells you how you're doing — no charts to decode</li>
+        </ul>
+      </div>
+      <!-- phone -->
+      <div class="flex justify-center lg:justify-end" data-reveal>
+        <div class="phone tilt" data-tilt>
+          <img class="ph phone-screen" src="pictures/lungs.png" alt="Lungs filling with green as you heal"
+               data-ratio="9/19.5"
+               data-ph="SCREENSHOT — lungs.png (Home: the lungs half-filled with glowing green liquid, % recovery + live counter below)"
+               onerror="placeholder(this)">
         </div>
       </div>
     </div>
@@ -288,6 +318,32 @@
     </div>
   </section>
 
+  <!-- ══════════ COMMUNITY (spotlight with screenshot) ══════════ -->
+  <section id="community" class="relative py-28">
+    <div class="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-14 items-center">
+      <!-- copy -->
+      <div data-reveal>
+        <span class="chip" data-i18n="cm.chip">New · Community</span>
+        <h2 class="mt-4 font-extrabold tracking-tight text-4xl sm:text-5xl" data-i18n="cm.title">You're not quitting <span class="gradient-text">alone</span>.</h2>
+        <p class="mt-5 text-white/70 text-lg max-w-md" data-i18n="cm.sub">Open a room — your country or the whole world — and talk with people who are quitting right now. Malaysia, France, anywhere: every room is open to everyone.</p>
+        <ul class="mt-7 space-y-3 max-w-md">
+          <li class="check" data-i18n="cm.p1">68 country rooms plus a worldwide room — switch any time</li>
+          <li class="check" data-i18n="cm.p2">You pick a public nickname — your real name stays private</li>
+          <li class="check" data-i18n="cm.p3">Free for every user, with block &amp; report built in</li>
+        </ul>
+      </div>
+      <!-- phone -->
+      <div class="flex justify-center lg:justify-end" data-reveal>
+        <div class="phone tilt" data-tilt>
+          <img class="ph phone-screen" src="pictures/community.png" alt="Community country chat"
+               data-ratio="9/19.5"
+               data-ph="SCREENSHOT — community.png (Community tab: country picker pill 🇲🇾, chat bubbles with nicknames, message input)"
+               onerror="placeholder(this)">
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ══════════ PRICING ══════════ -->
   <section id="pricing" class="relative py-28">
     <div class="mx-auto max-w-5xl px-6">
@@ -307,6 +363,7 @@
             <li class="check" data-i18n="pr.f2">Fast logging, stats &amp; trigger heatmap</li>
             <li class="check" data-i18n="pr.f3">Health milestones &amp; ranks</li>
             <li class="check" data-i18n="pr.f4">Daily coach line &amp; weekly insight</li>
+            <li class="check" data-i18n="pr.f5">Community — chat with quitters worldwide</li>
           </ul>
         </div>
         <!-- Premium -->
@@ -314,6 +371,7 @@
           <div class="price-tag" data-i18n="pr.popular">Most popular</div>
           <h3 class="price-name" data-i18n="pr.proName">Premium</h3>
           <div class="price-amount">$3.99<span class="price-per" data-i18n="pr.perMonth">/month</span></div>
+          <p class="mt-1 text-sm font-semibold text-teal" data-i18n="pr.yearly">or $35.99/year — save 25%</p>
           <p class="price-note" data-i18n="pr.proNote">For the moments that decide everything.</p>
           <ul class="price-list">
             <li class="check" data-i18n="pr.p1">Everything in Free</li>
@@ -351,11 +409,15 @@
         </details>
         <details class="faq" data-reveal>
           <summary data-i18n="fq.q4">What does it cost?</summary>
-          <p data-i18n="fq.a4">The core app is free forever. Premium ($3.99/month) unlocks the Craving SOS toolkit, the live AI coach and The Room. Cancel anytime.</p>
+          <p data-i18n="fq.a4">The core app — including Community — is free forever. Premium unlocks the Craving SOS toolkit, the live AI coach and The Room: $3.99/month, or $35.99/year (25% off). Cancel anytime.</p>
         </details>
         <details class="faq" data-reveal>
           <summary data-i18n="fq.q5">Does it work for vaping too?</summary>
           <p data-i18n="fq.a5">Yes — cigarettes, vaping, rolled tobacco and shisha. The stats and savings adapt to what you use.</p>
+        </details>
+        <details class="faq" data-reveal>
+          <summary data-i18n="fq.q6">Is there a community?</summary>
+          <p data-i18n="fq.a6">Yes — country chat rooms (plus a worldwide one) where you talk with other people quitting right now, under a nickname you choose. It's free for everyone, and every room has block and report built in.</p>
         </details>
       </div>
     </div>

@@ -23,6 +23,9 @@ function placeholder(img) {
 }
 window.placeholder = placeholder;
 
+// Images whose onerror fired before this file loaded (queued by the head stub),
+// plus any that failed without firing the handler at all.
+(window.__phQueue || []).forEach((img) => img.isConnected && placeholder(img));
 document.querySelectorAll('img.ph').forEach((img) => {
   if (img.complete && img.naturalWidth === 0) placeholder(img);
 });
