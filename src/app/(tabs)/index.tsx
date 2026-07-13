@@ -8,6 +8,7 @@ import { CoachCard } from '@/features/dashboard/CoachCard';
 import { LungsHero } from '@/features/dashboard/LungsHero';
 import { MilestoneRow } from '@/features/dashboard/MilestoneRow';
 import { OverallProgress } from '@/features/dashboard/OverallProgress';
+import { RewardGoalCard } from '@/features/dashboard/RewardGoalCard';
 import { StreakHero } from '@/features/dashboard/StreakHero';
 import { useEnsureReductionPlan } from '@/features/dashboard/useEnsureReductionPlan';
 import { useProgress } from '@/features/dashboard/useProgress';
@@ -62,6 +63,10 @@ function HomeContent() {
         <View style={styles.section}>
           <OverallProgress profile={profile} progress={progress} />
         </View>
+
+        {/* Standing reminder of what the savings are FOR. Renders nothing
+            until a goal is set, so it carries its own top margin. */}
+        <RewardGoalCard profile={profile} progress={progress} />
 
         <View style={styles.section}>
           <MilestoneRow profile={profile} />

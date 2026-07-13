@@ -27,6 +27,7 @@ export default function AuthScreen() {
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
 
@@ -50,6 +51,13 @@ export default function AuthScreen() {
   const submitEmail = async () => {
     if (!email.trim() || password.length < 6) {
       setMessage({ text: t('auth.invalid'), error: true });
+      return;
+    }
+    // Registration is a real account creation: the password must be typed
+    // twice. After sign-up the guards route straight into onboarding (name
+    // and the follow-up questions).
+    if (mode === 'register' && confirm !== password) {
+      setMessage({ text: t('auth.passwordMismatch'), error: true });
       return;
     }
     setBusy(true);
@@ -131,6 +139,17 @@ export default function AuthScreen() {
             style={styles.field}
             accessibilityLabel="Password"
           />
+          {mode === 'register' && (
+            <AppTextInput
+              placeholder={t('auth.confirmPassword')}
+              value={confirm}
+              onChangeText={setConfirm}
+              secureTextEntry
+              autoComplete="new-password"
+              style={styles.field}
+              accessibilityLabel={t('auth.confirmPassword')}
+            />
+          )}
 
           {banner && (
             <AppText
@@ -151,6 +170,7 @@ export default function AuthScreen() {
           <Pressable
             onPress={() => {
               setMode(mode === 'login' ? 'register' : 'login');
+              setConfirm('');
               setMessage(null);
             }}
             accessibilityRole="button"

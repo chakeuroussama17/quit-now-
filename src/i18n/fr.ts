@@ -42,6 +42,8 @@ export const fr: Partial<Record<TKey, string>> = {
   'auth.orEmail': 'ou par e-mail',
   'auth.email': 'E-mail',
   'auth.password': 'Mot de passe (min 6 caractères)',
+  'auth.confirmPassword': 'Confirmez le mot de passe',
+  'auth.passwordMismatch': 'Les mots de passe ne correspondent pas.',
   'auth.login': 'Se connecter',
   'auth.register': 'S’inscrire',
   'auth.newHere': 'Nouveau ici ? ',
@@ -201,6 +203,8 @@ export const fr: Partial<Record<TKey, string>> = {
   'home.unitsAvoided': 'unités évitées',
   'home.savedLabel': 'économisés',
   'home.wonBack': 'regagnés',
+  'home.goalProgress': '{saved} sur {total} économisés à ce jour',
+  'home.goalReached': 'Objectif atteint — votre {name} est payé. Profitez-en.',
 
   // Welcome offer
   'offer.spendLabel': 'Vous dépensez actuellement',
@@ -420,7 +424,7 @@ export const fr: Partial<Record<TKey, string>> = {
   'set.photoChange': 'Changer votre photo',
   'set.photoPick': 'Choisir une photo dans la galerie',
   'set.editProfile': 'Modifier profil & coûts',
-  'set.editProfileCaption': 'Nom, consommation de base, prix',
+  'set.editProfileCaption': 'Photo, nom, mot de passe, consommation & prix',
   'set.reward': 'Objectif récompense',
   'set.rewardFor': 'Économies pour : {goal}',
   'set.rewardSet': 'Définissez à quoi servent vos économies',
@@ -471,8 +475,13 @@ export const fr: Partial<Record<TKey, string>> = {
   'notif.milestoneTitle': 'Étape : {label}',
 
   // Sheets
-  'edit.title': 'Profil & coûts',
+  'edit.title': 'Modifier le profil',
   'edit.name': 'Nom',
+  'edit.photoHint': 'Touchez pour changer votre photo',
+  'edit.newPassword': 'Nouveau mot de passe',
+  'edit.passwordKeep': 'Laissez vide pour garder l’actuel',
+  'edit.passwordShort': 'Le nouveau mot de passe doit faire au moins 6 caractères.',
+  'edit.passwordFailed': 'Impossible de mettre à jour le mot de passe. Réessayez dans un instant.',
   'edit.baseline': 'Cigarettes par jour (base)',
   'goal.title': 'Objectif récompense',
   'goal.subtitle':

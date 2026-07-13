@@ -42,6 +42,8 @@ export const en = {
   'auth.orEmail': 'or with email',
   'auth.email': 'Email',
   'auth.password': 'Password (min 6 characters)',
+  'auth.confirmPassword': 'Confirm password',
+  'auth.passwordMismatch': 'Passwords don’t match.',
   'auth.login': 'Log in',
   'auth.register': 'Register',
   'auth.newHere': 'New here? ',
@@ -198,6 +200,8 @@ export const en = {
   'home.unitsAvoided': 'units avoided',
   'home.savedLabel': 'saved',
   'home.wonBack': 'won back',
+  'home.goalProgress': '{saved} of {total} saved so far',
+  'home.goalReached': 'Fully saved — your {name} is paid for. Enjoy it.',
 
   // Welcome offer (after onboarding)
   'offer.spendLabel': 'You currently spend',
@@ -413,7 +417,7 @@ export const en = {
   'set.photoChange': 'Change your photo',
   'set.photoPick': 'Pick a photo from your library',
   'set.editProfile': 'Edit profile & costs',
-  'set.editProfileCaption': 'Name, baseline consumption, prices',
+  'set.editProfileCaption': 'Photo, name, password, consumption & prices',
   'set.reward': 'Reward goal',
   'set.rewardFor': 'Saving for: {goal}',
   'set.rewardSet': 'Set what your saved money is for',
@@ -464,8 +468,13 @@ export const en = {
   'notif.milestoneTitle': 'Milestone: {label}',
 
   // Edit profile / reward sheets
-  'edit.title': 'Profile & costs',
+  'edit.title': 'Edit profile',
   'edit.name': 'Name',
+  'edit.photoHint': 'Tap to change your photo',
+  'edit.newPassword': 'New password',
+  'edit.passwordKeep': 'Leave empty to keep your current one',
+  'edit.passwordShort': 'The new password needs at least 6 characters.',
+  'edit.passwordFailed': 'Could not update the password. Try again in a moment.',
   'edit.baseline': 'Baseline sticks per day',
   'goal.title': 'Reward goal',
   'goal.subtitle':

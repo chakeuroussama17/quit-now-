@@ -44,6 +44,8 @@ export const ar: Partial<Record<TKey, string>> = {
   'auth.orEmail': 'أو عبر البريد الإلكتروني',
   'auth.email': 'البريد الإلكتروني',
   'auth.password': 'كلمة المرور (٦ أحرف على الأقل)',
+  'auth.confirmPassword': 'تأكيد كلمة المرور',
+  'auth.passwordMismatch': 'كلمتا المرور غير متطابقتين.',
   'auth.login': 'تسجيل الدخول',
   'auth.register': 'إنشاء حساب',
   'auth.newHere': 'جديد هنا؟ ',
@@ -197,6 +199,8 @@ export const ar: Partial<Record<TKey, string>> = {
   'home.unitsAvoided': 'وحدات تُجُنِّبت',
   'home.savedLabel': 'موفَّرة',
   'home.wonBack': 'استُعيدت',
+  'home.goalProgress': 'وفّرت {saved} من {total} حتى الآن',
+  'home.goalReached': 'اكتمل التوفير — {name} أصبح مدفوع الثمن. استمتع به.',
 
   // Welcome offer
   'offer.spendLabel': 'أنت تنفق حاليًا',
@@ -409,7 +413,7 @@ export const ar: Partial<Record<TKey, string>> = {
   'set.photoChange': 'غيّر صورتك',
   'set.photoPick': 'اختر صورة من المعرض',
   'set.editProfile': 'تعديل الملف والتكاليف',
-  'set.editProfileCaption': 'الاسم، الاستهلاك الأساسي، الأسعار',
+  'set.editProfileCaption': 'الصورة، الاسم، كلمة المرور، الاستهلاك والأسعار',
   'set.reward': 'هدف المكافأة',
   'set.rewardFor': 'تدّخر من أجل: {goal}',
   'set.rewardSet': 'حدد الغاية من مالك الموفَّر',
@@ -458,8 +462,13 @@ export const ar: Partial<Record<TKey, string>> = {
   'notif.milestoneTitle': 'مرحلة: {label}',
 
   // Sheets
-  'edit.title': 'الملف والتكاليف',
+  'edit.title': 'تعديل الملف الشخصي',
   'edit.name': 'الاسم',
+  'edit.photoHint': 'اضغط لتغيير صورتك',
+  'edit.newPassword': 'كلمة مرور جديدة',
+  'edit.passwordKeep': 'اتركها فارغة للاحتفاظ بالحالية',
+  'edit.passwordShort': 'كلمة المرور الجديدة تحتاج ٦ أحرف على الأقل.',
+  'edit.passwordFailed': 'تعذّر تحديث كلمة المرور. حاول بعد قليل.',
   'edit.baseline': 'سيجارة في اليوم (أساسي)',
   'goal.title': 'هدف المكافأة',
   'goal.subtitle': 'أعطِ مهمة للمال الذي توفره. سترى تقدمك نحوه في لوحتك.',

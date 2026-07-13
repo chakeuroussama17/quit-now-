@@ -14,6 +14,11 @@ export async function setSetting(key: string, value: string): Promise<void> {
   await db.runAsync('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, value]);
 }
 
+export async function deleteSetting(key: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM settings WHERE key = ?', [key]);
+}
+
 export async function getAllSettings(): Promise<Record<string, string>> {
   const db = await getDb();
   const rows = await db.getAllAsync<{ key: string; value: string }>('SELECT * FROM settings');

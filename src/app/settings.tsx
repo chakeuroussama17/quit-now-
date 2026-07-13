@@ -9,7 +9,6 @@ import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { wipeAllData, wipeRoomData } from '@/db/database';
 import { seedDemoData } from '@/db/seed';
-import { pickAvatar } from '@/features/settings/avatar';
 import { EditProfileSheet } from '@/features/settings/EditProfileSheet';
 import { FeedbackSheet } from '@/features/settings/FeedbackSheet';
 import { RewardGoalSheet } from '@/features/settings/RewardGoalSheet';
@@ -213,12 +212,6 @@ export default function SettingsScreen() {
           {t('set.profileGoals')}
         </AppText>
         <Card style={styles.group}>
-          <SettingsRow
-            icon="image-outline"
-            label={t('set.photo')}
-            caption={values['avatar_uri'] ? t('set.photoChange') : t('set.photoPick')}
-            onPress={() => pickAvatar().catch(() => {})}
-          />
           <SettingsRow
             icon="create-outline"
             label={t('set.editProfile')}

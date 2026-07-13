@@ -41,6 +41,8 @@ export const ms: Partial<Record<TKey, string>> = {
   'auth.orEmail': 'atau dengan e-mel',
   'auth.email': 'E-mel',
   'auth.password': 'Kata laluan (min 6 aksara)',
+  'auth.confirmPassword': 'Sahkan kata laluan',
+  'auth.passwordMismatch': 'Kata laluan tidak sepadan.',
   'auth.login': 'Log masuk',
   'auth.register': 'Daftar',
   'auth.newHere': 'Baru di sini? ',
@@ -200,6 +202,8 @@ export const ms: Partial<Record<TKey, string>> = {
   'home.unitsAvoided': 'unit dielakkan',
   'home.savedLabel': 'disimpan',
   'home.wonBack': 'dipulihkan',
+  'home.goalProgress': '{saved} daripada {total} disimpan setakat ini',
+  'home.goalReached': 'Simpanan cukup — {name} anda sudah terbayar. Nikmatinya.',
 
   // Welcome offer
   'offer.spendLabel': 'Anda kini membelanjakan',
@@ -419,7 +423,7 @@ export const ms: Partial<Record<TKey, string>> = {
   'set.photoChange': 'Tukar gambar anda',
   'set.photoPick': 'Pilih gambar dari galeri',
   'set.editProfile': 'Edit profil & kos',
-  'set.editProfileCaption': 'Nama, penggunaan asas, harga',
+  'set.editProfileCaption': 'Foto, nama, kata laluan, penggunaan & harga',
   'set.reward': 'Matlamat ganjaran',
   'set.rewardFor': 'Menyimpan untuk: {goal}',
   'set.rewardSet': 'Tetapkan tujuan wang simpanan anda',
@@ -470,8 +474,13 @@ export const ms: Partial<Record<TKey, string>> = {
   'notif.milestoneTitle': 'Pencapaian: {label}',
 
   // Sheets
-  'edit.title': 'Profil & kos',
+  'edit.title': 'Sunting profil',
   'edit.name': 'Nama',
+  'edit.photoHint': 'Ketik untuk menukar foto anda',
+  'edit.newPassword': 'Kata laluan baharu',
+  'edit.passwordKeep': 'Biarkan kosong untuk kekalkan yang sedia ada',
+  'edit.passwordShort': 'Kata laluan baharu perlu sekurang-kurangnya 6 aksara.',
+  'edit.passwordFailed': 'Tidak dapat mengemas kini kata laluan. Cuba lagi sebentar.',
   'edit.baseline': 'Batang sehari (asas)',
   'goal.title': 'Matlamat ganjaran',
   'goal.subtitle':
