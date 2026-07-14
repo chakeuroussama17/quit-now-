@@ -10,14 +10,20 @@
    Keep this table in sync with those — the page must never promise a price
    the store won't honor. Add a row per country you price explicitly;
    everyone else sees the US price.                                        */
+/* Three tiers: Asia ≈ $1.99 · Europe ≈ $5.99 · US (and everyone else) $9.99.
+   Malaysia and the UK show the same tier in their own currency. Yearly is
+   always monthly × 12 − 25%.                                              */
 const PRICING = {
-  US: { monthly: '$3.99', yearly: '$35.99', free: '$0' },
-  MY: { monthly: 'RM 15.90', yearly: 'RM 142.90', free: 'RM 0' },
-  GB: { monthly: '£2.99', yearly: '£26.99', free: '£0' },
-  EU: { monthly: '€3.49', yearly: '€30.99', free: '€0' },
+  US: { monthly: '$9.99', yearly: '$89.99', free: '$0' },
+  MY: { monthly: 'RM 8.90', yearly: 'RM 79.90', free: 'RM 0' },
+  ASIA: { monthly: '$1.99', yearly: '$17.99', free: '$0' },
+  GB: { monthly: '£4.99', yearly: '£44.99', free: '£0' },
+  EU: { monthly: '€5.99', yearly: '€53.99', free: '€0' },
 };
 
 const EU_REGIONS = ['FR', 'DE', 'ES', 'IT', 'NL', 'BE', 'PT', 'IE', 'AT', 'FI', 'GR'];
+const ASIA_REGIONS = ['ID', 'IN', 'PK', 'PH', 'VN', 'TH', 'SG', 'BD', 'LK', 'SA', 'AE',
+  'KW', 'QA', 'JO', 'IQ', 'CN', 'JP', 'KR', 'TW', 'HK', 'BN', 'KH', 'MM', 'NP'];
 
 /* Country from the browser alone — timezone first (can't be faked by the UI
    language), then the locale's region tag. No geo-IP service: nothing to pay
@@ -26,13 +32,14 @@ function detectRegion() {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     if (tz === 'Asia/Kuala_Lumpur' || tz === 'Asia/Kuching') return 'MY';
+    if (tz.indexOf('Asia/') === 0) return 'ASIA';
     if (tz === 'Europe/London') return 'GB';
-    if (/^Europe\/(Paris|Brussels|Berlin|Madrid|Rome|Amsterdam|Lisbon|Dublin|Vienna|Helsinki|Athens|Luxembourg|Malta|Bratislava|Ljubljana|Tallinn|Riga|Vilnius|Zagreb|Nicosia)$/.test(tz))
-      return 'EU';
+    if (tz.indexOf('Europe/') === 0) return 'EU';
   } catch (e) {}
   const region = ((navigator.language || '').split('-')[1] || '').toUpperCase();
   if (PRICING[region]) return region;
   if (EU_REGIONS.includes(region)) return 'EU';
+  if (ASIA_REGIONS.includes(region)) return 'ASIA';
   return 'US';
 }
 
