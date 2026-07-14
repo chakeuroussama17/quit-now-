@@ -4,6 +4,52 @@
    innerHTML (trusted, own content). Arabic flips the page to RTL.
    ───────────────────────────────────────────────────────────── */
 
+/* ── Regional pricing ────────────────────────────────────────
+   ⚠ These numbers are DISPLAY ONLY. Google Play charges whatever is set in
+   Play Console → Monetization → premium_monthly/annual → Regional prices.
+   Keep this table in sync with those — the page must never promise a price
+   the store won't honor. Add a row per country you price explicitly;
+   everyone else sees the US price.                                        */
+const PRICING = {
+  US: { monthly: '$3.99', yearly: '$35.99', free: '$0' },
+  MY: { monthly: 'RM 15.90', yearly: 'RM 142.90', free: 'RM 0' },
+  GB: { monthly: '£2.99', yearly: '£26.99', free: '£0' },
+  EU: { monthly: '€3.49', yearly: '€30.99', free: '€0' },
+};
+
+const EU_REGIONS = ['FR', 'DE', 'ES', 'IT', 'NL', 'BE', 'PT', 'IE', 'AT', 'FI', 'GR'];
+
+/* Country from the browser alone — timezone first (can't be faked by the UI
+   language), then the locale's region tag. No geo-IP service: nothing to pay
+   for, rate-limit, or leak the visitor's IP to.                           */
+function detectRegion() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (tz === 'Asia/Kuala_Lumpur' || tz === 'Asia/Kuching') return 'MY';
+    if (tz === 'Europe/London') return 'GB';
+    if (/^Europe\/(Paris|Brussels|Berlin|Madrid|Rome|Amsterdam|Lisbon|Dublin|Vienna|Helsinki|Athens|Luxembourg|Malta|Bratislava|Ljubljana|Tallinn|Riga|Vilnius|Zagreb|Nicosia)$/.test(tz))
+      return 'EU';
+  } catch (e) {}
+  const region = ((navigator.language || '').split('-')[1] || '').toUpperCase();
+  if (PRICING[region]) return region;
+  if (EU_REGIONS.includes(region)) return 'EU';
+  return 'US';
+}
+
+const PRICES = PRICING[detectRegion()];
+
+/** Dict strings may carry {monthly} / {yearly} — filled from PRICES. */
+function withPrices(text) {
+  return text.replace(/\{monthly\}/g, PRICES.monthly).replace(/\{yearly\}/g, PRICES.yearly);
+}
+
+function applyPrices() {
+  const monthly = document.getElementById('priceMonthly');
+  if (monthly) monthly.textContent = PRICES.monthly;
+  const free = document.getElementById('priceFree');
+  if (free) free.textContent = PRICES.free;
+}
+
 const I18N = {
   en: {
     'nav.cta': 'Get the app',
@@ -73,7 +119,7 @@ const I18N = {
     'pr.f4': 'Daily coach line & weekly insight',
     'pr.f5': 'Community — chat with quitters worldwide',
     'pr.popular': 'Most popular', 'pr.proName': 'Premium', 'pr.perMonth': '/month',
-    'pr.yearly': 'or $35.99/year — save 25%',
+    'pr.yearly': 'or {yearly}/year — save 25%',
     'pr.proNote': 'For the moments that decide everything.',
     'pr.p1': 'Everything in Free',
     'pr.p2': 'Craving SOS toolkit & breathing timer',
@@ -89,7 +135,7 @@ const I18N = {
     'fq.q3': 'Which languages are supported?',
     'fq.a3': 'English, Bahasa Melayu, Arabic and French — across the whole app, including the AI coach, which replies in your chosen language.',
     'fq.q4': 'What does it cost?',
-    'fq.a4': 'The core app — including Community — is free forever. Premium unlocks the Craving SOS toolkit, the live AI coach and The Room: $3.99/month, or $35.99/year (25% off). Cancel anytime.',
+    'fq.a4': 'The core app — including Community — is free forever. Premium unlocks the Craving SOS toolkit, the live AI coach and The Room: {monthly}/month, or {yearly}/year (25% off). Cancel anytime.',
     'fq.q5': 'Does it work for vaping too?',
     'fq.a5': 'Yes — cigarettes, vaping, rolled tobacco and shisha. The stats and savings adapt to what you use.',
     'fq.q6': 'Is there a community?',
@@ -170,7 +216,7 @@ const I18N = {
     'pr.f4': 'Kata jurulatih harian & tinjauan mingguan',
     'pr.f5': 'Komuniti — sembang dengan pejuang seluruh dunia',
     'pr.popular': 'Paling popular', 'pr.proName': 'Premium', 'pr.perMonth': '/bulan',
-    'pr.yearly': 'atau $35.99/tahun — jimat 25%',
+    'pr.yearly': 'atau {yearly}/tahun — jimat 25%',
     'pr.proNote': 'Untuk saat-saat yang menentukan segalanya.',
     'pr.p1': 'Semua dalam Percuma',
     'pr.p2': 'Kit SOS Keinginan & pemasa pernafasan',
@@ -186,7 +232,7 @@ const I18N = {
     'fq.q3': 'Bahasa apa yang disokong?',
     'fq.a3': 'Inggeris, Bahasa Melayu, Arab dan Perancis — di seluruh apl, termasuk jurulatih AI yang membalas dalam bahasa pilihan anda.',
     'fq.q4': 'Berapa kosnya?',
-    'fq.a4': 'Apl teras — termasuk Komuniti — percuma selamanya. Premium membuka Kit SOS Keinginan, jurulatih AI langsung dan Bilik: $3.99/bulan atau $35.99/tahun (jimat 25%). Batal bila-bila masa.',
+    'fq.a4': 'Apl teras — termasuk Komuniti — percuma selamanya. Premium membuka Kit SOS Keinginan, jurulatih AI langsung dan Bilik: {monthly}/bulan atau {yearly}/tahun (jimat 25%). Batal bila-bila masa.',
     'fq.q5': 'Adakah ia berfungsi untuk vape juga?',
     'fq.a5': 'Ya — rokok, vape, tembakau gulung dan shisha. Statistik dan penjimatan disesuaikan dengan apa yang anda guna.',
     'fq.q6': 'Adakah terdapat komuniti?',
@@ -267,7 +313,7 @@ const I18N = {
     'pr.f4': 'Phrase du coach quotidienne & bilan hebdo',
     'pr.f5': 'Communauté — parlez avec d’autres personnes qui arrêtent',
     'pr.popular': 'Le plus choisi', 'pr.proName': 'Premium', 'pr.perMonth': '/mois',
-    'pr.yearly': 'ou 35,99 $/an — 25 % d’économie',
+    'pr.yearly': 'ou {yearly}/an — 25 % d’économie',
     'pr.proNote': 'Pour les moments qui décident de tout.',
     'pr.p1': 'Tout le gratuit',
     'pr.p2': 'Kit SOS Envie & minuteur de respiration',
@@ -283,7 +329,7 @@ const I18N = {
     'fq.q3': 'Quelles langues sont prises en charge ?',
     'fq.a3': 'Anglais, malais, arabe et français — dans toute l’app, y compris le coach IA qui répond dans votre langue.',
     'fq.q4': 'Combien ça coûte ?',
-    'fq.a4': 'L’app de base — Communauté incluse — est gratuite pour toujours. Premium débloque le kit SOS Envie, le coach IA en direct et le Refuge : 3,99 $/mois ou 35,99 $/an (−25 %). Annulable à tout moment.',
+    'fq.a4': 'L’app de base — Communauté incluse — est gratuite pour toujours. Premium débloque le kit SOS Envie, le coach IA en direct et le Refuge : {monthly}/mois ou {yearly}/an (−25 %). Annulable à tout moment.',
     'fq.q5': 'Ça marche aussi pour la vape ?',
     'fq.a5': 'Oui — cigarettes, vape, tabac à rouler et chicha. Les stats et économies s’adaptent à ce que vous consommez.',
     'fq.q6': 'Y a-t-il une communauté ?',
@@ -364,7 +410,7 @@ const I18N = {
     'pr.f4': 'جملة المدرّب اليومية والتقرير الأسبوعي',
     'pr.f5': 'المجتمع — تحدّث مع مُقلعين حول العالم',
     'pr.popular': 'الأكثر شيوعًا', 'pr.proName': 'بريميوم', 'pr.perMonth': '/شهر',
-    'pr.yearly': 'أو 35.99$ سنويًا — وفّر 25%',
+    'pr.yearly': 'أو {yearly} سنويًا — وفّر 25%',
     'pr.proNote': 'للحظات التي تحسم كل شيء.',
     'pr.p1': 'كل ما في المجاني',
     'pr.p2': 'أدوات نجدة الرغبة ومؤقّت التنفّس',
@@ -380,7 +426,7 @@ const I18N = {
     'fq.q3': 'ما اللغات المدعومة؟',
     'fq.a3': 'الإنجليزية والماليزية والعربية والفرنسية — في كامل التطبيق، بما في ذلك المدرّب الذي يردّ بلغتك المختارة.',
     'fq.q4': 'كم يكلّف؟',
-    'fq.a4': 'التطبيق الأساسي — بما فيه المجتمع — مجاني للأبد. بريميوم يفتح أدوات نجدة الرغبة والمدرّب المباشر والغرفة: 3.99$ شهريًا أو 35.99$ سنويًا (خصم 25%). ألغِ في أي وقت.',
+    'fq.a4': 'التطبيق الأساسي — بما فيه المجتمع — مجاني للأبد. بريميوم يفتح أدوات نجدة الرغبة والمدرّب المباشر والغرفة: {monthly} شهريًا أو {yearly} سنويًا (خصم 25%). ألغِ في أي وقت.',
     'fq.q5': 'هل يعمل للفيب أيضًا؟',
     'fq.a5': 'نعم — السجائر والفيب والتبغ الملفوف والشيشة. تتكيّف الإحصائيات والتوفير مع ما تستخدمه.',
     'fq.q6': 'هل يوجد مجتمع؟',
@@ -400,8 +446,9 @@ function applyLang(lang) {
   const dict = I18N[lang] || I18N.en;
   document.querySelectorAll('[data-i18n]').forEach((el) => {
     const key = el.getAttribute('data-i18n');
-    if (dict[key] != null) el.innerHTML = dict[key];
+    if (dict[key] != null) el.innerHTML = withPrices(dict[key]);
   });
+  applyPrices();
 
   const rtl = RTL_LANGS.includes(lang);
   document.documentElement.lang = lang;
