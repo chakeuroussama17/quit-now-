@@ -46,11 +46,16 @@ example
 # Reference landing page (has its own git repo)
 landing_page_dreaming_ball/
 
-# Big media / build artifacts dropped into the landing page folder.
+# Big media / build artifacts dropped next to the landing page pictures.
 # GitHub rejects files >100MB, and these don't belong in source control.
-landing_page_exhale/pictures/*.mp4
-landing_page_exhale/pictures/*.apk
-landing_page_exhale/pictures/*.pdf
+server/pictures/*.mp4
+server/pictures/*.apk
+server/pictures/*.pdf
+
+# Old landing page location — the page now lives in server/ (deployed with
+# the API on Vercel). The folder that remains holds its own git repo and
+# local leftovers only.
+landing_page_exhale/
 
 # Watermarked stock image — kept locally, never committed (licensing).
 assets/images/lungs.webp

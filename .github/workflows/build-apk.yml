@@ -3,9 +3,11 @@ name: Build Android APK
 on:
   push:
     branches: [main]
-    # Don't rebuild the app for website/docs-only changes.
+    # Don't rebuild the app for website/proxy/docs-only changes — the APK
+    # never bundles anything from server/ (that's the Vercel deployment).
     paths-ignore:
       - 'landing_page_**'
+      - 'server/**'
       - '**.md'
   workflow_dispatch:
 
