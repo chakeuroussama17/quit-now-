@@ -8,6 +8,12 @@
     "scheme": "exhale",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0A0A0C",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/aab002c8-c5b5-46b9-8d68-119e55d3f028"
+    },
     "ios": {
       "bundleIdentifier": "com.exhale.quitnow",
       "supportsTablet": false,
@@ -23,7 +29,10 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "single",
@@ -67,6 +76,12 @@
       "eas": {
         "projectId": "aab002c8-c5b5-46b9-8d68-119e55d3f028"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/aab002c8-c5b5-46b9-8d68-119e55d3f028"
     }
   }
 }
