@@ -458,6 +458,15 @@ export const en = {
   'set.deleteAllBody':
     'This wipes your profile, every log and every setting from this device. It cannot be undone.',
   'set.deleteAllAction': 'Delete everything',
+  'set.deleteAccount': 'Delete account',
+  'set.deleteAccountCaption': 'Permanently erase your account and cloud data',
+  'set.deleteAccountConfirm': 'Delete your account?',
+  'set.deleteAccountBody':
+    'This permanently deletes your account, profile, subscription and community data from our servers, and erases everything on this device. This cannot be undone.',
+  'set.deleteAccountAction': 'Delete account',
+  'set.deleteAccountFailed': 'Couldn’t delete account',
+  'set.deleteAccountFailedBody':
+    'Something went wrong and your account was not deleted. Check your connection and try again.',
   'set.permTitle': 'Permission needed',
   'set.permBody': 'Enable notifications for Exhale in your system settings to use reminders.',
 

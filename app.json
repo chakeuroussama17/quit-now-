@@ -9,8 +9,11 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0A0A0C",
     "ios": {
-      "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.exhale.quitnow"
+      "bundleIdentifier": "com.exhale.quitnow",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.exhale.quitnow",
@@ -38,6 +41,12 @@
       ],
       "expo-sqlite",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Exhale needs access to your photos so you can choose a profile picture."
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
@@ -52,6 +61,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "aab002c8-c5b5-46b9-8d68-119e55d3f028"
+      }
     }
   }
 }

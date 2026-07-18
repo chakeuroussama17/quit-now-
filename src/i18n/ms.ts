@@ -464,6 +464,15 @@ export const ms: Partial<Record<TKey, string>> = {
   'set.deleteAllBody':
     'Ini memadam profil, semua log dan semua tetapan dari peranti ini. Tidak boleh dibatalkan.',
   'set.deleteAllAction': 'Padam semuanya',
+  'set.deleteAccount': 'Padam akaun',
+  'set.deleteAccountCaption': 'Padam akaun dan data awan anda secara kekal',
+  'set.deleteAccountConfirm': 'Padam akaun anda?',
+  'set.deleteAccountBody':
+    'Ini memadam akaun, profil, langganan dan data komuniti anda secara kekal dari pelayan kami, dan memadam segala-galanya pada peranti ini. Tindakan ini tidak boleh dibatalkan.',
+  'set.deleteAccountAction': 'Padam akaun',
+  'set.deleteAccountFailed': 'Tidak dapat memadam akaun',
+  'set.deleteAccountFailedBody':
+    'Sesuatu tidak kena dan akaun anda tidak dipadam. Semak sambungan anda dan cuba lagi.',
   'set.permTitle': 'Kebenaran diperlukan',
   'set.permBody': 'Benarkan notifikasi untuk Exhale dalam tetapan sistem anda.',
 

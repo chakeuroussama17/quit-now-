@@ -452,6 +452,15 @@ export const ar: Partial<Record<TKey, string>> = {
   'set.deleteAllConfirm': 'حذف كل البيانات؟',
   'set.deleteAllBody': 'سيمحو هذا ملفك وكل السجلات والإعدادات من هذا الجهاز. لا يمكن التراجع.',
   'set.deleteAllAction': 'احذف كل شيء',
+  'set.deleteAccount': 'حذف الحساب',
+  'set.deleteAccountCaption': 'محو حسابك وبياناتك السحابية نهائيًا',
+  'set.deleteAccountConfirm': 'حذف حسابك؟',
+  'set.deleteAccountBody':
+    'يؤدي هذا إلى حذف حسابك وملفك الشخصي واشتراكك وبيانات المجتمع نهائيًا من خوادمنا، ويمحو كل شيء على هذا الجهاز. لا يمكن التراجع عن ذلك.',
+  'set.deleteAccountAction': 'حذف الحساب',
+  'set.deleteAccountFailed': 'تعذّر حذف الحساب',
+  'set.deleteAccountFailedBody':
+    'حدث خطأ ولم يُحذف حسابك. تحقق من اتصالك وحاول مرة أخرى.',
   'set.permTitle': 'إذن مطلوب',
   'set.permBody': 'فعّل إشعارات Exhale من إعدادات النظام لاستخدام التذكيرات.',
 

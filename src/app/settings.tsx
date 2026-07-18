@@ -13,6 +13,7 @@ import { EditProfileSheet } from '@/features/settings/EditProfileSheet';
 import { FeedbackSheet } from '@/features/settings/FeedbackSheet';
 import { RewardGoalSheet } from '@/features/settings/RewardGoalSheet';
 import { LANGUAGES, useT, type TKey } from '@/i18n';
+import { deleteCloudAccount } from '@/services/accountService';
 import { exportDataCsv } from '@/services/exportService';
 import { ensureNotificationPermissions, syncNotifications } from '@/services/notificationService';
 import { useAuthStore } from '@/state/useAuthStore';
@@ -120,6 +121,7 @@ export default function SettingsScreen() {
   const isPremium = useAuthStore((s) => s.isPremium);
   const signOut = useAuthStore((s) => s.signOut);
   const [seeding, setSeeding] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [goalOpen, setGoalOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -162,6 +164,33 @@ export default function SettingsScreen() {
           await wipeAllData();
           await Promise.all([refreshLogs(), hydrateSettings()]);
           clearProfile(); // guard flips → back to onboarding
+        },
+      },
+    ]);
+  };
+
+  const confirmDeleteAccount = () => {
+    Alert.alert(t('set.deleteAccountConfirm'), t('set.deleteAccountBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('set.deleteAccountAction'),
+        style: 'destructive',
+        onPress: async () => {
+          setDeletingAccount(true);
+          // Delete the cloud account first, while the access token is still
+          // valid. Only wipe the device and sign out once that succeeds — so a
+          // network failure never leaves the user locally erased but still
+          // present on our servers.
+          const ok = await deleteCloudAccount();
+          if (!ok) {
+            setDeletingAccount(false);
+            Alert.alert(t('set.deleteAccountFailed'), t('set.deleteAccountFailedBody'));
+            return;
+          }
+          await wipeAllData();
+          await Promise.all([refreshLogs(), hydrateSettings()]);
+          clearProfile();
+          await signOut(); // session → null → redirect to auth
         },
       },
     ]);
@@ -337,6 +366,14 @@ export default function SettingsScreen() {
                 { text: t('set.signOut'), style: 'destructive', onPress: () => signOut() },
               ])
             }
+          />
+          <SettingsRow
+            icon="trash-outline"
+            label={t('set.deleteAccount')}
+            caption={t('set.deleteAccountCaption')}
+            onPress={confirmDeleteAccount}
+            destructive
+            disabled={deletingAccount}
           />
         </Card>
 

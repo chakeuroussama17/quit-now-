@@ -465,6 +465,15 @@ export const fr: Partial<Record<TKey, string>> = {
   'set.deleteAllBody':
     'Cela efface votre profil, tous les journaux et réglages de cet appareil. Irréversible.',
   'set.deleteAllAction': 'Tout supprimer',
+  'set.deleteAccount': 'Supprimer le compte',
+  'set.deleteAccountCaption': 'Effacer définitivement votre compte et vos données cloud',
+  'set.deleteAccountConfirm': 'Supprimer votre compte ?',
+  'set.deleteAccountBody':
+    'Cela supprime définitivement votre compte, votre profil, votre abonnement et vos données de communauté de nos serveurs, et efface tout sur cet appareil. Cette action est irréversible.',
+  'set.deleteAccountAction': 'Supprimer le compte',
+  'set.deleteAccountFailed': 'Impossible de supprimer le compte',
+  'set.deleteAccountFailedBody':
+    'Une erreur est survenue et votre compte n’a pas été supprimé. Vérifiez votre connexion et réessayez.',
   'set.permTitle': 'Autorisation requise',
   'set.permBody': 'Autorisez les notifications pour Exhale dans les réglages système.',
 
