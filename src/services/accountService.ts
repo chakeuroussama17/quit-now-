@@ -8,7 +8,8 @@ import { useAuthStore } from '@/state/useAuthStore';
  * Calls the backend proxy (which holds the service-role key) to delete the
  * Supabase auth user; every user-owned table cascades from it. The caller is
  * responsible for wiping local device data and signing out afterwards — see
- * useAuthStore.deleteAccount, which orchestrates the whole flow.
+ * confirmDeleteAccount in src/app/settings.tsx, which orchestrates the flow:
+ * cloud delete first (while the token is valid), then local wipe + sign-out.
  *
  * Returns false (rather than throwing) if there's no session or the proxy
  * isn't configured/reachable, so the UI can tell the user it didn't work

@@ -29,10 +29,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "single",
@@ -52,7 +49,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Exhale needs access to your photos so you can choose a profile picture."
+          "photosPermission": "Exhale needs access to your photos so you can choose a profile picture.",
+          "cameraPermission": false,
+          "microphonePermission": false
         }
       ],
       [
@@ -76,12 +75,6 @@
       "eas": {
         "projectId": "aab002c8-c5b5-46b9-8d68-119e55d3f028"
       }
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/aab002c8-c5b5-46b9-8d68-119e55d3f028"
     }
   }
 }
