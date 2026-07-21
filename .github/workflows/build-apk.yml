@@ -11,6 +11,12 @@ on:
       - '**.md'
   workflow_dispatch:
 
+# A newer push supersedes an in-flight build — cancel the old one instead of
+# letting two long Android builds run at once and pile up runner minutes.
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,13 +52,29 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install
 
+      # The RN template ships org.gradle.jvmargs=-Xmx2048m/MaxMetaspace=512m,
+      # which OOMs the Gradle daemon on the full native-module tree (metaspace
+      # exhaustion → the daemon thrashes and the build crawls for an hour+).
+      # gradle.properties takes the LAST value for a duplicated key, so this
+      # append overrides the template. GitHub's Linux runners have 16 GB RAM.
+      - name: Raise Gradle memory
+        run: |
+          {
+            echo ""
+            echo "org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=2g -Dfile.encoding=UTF-8"
+          } >> android/gradle.properties
+
       # arm64-v8a only: covers essentially every Android phone since ~2016 and
       # cuts the APK to roughly a third of the universal (4-ABI) size.
+      # -x lintVitalRelease: this is a test APK (debug-signed, installed by
+      # hand). Release lint over every native module is the slowest task here
+      # and the one that OOMs; the store build (EAS, eas.json) still runs full
+      # checks, so skipping it in CI costs nothing and saves ~20 min.
       - name: Build release APK (debug-signed, installable)
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
+          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a -x lintVitalRelease
 
       # Versioned filename so downloads can never be confused with old builds.
       - name: Rename APK with build number
